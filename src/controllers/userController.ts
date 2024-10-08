@@ -15,7 +15,7 @@ export const register = async (req: Request, res: Response) => {
     const newUser: IUser = new User({ username, password, role });
     await newUser.save();
 
-    const token = generateToken({ userId: (newUser._id as Types.ObjectId), username: newUser.username });
+    const token = generateToken({ userId: (newUser._id as Types.ObjectId), username: newUser.username, role: newUser.role });
     return res.status(201).json({ token });
   } catch (err) {
     //@ts-ignore
@@ -37,7 +37,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = generateToken({ userId: (user._id as Types.ObjectId), username: user.username });
+    const token = generateToken({ userId: (user._id as Types.ObjectId), username: user.username, role: user.role });
     return res.json({ token });
   } catch (err) {
     //@ts-ignore
