@@ -1,0 +1,27 @@
+@api = http://127.0.0.1:3000/api/users
+
+@api2 = https://bovinsoft-backend.onrender.com/
+
+### ingresar usuario
+POST {{api}}/register
+Content-Type: application/json
+
+{
+    "username":"Junior Hurtado",
+    "password":"Mapamapa84",
+    "role":"Cajero"
+}
+
+### login
+POST {{api}}/login
+Content-Type: application/json
+
+{
+    "username":"Junior Hurtado",
+    "password":"Mapamapa84"
+}
+
+##obtner profile
+####
+GET {{api}}/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzA0ZGE4MTkwMGRmNzdlNTYxOTczNmMiLCJ1c2VybmFtZSI6Ikp1bmlvciBIdXJ0YWRvIiwiaWF0IjoxNzI4MzcxMzcwLCJleHAiOjE3MjgzNzQ5NzB9.cKqvZXHkJsKocuWHy6SGPR2C5m_NZFvao4dbpq8v3YY
