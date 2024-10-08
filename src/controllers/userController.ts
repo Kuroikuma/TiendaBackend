@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import User, { IUser } from '../models/Users';
+import User, { IUser } from '../models/usuarios/User.model';
 import { generateToken } from '../utils/jwt';
 import { Types } from 'mongoose';
 
