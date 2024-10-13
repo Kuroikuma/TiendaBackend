@@ -7,7 +7,7 @@ const jwtOptions: SignOptions = {
 };
 
 export interface CustomJwtPayload extends JwtPayload {
-  userId: Types.ObjectId;
+  id: Types.ObjectId;
   username: string;
   role: string;
 }

@@ -3,9 +3,12 @@ import { register, login, getUserProfile } from '../controllers/userController';
 import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = express.Router()
+export const userRouter = express.Router()
+
+userRouter.use(authMiddleware)
 
 router.post('/register', register);
 router.post('/login', login);
-router.get('/profile', authMiddleware, getUserProfile);
+userRouter.get('/profile', getUserProfile);
 
 export default router;
