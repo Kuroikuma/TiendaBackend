@@ -1,11 +1,14 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { ISucursal } from '../sucursales/Sucursal.model';
 
 // Interfaz para tipar los usuarios
 export interface IUser extends Document {
   username: string;
   password: string;
   role: string;
+  sucursalId: mongoose.Types.ObjectId | ISucursal | null;
+  deleted_at: Date | null;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -24,6 +27,8 @@ const UserSchema: Schema<IUser> = new Schema({
     type: String,
     required: true,
   },
+  sucursalId: { type: Schema.Types.ObjectId, ref: 'Sucursal', default: null },
+  deleted_at: { type: Date, default: null },
 });
 
 // Método para comparar contraseñas usando bcrypt

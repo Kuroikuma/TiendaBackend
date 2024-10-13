@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/database';
-import userRoutes from './routes/userRoutes';
+import authRoutes, { userRouter } from './routes/userRoutes';
 
 dotenv.config();
 
@@ -13,7 +13,8 @@ connectDB();
 app.use(express.json());
 
 // Rutas
-app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRouter);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
