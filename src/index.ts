@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/database';
-import userRoutes from "./routes/user.routes";
+import userRoutes from './routes/user.routes';
 
 dotenv.config();
 

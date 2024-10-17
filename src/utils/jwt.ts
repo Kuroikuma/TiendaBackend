@@ -3,7 +3,7 @@ import { Types } from 'mongoose'; // Para manejar ObjectId
 
 const jwtOptions: SignOptions = {
   expiresIn: process.env.JWT_EXPIRES_IN || '1h',
-  algorithm: process.env.JWT_ALGORITHM as jwt.Algorithm || 'HS256',
+  algorithm: (process.env.JWT_ALGORITHM as jwt.Algorithm) || 'HS256',
 };
 
 export interface CustomJwtPayload extends JwtPayload {
@@ -14,14 +14,13 @@ export interface CustomJwtPayload extends JwtPayload {
 
 export const generateToken = (payload: CustomJwtPayload): string => {
   const secretKey = process.env.JWT_SECRET || 'defaultSecretKey';
-  
+
   if (!secretKey || secretKey === 'defaultSecretKey') {
     throw new Error('Secret key not set in environment variables');
   }
-  
+
   return jwt.sign(payload, secretKey, jwtOptions);
 };
-
 
 export const verifyToken = (token: string): CustomJwtPayload | null => {
   const secretKey = process.env.JWT_SECRET || 'defaultSecretKey';

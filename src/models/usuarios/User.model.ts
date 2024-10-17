@@ -32,7 +32,9 @@ const UserSchema: Schema<IUser> = new Schema({
 });
 
 // Método para comparar contraseñas usando bcrypt
-UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

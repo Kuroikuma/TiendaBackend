@@ -19,23 +19,42 @@ export interface ITraslado extends Document {
   deleted_at: Date | null;
 }
 
-const trasladoSchema: Schema = new Schema({
-  fechaRegistro: { type: Date, required: true },
-  fechaEnvio: { type: Date, required: true },
-  fechaRecepcion: { type: Date, default: null },
-  sucursalOrigenId: { type: Schema.Types.ObjectId, ref: 'Sucursal', required: true },
-  sucursalDestinoId: { type: Schema.Types.ObjectId, ref: 'Sucursal', required: true },
-  usuarioIdEnvia: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  usuarioIdRecibe: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-  estado: { type: String, required: true },
-  comentarioEnvio: { type: String, default: '' },
-  consecutivo: { type: Number, required: true },
-  comentarioRecepcion: { type: String, default: null },
-  estatusTraslado: { type: String, required: true },
-  archivosAdjuntos: { type: String, default: null },
-  deleted_at: { type: Date, default: null },
-}, {
-  timestamps: { createdAt: 'created_at', updatedAt: 'update_at' }
-});
+const trasladoSchema: Schema = new Schema(
+  {
+    fechaRegistro: { type: Date, required: true },
+    fechaEnvio: { type: Date, required: true },
+    fechaRecepcion: { type: Date, default: null },
+    sucursalOrigenId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Sucursal',
+      required: true,
+    },
+    sucursalDestinoId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Sucursal',
+      required: true,
+    },
+    usuarioIdEnvia: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    usuarioIdRecibe: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    estado: { type: String, required: true },
+    comentarioEnvio: { type: String, default: '' },
+    consecutivo: { type: Number, required: true },
+    comentarioRecepcion: { type: String, default: null },
+    estatusTraslado: { type: String, required: true },
+    archivosAdjuntos: { type: String, default: null },
+    deleted_at: { type: Date, default: null },
+  },
+  {
+    timestamps: { createdAt: 'created_at', updatedAt: 'update_at' },
+  }
+);
 
 export const Traslado = mongoose.model<ITraslado>('Traslado', trasladoSchema);
