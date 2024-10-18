@@ -1,10 +1,15 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IProducto } from './Producto.model';
+import { Interface } from 'readline';
 
 export interface IGrupoInventario extends Document {
   nombre: string;
   descripcion: string;
   deleted_at: Date | null;
+}
+
+export interface IGrupoInventarioWithPopulate extends IGrupoInventario {
+  products?: IProducto[];
 }
 
 const grupoInventarioSchema: Schema = new Schema(
