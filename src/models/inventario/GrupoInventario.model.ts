@@ -7,14 +7,16 @@ export interface IGrupoInventario extends Document {
   deleted_at: Date | null;
 }
 
-export interface IGrupoInventarioWithPopulate extends IGrupoInventario {
-  products?: IProducto[];
-}
+const grupoInventarioSchema: Schema = new Schema(
+  {
+    nombre: { type: String, required: true },
+    descripcion: { type: String },
+    deleted_at: { type: Date, default: null },
+  },
+  { timestamps: true }
+);
 
-const grupoInventarioSchema: Schema = new Schema({
-  nombre: { type: String, required: true },
-  descripcion: { type: String },
-  deleted_at: { type: Date, default: null },
-}, { timestamps: true });
-
-export const GrupoInventario = mongoose.model<IGrupoInventario>('GrupoInventario', grupoInventarioSchema);
+export const GrupoInventario = mongoose.model<IGrupoInventario>(
+  'GrupoInventario',
+  grupoInventarioSchema
+);

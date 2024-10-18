@@ -8,10 +8,24 @@ export interface IProductosGrupos extends Document {
   deleted_at: Date | null;
 }
 
-const productosGruposSchema: Schema = new Schema({
-  productoId: { type: Schema.Types.ObjectId, ref: Producto, required: true },
-  grupoId: { type: Schema.Types.ObjectId, ref: GrupoInventario, required: true },
-  deleted_at: { type: Date, default: null },
-}, { timestamps: true });
+const productosGruposSchema: Schema = new Schema(
+  {
+    productoId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Producto',
+      required: true,
+    },
+    grupoId: {
+      type: Schema.Types.ObjectId,
+      ref: 'GrupoInventario',
+      required: true,
+    },
+    deleted_at: { type: Date, default: null },
+  },
+  { timestamps: true }
+);
 
-export const ProductosGrupos = mongoose.model<IProductosGrupos>('ProductosGrupos', productosGruposSchema);
+export const ProductosGrupos = mongoose.model<IProductosGrupos>(
+  'ProductosGrupos',
+  productosGruposSchema
+);

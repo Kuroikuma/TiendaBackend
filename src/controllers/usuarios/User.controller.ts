@@ -4,10 +4,7 @@ import { UserService } from '../../services/user/User.service';
 
 @injectable()
 export class UserController {
-  
-  constructor(
-    @inject(UserService) private service: UserService
-  ) {}
+  constructor(@inject(UserService) private service: UserService) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -27,7 +24,11 @@ export class UserController {
     }
   }
 
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getById(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const user = await this.service.getUserById(req.params.id);
       res.status(200).json(user);
@@ -39,7 +40,11 @@ export class UserController {
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { limit = 10, skip = 0, ...filters } = req.query;
-      const users = await this.service.getAllUsers(filters, Number(limit), Number(skip));
+      const users = await this.service.getAllUsers(
+        filters,
+        Number(limit),
+        Number(skip)
+      );
       res.status(200).json(users);
     } catch (error) {
       next(error);
@@ -64,7 +69,11 @@ export class UserController {
     }
   }
 
-  async restore(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async restore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const user = await this.service.restoreUser(req.params.id);
       res.status(200).json(user);

@@ -13,17 +13,27 @@ export interface IDetalleVenta extends Document {
   deleted_at: Date | null;
 }
 
-const detalleVentaSchema: Schema = new Schema({
-  ventaId: { type: Schema.Types.ObjectId, ref: 'Venta', required: true },
-  productoId: { type: Schema.Types.ObjectId, ref: 'Producto', required: true },
-  precio: { type: Schema.Types.Decimal128, required: true },
-  cantidad: { type: Number, required: true },
-  subtotal: { type: Schema.Types.Decimal128, required: true },
-  total: { type: Schema.Types.Decimal128, required: true },
-  descuento: { type: Schema.Types.Decimal128, default: 0 },
-  deleted_at: { type: Date, default: null },
-}, {
-  timestamps: { createdAt: 'created_at', updatedAt: 'update_at' }
-});
+const detalleVentaSchema: Schema = new Schema(
+  {
+    ventaId: { type: Schema.Types.ObjectId, ref: 'Venta', required: true },
+    productoId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Producto',
+      required: true,
+    },
+    precio: { type: Schema.Types.Decimal128, required: true },
+    cantidad: { type: Number, required: true },
+    subtotal: { type: Schema.Types.Decimal128, required: true },
+    total: { type: Schema.Types.Decimal128, required: true },
+    descuento: { type: Schema.Types.Decimal128, default: 0 },
+    deleted_at: { type: Date, default: null },
+  },
+  {
+    timestamps: { createdAt: 'created_at', updatedAt: 'update_at' },
+  }
+);
 
-export const DetalleVenta = mongoose.model<IDetalleVenta>('DetalleVenta', detalleVentaSchema);
+export const DetalleVenta = mongoose.model<IDetalleVenta>(
+  'DetalleVenta',
+  detalleVentaSchema
+);
