@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IProducto } from '../inventario/Producto.model';
 
 export interface ISucursal extends Document {
   nombre: string;
@@ -7,6 +8,10 @@ export interface ISucursal extends Document {
   pais: string;
   telefono: string;
   deleted_at: Date | null;
+}
+
+export interface ISucursalWithProducts extends ISucursal {
+  products?: IProducto[];
 }
 
 const sucursalSchema: Schema = new Schema({
