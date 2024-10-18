@@ -1,4 +1,5 @@
-import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
+import { SignOptions, JwtPayload } from 'jsonwebtoken';
 import { Types } from 'mongoose'; // Para manejar ObjectId
 
 const jwtOptions: SignOptions = {
