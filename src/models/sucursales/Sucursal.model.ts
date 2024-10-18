@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IProducto } from '../inventario/Producto.model';
 
 export interface ISucursal extends Document {
   nombre: string;

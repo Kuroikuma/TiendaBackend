@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { IProducto } from './Producto.model';
-import { IGrupoInventario } from './GrupoInventario.model';
+import { IProducto, Producto } from './Producto.model';
+import { GrupoInventario, IGrupoInventario } from './GrupoInventario.model';
 
 export interface IProductosGrupos extends Document {
   productoId: mongoose.Types.ObjectId | IProducto;
