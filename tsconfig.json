@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES6",                         
-    "module": "commonjs",                     
-    "strict": true,                          
-    "esModuleInterop": true,                 
-    "skipLibCheck": true,                    
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true                       
+    "target": "es6",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "incremental": true,
+    "allowJs": true,
+    "strictNullChecks": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist", "eslint.config.js"]
 }

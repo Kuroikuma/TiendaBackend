@@ -6,12 +6,9 @@ import { injectable, inject } from 'tsyringe';
 
 @injectable()
 export class UserService {
-  constructor(
-    @inject(UserRepository) private repository: UserRepository
-  ) {}
+  constructor(@inject(UserRepository) private repository: UserRepository) {}
 
   async createUser(data: Partial<IUser>): Promise<string> {
-
     const userExists = await this.repository.findByUsername(data.username!);
 
     if (userExists) {
@@ -24,13 +21,12 @@ export class UserService {
       id: newUser._id as Types.ObjectId,
       username: newUser.username,
       role: newUser.role,
-    })
+    });
 
-    return token
+    return token;
   }
 
   async loginUser(data: Partial<IUser>): Promise<string> {
-    
     const user = await this.repository.findByUsername(data.username!);
 
     if (!user) {
@@ -47,9 +43,9 @@ export class UserService {
       id: user._id as Types.ObjectId,
       username: user.username,
       role: user.role,
-    })
+    });
 
-    return token
+    return token;
   }
 
   async getUserById(id: string): Promise<IUser | null> {
@@ -60,7 +56,11 @@ export class UserService {
     return user;
   }
 
-  async getAllUsers(filters: any, limit: number, skip: number): Promise<IUser[]> {
+  async getAllUsers(
+    filters: any,
+    limit: number,
+    skip: number
+  ): Promise<IUser[]> {
     return this.repository.findAll(filters, limit, skip);
   }
 
