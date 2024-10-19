@@ -1,14 +1,14 @@
 import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
-import { SucursalService } from '../../services/sucursal/Sucursal.service';
+import { ProductoService } from '../../services/inventario/Product.service';
 
 @injectable()
-export class SucursalController {
-  constructor(@inject(SucursalService) private service: SucursalService) {}
+export class ProductoController {
+  constructor(@inject(ProductoService) private service: ProductoService) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const branch = await this.service.createSucursal(req.body);
+      const branch = await this.service.createProduct(req.body);
       res.status(201).json(branch);
     } catch (error) {
       next(error);
@@ -21,7 +21,7 @@ export class SucursalController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const branch = await this.service.getBranchById(req.params.id);
+      const branch = await this.service.getProductById(req.params.id);
       res.status(200).json(branch);
     } catch (error) {
       next(error);
@@ -31,7 +31,7 @@ export class SucursalController {
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { limit = 10, skip = 0, ...filters } = req.query;
-      const branch = await this.service.getAllBranch(
+      const branch = await this.service.getAllProduct(
         filters,
         Number(limit),
         Number(skip)
@@ -44,7 +44,7 @@ export class SucursalController {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const branch = await this.service.updateBranch(req.params.id, req.body);
+      const branch = await this.service.updateProduct(req.params.id, req.body);
       res.status(200).json(branch);
     } catch (error) {
       next(error);
@@ -53,7 +53,7 @@ export class SucursalController {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const branch = await this.service.deleteBranch(req.params.id);
+      const branch = await this.service.deleteProduct(req.params.id);
       res.status(200).json(branch);
     } catch (error) {
       next(error);
@@ -66,7 +66,7 @@ export class SucursalController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const branch = await this.service.restoreBranch(req.params.id);
+      const branch = await this.service.restoreProduct(req.params.id);
       res.status(200).json(branch);
     } catch (error) {
       next(error);

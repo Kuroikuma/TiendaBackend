@@ -15,7 +15,7 @@ router.get(
   authMiddleware,
   usersController.getById.bind(usersController)
 );
-router.get('/', authMiddleware, usersController.getAll.bind(usersController));
+router.get('/', usersController.getAll.bind(usersController));
 router.put(
   '/:id',
   authMiddleware,

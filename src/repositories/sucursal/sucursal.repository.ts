@@ -3,10 +3,8 @@ import { IProducto, Producto } from '../../models/inventario/Producto.model';
 import { Sucursal, ISucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 
-
 @injectable()
 export class SucursalRepository {
-
   private model: typeof Producto;
   private modelSucursal: typeof Sucursal;
   private modelInventarioSucursal: typeof InventarioSucursal;
@@ -31,13 +29,17 @@ export class SucursalRepository {
 
     return sucursal;
   }
-  
-  async findAll(filters: any = {}, limit: number = 10, skip: number = 0): Promise<ISucursal[]> {
-    const query = this.modelSucursal.find(filters);
+
+  async findAll(
+    filters: any = {},
+    limit: number = 10,
+    skip: number = 0
+  ): Promise<ISucursal[]> {
+    const query = this.modelSucursal.find({ ...filters, deleted_at: null });
 
     return await query.limit(limit).skip(skip).exec();
   }
-  
+
   async findBranchProducts(id: string): Promise<IProducto[]> {
     const sucursal = await this.modelSucursal.findById(id);
 
@@ -45,11 +47,13 @@ export class SucursalRepository {
       return [];
     }
 
-    const products = await this.modelInventarioSucursal.find({ sucursalId: id }).populate('productoId');
+    const products = await this.modelInventarioSucursal
+      .find({ sucursalId: id, deleted_at: null })
+      .populate('productoId');
 
     let newProducts: IProducto[] = [];
 
-    products.forEach(product => {
+    products.forEach((product) => {
       newProducts.push(product.productoId as IProducto);
     });
 
@@ -58,19 +62,28 @@ export class SucursalRepository {
 
   async findByName(name: string): Promise<ISucursal | null> {
     const query = this.modelSucursal.findOne({ nombre: name });
-  
+
     return await query.exec();
   }
 
-  async update(id: string, data: Partial<ISucursal>): Promise<ISucursal | null> {
-    return await this.modelSucursal.findByIdAndUpdate(id, data, { new: true }).exec();
+  async update(
+    id: string,
+    data: Partial<ISucursal>
+  ): Promise<ISucursal | null> {
+    return await this.modelSucursal
+      .findByIdAndUpdate(id, data, { new: true })
+      .exec();
   }
 
   async delete(id: string): Promise<ISucursal | null> {
-    return await this.modelSucursal.findByIdAndUpdate(id, { deleted_at: new Date() }, { new: true }).exec();
+    return await this.modelSucursal
+      .findByIdAndUpdate(id, { deleted_at: new Date() }, { new: true })
+      .exec();
   }
 
-  async restore(id: string): Promise<ISucursal | null> { 
-    return await this.modelSucursal.findByIdAndUpdate(id, { deleted_at: null }, { new: true }).exec();
+  async restore(id: string): Promise<ISucursal | null> {
+    return await this.modelSucursal
+      .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
+      .exec();
   }
 }

@@ -1,15 +1,15 @@
 import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
-import { SucursalService } from '../../services/sucursal/Sucursal.service';
+import { GrupoInventarioService } from '../../services/inventario/GrupoInventario.service';
 
 @injectable()
-export class SucursalController {
-  constructor(@inject(SucursalService) private service: SucursalService) {}
+export class GrupoInventarioController {
+  constructor(@inject(GrupoInventarioService) private service: GrupoInventarioService) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const branch = await this.service.createSucursal(req.body);
-      res.status(201).json(branch);
+      const group = await this.service.createGrupo(req.body);
+      res.status(201).json(group);
     } catch (error) {
       next(error);
     }
@@ -21,8 +21,8 @@ export class SucursalController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const branch = await this.service.getBranchById(req.params.id);
-      res.status(200).json(branch);
+      const group = await this.service.getGroupById(req.params.id);
+      res.status(200).json(group);
     } catch (error) {
       next(error);
     }
@@ -31,12 +31,12 @@ export class SucursalController {
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { limit = 10, skip = 0, ...filters } = req.query;
-      const branch = await this.service.getAllBranch(
+      const group = await this.service.getAllGroups(
         filters,
         Number(limit),
         Number(skip)
       );
-      res.status(200).json(branch);
+      res.status(200).json(group);
     } catch (error) {
       next(error);
     }
@@ -44,8 +44,8 @@ export class SucursalController {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const branch = await this.service.updateBranch(req.params.id, req.body);
-      res.status(200).json(branch);
+      const group = await this.service.updateGroup(req.params.id, req.body);
+      res.status(200).json(group);
     } catch (error) {
       next(error);
     }
@@ -53,8 +53,8 @@ export class SucursalController {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const branch = await this.service.deleteBranch(req.params.id);
-      res.status(200).json(branch);
+      const group = await this.service.deleteGroup(req.params.id);
+      res.status(200).json(group);
     } catch (error) {
       next(error);
     }
@@ -66,8 +66,8 @@ export class SucursalController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const branch = await this.service.restoreBranch(req.params.id);
-      res.status(200).json(branch);
+      const group = await this.service.restoreGroup(req.params.id);
+      res.status(200).json(group);
     } catch (error) {
       next(error);
     }

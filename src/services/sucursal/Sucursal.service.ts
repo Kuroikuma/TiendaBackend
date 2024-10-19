@@ -1,3 +1,4 @@
+
 import { injectable, inject } from 'tsyringe';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
@@ -9,7 +10,6 @@ export class SucursalService {
   ) {}
 
   async createSucursal(data: Partial<ISucursal>): Promise<ISucursal> {
-
     const branchExists = await this.repository.findByName(data.nombre!);
 
     if (branchExists) {
@@ -18,9 +18,8 @@ export class SucursalService {
 
     const newBranch = await this.repository.create(data);
 
-    return newBranch
+    return newBranch;
   }
-
 
   async getBranchById(id: string): Promise<ISucursal | null> {
     const user = await this.repository.findById(id);
@@ -30,11 +29,18 @@ export class SucursalService {
     return user;
   }
 
-  async getAllBranch(filters: any, limit: number, skip: number): Promise<ISucursal[]> {
+  async getAllBranch(
+    filters: any,
+    limit: number,
+    skip: number
+  ): Promise<ISucursal[]> {
     return this.repository.findAll(filters, limit, skip);
   }
 
-  async updateBranch(id: string, data: Partial<ISucursal>): Promise<ISucursal | null> {
+  async updateBranch(
+    id: string,
+    data: Partial<ISucursal>
+  ): Promise<ISucursal | null> {
     const branch = await this.repository.update(id, data);
     if (!branch) {
       throw new Error('Branch not found');
