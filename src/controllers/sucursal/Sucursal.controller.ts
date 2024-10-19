@@ -4,10 +4,7 @@ import { SucursalService } from '../../services/sucursal/Sucursal.service';
 
 @injectable()
 export class SucursalController {
-  
-  constructor(
-    @inject(SucursalService) private service: SucursalService
-  ) {}
+  constructor(@inject(SucursalService) private service: SucursalService) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -18,7 +15,11 @@ export class SucursalController {
     }
   }
 
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getById(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const branch = await this.service.getBranchById(req.params.id);
       res.status(200).json(branch);
@@ -30,7 +31,11 @@ export class SucursalController {
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { limit = 10, skip = 0, ...filters } = req.query;
-      const branch = await this.service.getAllBranch(filters, Number(limit), Number(skip));
+      const branch = await this.service.getAllBranch(
+        filters,
+        Number(limit),
+        Number(skip)
+      );
       res.status(200).json(branch);
     } catch (error) {
       next(error);
@@ -55,7 +60,11 @@ export class SucursalController {
     }
   }
 
-  async restore(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async restore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const branch = await this.service.restoreBranch(req.params.id);
       res.status(200).json(branch);

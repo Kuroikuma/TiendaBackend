@@ -9,6 +9,12 @@ export interface IProducto extends Document {
   deleted_at: Date | null;
 }
 
+export interface IProductCreate extends IProducto {
+  sucursalId: mongoose.Types.ObjectId;
+  grupoId: mongoose.Types.ObjectId;
+  stock: number;
+}
+
 const productoSchema: Schema = new Schema(
   {
     nombre: { type: String, required: true },

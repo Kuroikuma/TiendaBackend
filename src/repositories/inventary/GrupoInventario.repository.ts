@@ -1,7 +1,11 @@
 import { injectable } from 'tsyringe';
 import { ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 import { IProducto, Producto } from '../../models/inventario/Producto.model';
-import { GrupoInventario, IGrupoInventario, IGrupoInventarioWithPopulate } from '../../models/inventario/GrupoInventario.model';
+import {
+  GrupoInventario,
+  IGrupoInventario,
+  IGrupoInventarioWithPopulate,
+} from '../../models/inventario/GrupoInventario.model';
 
 @injectable()
 export class GrupoInventarioRepository {
@@ -38,32 +42,45 @@ export class GrupoInventarioRepository {
 
     let newGrupo: IGrupoInventarioWithPopulate = grupo;
 
-    let productGroup = await this.modelProductoGrupo.find({ grupoId: id }).populate('productoId');
+    let productGroup = await this.modelProductoGrupo
+      .find({ grupoId: id, deleted_at: null })
+      .populate('productoId');
 
     if (productGroup.length > 0) {
-      productGroup.forEach(product => {
+      productGroup.forEach((product) => {
         newGrupo.products?.push(product.productoId as IProducto);
       });
     }
-    
+
     return grupo;
   }
-  
-  async findAll(filters: any = {}, limit: number = 10, skip: number = 0): Promise<IGrupoInventario[]> {
-    const query = this.model.find(filters);
+
+  async findAll(
+    filters: any = {},
+    limit: number = 10,
+    skip: number = 0
+  ): Promise<IGrupoInventario[]> {
+    const query = this.model.find({...filters, deleted_at: null});
 
     return await query.limit(limit).skip(skip).exec();
   }
 
-  async update(id: string, data: Partial<IGrupoInventario>): Promise<IGrupoInventario | null> {
+  async update(
+    id: string,
+    data: Partial<IGrupoInventario>
+  ): Promise<IGrupoInventario | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
   async delete(id: string): Promise<IGrupoInventario | null> {
-    return await this.model.findByIdAndUpdate(id, { deleted_at: new Date() }, { new: true }).exec();
+    return await this.model
+      .findByIdAndUpdate(id, { deleted_at: new Date() }, { new: true })
+      .exec();
   }
 
   async restore(id: string): Promise<IGrupoInventario | null> {
-    return await this.model.findByIdAndUpdate(id, { deleted_at: null }, { new: true }).exec();
+    return await this.model
+      .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
+      .exec();
   }
 }
