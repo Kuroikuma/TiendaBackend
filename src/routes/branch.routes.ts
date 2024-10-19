@@ -33,4 +33,6 @@ router.patch(
   branchController.restore.bind(branchController)
 );
 
+router.get('/:id/products', authMiddleware, branchController.findBranchProducts.bind(branchController));
+
 export default router;

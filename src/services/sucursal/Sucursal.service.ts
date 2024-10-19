@@ -2,6 +2,7 @@
 import { injectable, inject } from 'tsyringe';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
+import { IProducto } from 'src/models/inventario/Producto.model';
 
 @injectable()
 export class SucursalService {
@@ -35,6 +36,10 @@ export class SucursalService {
     skip: number
   ): Promise<ISucursal[]> {
     return this.repository.findAll(filters, limit, skip);
+  }
+
+  async findBranchProducts (id: string): Promise<IProducto[]> {
+    return this.repository.findBranchProducts(id);
   }
 
   async updateBranch(

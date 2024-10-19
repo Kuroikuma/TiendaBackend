@@ -42,6 +42,15 @@ export class SucursalController {
     }
   }
 
+  async findBranchProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const branch = await this.service.findBranchProducts(req.params.id);
+      res.status(200).json(branch);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const branch = await this.service.updateBranch(req.params.id, req.body);
