@@ -44,7 +44,7 @@ export class UserRepository {
     limit: number = 10,
     skip: number = 0
   ): Promise<IUser[]> {
-    const query = this.model.find({...filters, deleted_at: null});
+    const query = this.model.find({ ...filters, deleted_at: null });
 
     query.populate({
       path: 'sucursalId',

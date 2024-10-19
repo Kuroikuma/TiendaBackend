@@ -35,7 +35,7 @@ export class SucursalRepository {
     limit: number = 10,
     skip: number = 0
   ): Promise<ISucursal[]> {
-    const query = this.modelSucursal.find({...filters, deleted_at: null});
+    const query = this.modelSucursal.find({ ...filters, deleted_at: null });
 
     return await query.limit(limit).skip(skip).exec();
   }

@@ -7,7 +7,8 @@ import {
 import { Sucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import mongoose from 'mongoose';
-import { ProductosGrupos } from 'src/models/inventario/ProductosGrupo.model';
+import { ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
+import { GrupoInventario } from '../../models/inventario/GrupoInventario.model';
 
 @injectable()
 export class ProductoRepository {
@@ -15,12 +16,14 @@ export class ProductoRepository {
   private modelSucursal: typeof Sucursal;
   private modelInventarioSucursal: typeof InventarioSucursal;
   private modelProductoGrupo: typeof ProductosGrupos;
+  private modelGrupoInventario: typeof GrupoInventario;
 
   constructor() {
     this.model = Producto;
     this.modelSucursal = Sucursal;
     this.modelInventarioSucursal = InventarioSucursal;
     this.modelProductoGrupo = ProductosGrupos;
+    this.modelGrupoInventario = GrupoInventario;
   }
 
   async create(data: Partial<IProductCreate>): Promise<IProducto | null> {
@@ -29,7 +32,12 @@ export class ProductoRepository {
     try {
       session.startTransaction();
 
-      let isProductAvailableAtBranch = await this.findProductByNameInSucursal(data.nombre!, data.sucursalId!.toString());
+      let isProductAvailableAtBranch = await this.findProductByNameInSucursal(
+        data.nombre!,
+        data.sucursalId!.toString()
+      );
+
+      // se debe que si el producto esta eliminaddo, no se puede insertarlo
 
       if (isProductAvailableAtBranch) {
         throw new Error('Producto ya existente en la sucursal');
@@ -37,7 +45,7 @@ export class ProductoRepository {
 
       const product = new this.model(data);
       const sucursal = await this.modelSucursal.findById(data.sucursalId);
-      const grupo = await this.modelSucursal.findById(data.grupoId);
+      const grupo = await this.modelGrupoInventario.findById(data.grupoId);
 
       if (!sucursal) {
         throw new Error('Sucursal no encontrada');
@@ -47,7 +55,7 @@ export class ProductoRepository {
         throw new Error('Grupo no encontrado');
       }
 
-      let productSave = await product.save({session});
+      let productSave = await product.save({ session });
 
       let inventarioSucursal = new this.modelInventarioSucursal({
         productoId: productSave._id,
@@ -61,15 +69,14 @@ export class ProductoRepository {
         grupoId: grupo._id,
       });
 
-      await inventarioSucursal.save({session});
+      await inventarioSucursal.save({ session });
 
-      await productoGrupo.save({session});
+      await productoGrupo.save({ session });
 
       await session.commitTransaction();
       session.endSession();
 
       return productSave;
-
     } catch (error) {
       console.log(error);
 
@@ -95,17 +102,23 @@ export class ProductoRepository {
     limit: number = 10,
     skip: number = 0
   ): Promise<IProducto[]> {
-    const query = this.model.find({...filters, deleted_at: null});
+    const query = this.model.find({ ...filters, deleted_at: null });
 
     return await query.limit(limit).skip(skip).exec();
   }
 
-  async findProductByNameInSucursal(name: string, sucursalId: string): Promise<IProducto | null> {	
+  async findProductByNameInSucursal(
+    name: string,
+    sucursalId: string
+  ): Promise<IProducto | null> {
     const product = await this.model.findOne({ nombre: name });
 
-    if (!product) return null; 
+    if (!product) return null;
 
-    const query = await this.modelInventarioSucursal.findOne({ productoId: product._id, sucursalId: sucursalId });
+    const query = await this.modelInventarioSucursal.findOne({
+      productoId: product._id,
+      sucursalId: sucursalId,
+    });
 
     return query ? product : null;
   }

@@ -60,9 +60,17 @@ export class GrupoInventarioRepository {
     limit: number = 10,
     skip: number = 0
   ): Promise<IGrupoInventario[]> {
-    const query = this.model.find({...filters, deleted_at: null});
+    const query = this.model.find({ ...filters, deleted_at: null });
 
     return await query.limit(limit).skip(skip).exec();
+  }
+
+  async findByName(
+    name: string,
+  ): Promise<IGrupoInventario | null> {
+    const grupo = await this.model.findOne({ nombre: name });
+
+    return grupo;
   }
 
   async update(

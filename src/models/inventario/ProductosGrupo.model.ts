@@ -12,12 +12,12 @@ const productosGruposSchema: Schema = new Schema(
   {
     productoId: {
       type: Schema.Types.ObjectId,
-      ref: 'Producto',
+      ref: Producto,
       required: true,
     },
     grupoId: {
       type: Schema.Types.ObjectId,
-      ref: 'GrupoInventario',
+      ref: GrupoInventario,
       required: true,
     },
     deleted_at: { type: Date, default: null },
