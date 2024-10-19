@@ -1,9 +1,13 @@
 import 'reflect-metadata';
 import * as dotenv from 'dotenv';
-import express from 'express';
 import connectDB from './config/database';
 import userRoutes from './routes/user.routes';
 import branchRoutes from './routes/branch.routes';
+import productRoutes from './routes/inventario/producto.routes';
+import { errorHandler } from './middlewares/errorHandler';
+
+const express = require('express');
+const cors = require("cors");
 
 dotenv.config();
 
@@ -12,11 +16,21 @@ const port = process.env.PORT;
 
 connectDB();
 
+app.use(cors());
+
 app.use(express.json());
 
 // Rutas
 app.use('/api/users', userRoutes);
 app.use('/api/branches', branchRoutes);
+
+// rutas de inventario
+app.use('/api/inventario/productos', productRoutes);
+
+// Middleware de manejo de errores
+app.use(errorHandler);
+
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
