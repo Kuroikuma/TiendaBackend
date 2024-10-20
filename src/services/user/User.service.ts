@@ -1,5 +1,5 @@
 import { UserRepository } from '../../repositories/user/User.repository';
-import { IUser } from '../../models/usuarios/User.model';
+import { IResponseLogin, IUser } from '../../models/usuarios/User.model';
 import { generateToken } from '../../utils/jwt';
 import { Types } from 'mongoose';
 import { injectable, inject } from 'tsyringe';
@@ -26,7 +26,7 @@ export class UserService {
     return token;
   }
 
-  async loginUser(data: Partial<IUser>): Promise<string> {
+  async loginUser(data: Partial<IUser>): Promise<IResponseLogin> {
     const user = await this.repository.findByUsername(data.username!);
 
     if (!user) {
@@ -45,7 +45,7 @@ export class UserService {
       role: user.role,
     });
 
-    return token;
+    return { token, user };
   }
 
   async getUserById(id: string): Promise<IUser | null> {

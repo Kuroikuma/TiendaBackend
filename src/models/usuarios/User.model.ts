@@ -12,6 +12,11 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
+export interface IResponseLogin {
+  token: string;
+  user: IUser;
+}
+
 // Definir el esquema de usuario
 const UserSchema: Schema<IUser> = new Schema({
   username: {
