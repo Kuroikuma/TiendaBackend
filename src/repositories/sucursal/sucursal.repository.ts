@@ -1,5 +1,5 @@
 import { injectable } from 'tsyringe';
-import { IProducto, Producto } from '../../models/inventario/Producto.model';
+import { IBranchProducts, IProducto, Producto } from '../../models/inventario/Producto.model';
 import { Sucursal, ISucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 
@@ -40,7 +40,7 @@ export class SucursalRepository {
     return await query.limit(limit).skip(skip).exec();
   }
 
-  async findBranchProducts(id: string): Promise<IProducto[]> {
+  async findBranchProducts(id: string): Promise<IBranchProducts[]> {
     const sucursal = await this.modelSucursal.findById(id);
 
     if (!sucursal) {
@@ -51,10 +51,13 @@ export class SucursalRepository {
       .find({ sucursalId: id, deleted_at: null })
       .populate('productoId');
 
-    let newProducts: IProducto[] = [];
+    let newProducts: IBranchProducts[] = [];
 
     products.forEach((product) => {
-      newProducts.push(product.productoId as IProducto);
+      if (product.deleted_at === null) {
+        let producto = product.productoId as IProducto;
+        newProducts.push({...producto, stock: product.stock});
+      }
     });
 
     return newProducts;
