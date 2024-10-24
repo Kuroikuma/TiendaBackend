@@ -3,7 +3,7 @@ import { IProducto } from '../inventario/Producto.model';
 import { IInventarioSucursal } from '../inventario/InventarioSucursal.model';
 import { ITraslado } from './Traslado.model';
 
-export interface IDetalleTraslado extends Document {
+export interface IDetalleTraslado {
   inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
   trasladoId: mongoose.Types.ObjectId | ITraslado;
   productoId: mongoose.Types.ObjectId | IProducto;

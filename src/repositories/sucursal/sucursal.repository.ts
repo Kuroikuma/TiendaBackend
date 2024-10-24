@@ -6,6 +6,7 @@ import {
 } from '../../models/inventario/Producto.model';
 import { Sucursal, ISucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
+import mongoose from 'mongoose';
 
 @injectable()
 export class SucursalRepository {
@@ -58,8 +59,10 @@ export class SucursalRepository {
     let newProducts: IBranchProducts[] = [];
 
     products.forEach((product) => {
-      if (product.deleted_at === null) {
+      if (product.deleted_at == null) {
         let producto = product.productoId as IProducto;
+        let sucursalId = product.sucursalId as ISucursal;
+
         newProducts.push({
           stock: product.stock,
           nombre: producto.nombre,
@@ -67,6 +70,8 @@ export class SucursalRepository {
           precio: producto.precio,
           monedaId: producto.monedaId,
           deleted_at: producto.deleted_at,
+          id: producto._id as mongoose.Types.ObjectId,
+          sucursalId: sucursalId._id as mongoose.Types.ObjectId,
         });
       }
     });
