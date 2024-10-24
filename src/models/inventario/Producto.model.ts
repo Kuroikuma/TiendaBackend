@@ -16,6 +16,8 @@ export interface IBranchProducts {
   monedaId: mongoose.Types.ObjectId | IMoneda;
   deleted_at: Date | null;
   stock: number;
+  id: mongoose.Types.ObjectId;
+  sucursalId: mongoose.Types.ObjectId;
 }
 
 export interface IProductCreate {
