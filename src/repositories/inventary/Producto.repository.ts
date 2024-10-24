@@ -4,11 +4,12 @@ import {
   IProducto,
   Producto,
 } from '../../models/inventario/Producto.model';
-import { Sucursal } from '../../models/sucursales/Sucursal.model';
+import { ISucursal, Sucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import mongoose from 'mongoose';
 import { ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 import { GrupoInventario } from '../../models/inventario/GrupoInventario.model';
+import { ObjectId } from 'mongoose';
 
 @injectable()
 export class ProductoRepository {
@@ -26,7 +27,7 @@ export class ProductoRepository {
     this.modelGrupoInventario = GrupoInventario;
   }
 
-  async create(data: Partial<IProductCreate>): Promise<IProducto | null> {
+  async create(data: Partial<IProductCreate>): Promise<IProductCreate | null> {
     const session = await mongoose.startSession();
 
     try {
@@ -76,7 +77,22 @@ export class ProductoRepository {
       await session.commitTransaction();
       session.endSession();
 
-      return productSave;
+      const sucursalId = new mongoose.Types.ObjectId(data.sucursalId?.toString());
+      let grupoId = new mongoose.Types.ObjectId(data.grupoId?.toString());
+
+      let productoCreate: IProductCreate = {
+        nombre: data.nombre!,
+        descripcion: data.descripcion!,
+        precio: data.precio!,
+        monedaId: data.monedaId!,
+        deleted_at: null,
+        sucursalId,
+        grupoId,
+        stock: data.stock!,
+      };
+
+      return productoCreate;
+
     } catch (error) {
       console.log(error);
 
