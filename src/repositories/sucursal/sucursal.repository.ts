@@ -1,5 +1,9 @@
 import { injectable } from 'tsyringe';
-import { IBranchProducts, IProducto, Producto } from '../../models/inventario/Producto.model';
+import {
+  IBranchProducts,
+  IProducto,
+  Producto,
+} from '../../models/inventario/Producto.model';
 import { Sucursal, ISucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 
@@ -56,7 +60,14 @@ export class SucursalRepository {
     products.forEach((product) => {
       if (product.deleted_at === null) {
         let producto = product.productoId as IProducto;
-        newProducts.push({...producto, stock: product.stock});
+        newProducts.push({
+          stock: product.stock,
+          nombre: producto.nombre,
+          descripcion: producto.descripcion,
+          precio: producto.precio,
+          monedaId: producto.monedaId,
+          deleted_at: producto.deleted_at,
+        });
       }
     });
 
