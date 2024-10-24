@@ -13,7 +13,7 @@ export class ProductoService {
 
   async createProduct(
     data: Partial<IProductCreate>
-  ): Promise<IProducto | null> {
+  ): Promise<IProductCreate | null> {
     const newBranch = await this.repository.create(data);
 
     return newBranch;

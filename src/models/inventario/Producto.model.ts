@@ -18,7 +18,12 @@ export interface IBranchProducts {
   stock: number;
 }
 
-export interface IProductCreate extends IProducto {
+export interface IProductCreate {
+  nombre: string;
+  descripcion: string;
+  precio: mongoose.Types.Decimal128;
+  monedaId: mongoose.Types.ObjectId | IMoneda;
+  deleted_at: Date | null;
   sucursalId: mongoose.Types.ObjectId;
   grupoId: mongoose.Types.ObjectId;
   stock: number;

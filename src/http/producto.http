@@ -1,15 +1,15 @@
 @api = http://127.0.0.1:3000/api/inventory/products
 
 POST {{api}}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJDYWplcm8iLCJpYXQiOjE3MjkzMTQ2MTAsImV4cCI6MTcyOTMxODIxMH0.yZ5Bx_YQyCS3sc7mCzbh1ED_6L_xDCc1UkclRMpVSJk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJDYWplcm8iLCJpYXQiOjE3Mjk3NDYxNjksImV4cCI6MTcyOTc0OTc2OX0.yVdASLQanwWR2tlEQ4eJf18yNmGppJeTxCjq00Xsprc
 Content-Type: application/json
 
 {
-    "nombre":"Auriculares Bluetooth Inalámbricos",
-    "descripcion":"Auriculares ligeros con sonido de alta calidad, micrófono integrado y controles táctiles. Ofrecen hasta 8 horas de autonomía y cancelación de ruido.",
-    "precio":100,
+    "nombre":"iPhone 15 Pro Max",
+    "descripcion":"El último modelo de iPhone con cámara mejorada, chip A17 Bionic, y pantalla de 6.7 pulgadas.",
+    "precio":1499.99,
     "monedaId":"671342d4664051db7c1f8792",
     "grupoId":"671341caef1cc47547aae694",
-    "stock":10,
+    "stock":100,
     "sucursalId":"67133f450dcdd2f9ee534c5c"
 }
