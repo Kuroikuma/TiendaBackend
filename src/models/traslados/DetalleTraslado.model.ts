@@ -11,8 +11,10 @@ export interface IDetalleTraslado extends Document {
   recibido: boolean;
   regresado: boolean;
   estado: boolean;
-  archivosAdjuntos: boolean;
+  archivosAdjuntos: string[];
   deleted_at: Date | null;
+  comentarioRecepcion:string;
+  comentarioEnvio:string;
 }
 
 const detalleTrasladoSchema: Schema = new Schema(
@@ -36,7 +38,7 @@ const detalleTrasladoSchema: Schema = new Schema(
     recibido: { type: Boolean, required: true },
     regresado: { type: Boolean, required: true },
     estado: { type: Boolean, required: true },
-    archivosAdjuntos: { type: Boolean, default: false },
+    archivosAdjuntos: { type: Array<string>, default: false },
     deleted_at: { type: Date, default: null },
   },
   {

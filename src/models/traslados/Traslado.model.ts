@@ -15,7 +15,7 @@ export interface ITraslado extends Document {
   consecutivo: number;
   comentarioRecepcion: string | null;
   estatusTraslado: string;
-  archivosAdjuntos: string | null;
+  archivosAdjuntos: string[] | null;
   deleted_at: Date | null;
 }
 
@@ -49,7 +49,7 @@ const trasladoSchema: Schema = new Schema(
     consecutivo: { type: Number, required: true },
     comentarioRecepcion: { type: String, default: null },
     estatusTraslado: { type: String, required: true },
-    archivosAdjuntos: { type: String, default: null },
+    archivosAdjuntos: { type: Array<string>, default: null },
     deleted_at: { type: Date, default: null },
   },
   {

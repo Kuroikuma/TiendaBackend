@@ -9,6 +9,15 @@ export interface IProducto extends Document {
   deleted_at: Date | null;
 }
 
+export interface IBranchProducts {
+  nombre: string;
+  descripcion: string;
+  precio: mongoose.Types.Decimal128;
+  monedaId: mongoose.Types.ObjectId | IMoneda;
+  deleted_at: Date | null;
+  stock: number;
+}
+
 export interface IProductCreate extends IProducto {
   sucursalId: mongoose.Types.ObjectId;
   grupoId: mongoose.Types.ObjectId;
