@@ -89,6 +89,8 @@ export class ProductoRepository {
         sucursalId,
         grupoId,
         stock: data.stock!,
+        create_at: new Date(),
+        update_at: new Date(),
       };
 
       return productoCreate;

@@ -1,17 +1,17 @@
 import mongoose, { ObjectId } from 'mongoose';
 import { IDetalleTraslado, IDetalleTrasladoEnvio } from '../../models/traslados/DetalleTraslado.model';
-import { IInventarioSucursal } from 'src/models/inventario/InventarioSucursal.model';
-import { InventarioSucursalRepository } from 'src/repositories/inventary/inventarioSucursal.repository';
-import { ITraslado, Traslado } from 'src/models/traslados/Traslado.model';
-import { SucursalRepository } from 'src/repositories/sucursal/sucursal.repository';
+import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
+import { ISendTrasladoProducto, ITraslado, Traslado } from '../../models/traslados/Traslado.model';
+import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
 import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
 import { inject, injectable } from 'tsyringe';
+import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 
 interface IManageHerramientaModel {
   init(sucursalEnviaId: string, sucursalRecibeId: string, usuarioIdEnvia:string): void;
   initManage(sucursalEnviaId: string, sucursalRecibeId: string, listInventarioSucursalId: string[]): Promise<void>;
-  generatePedidoHerramienta();
-  sendPedidoHerramienta(model: ITraslado): Promise<void>;
+  generatePedidoHerramienta(session: mongoose.mongo.ClientSession);
+  sendPedidoHerramienta(model: ISendTrasladoProducto, session: mongoose.mongo.ClientSession): Promise<void>;
   subtractCantidadByDetalleTraslado(listItems: IDetalleTraslado[]): Promise<void>;
 }
 
@@ -44,31 +44,32 @@ export class InventoryManagementService implements IManageHerramientaModel {
     this._listInventarioSucursal = await this.inventarioSucursalRepo.getListProductByInventarioSucursalIds(sucursalEnviaId,listInventarioSucursalId);
   }
 
-  async generatePedidoHerramienta(){
+  async generatePedidoHerramienta(session: mongoose.mongo.ClientSession){
     const ultimoPedido = await this.trasladoRepository.getLastTrasladoBySucursalId(this.sucursalRecibeId.toString())
     const idRegistro = this.usuarioEnviaId; // Aquí debes obtener el id del trabajador desde el contexto o sesión
 
     const newConsecutivo = ultimoPedido?.consecutivo ? ultimoPedido.consecutivo + 1 : 1;
 
     const newPedido = new Traslado({
-      estatusPedido: 'Solicitado',
+      estatusTraslado: 'Solicitado',
       fechaRegistro: new Date(),
       tipoPedido: 0,
       estado: true,
-      numeroConsecutivo: newConsecutivo,
+      consecutivo: newConsecutivo,
       sucursalDestinoId:this.sucursalRecibeId,
       sucursalOrigenId:this.sucursalEnviaId,
     });
 
-    await newPedido.save();
+    await newPedido.save({session});
     return newPedido;
   }
 
-  async sendPedidoHerramienta(model: ITraslado): Promise<void> {
-    let traslado = model;
+  async sendPedidoHerramienta(model: ISendTrasladoProducto, session: mongoose.mongo.ClientSession): Promise<void> {
+    let traslado = model.traslado;
+    let trasladoId = (traslado._id as mongoose.Types.ObjectId).toString()
 
-    if (!traslado && model._id) {
-      traslado = await this.trasladoRepository.findById(model._id.toString()) as ITraslado;
+    if (!traslado && trasladoId) {
+      traslado = await this.trasladoRepository.findById(trasladoId) as ITraslado;
     }
 
     if (!traslado) throw new Error('Pedido no encontrado');
@@ -84,7 +85,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
     traslado.comentarioEnvio = model.comentarioEnvio;
 
-    await this.trasladoRepository.update((traslado._id as mongoose.Types.ObjectId).toString(), traslado);
+    await this.trasladoRepository.update(trasladoId, traslado, session);
   }
 
   public async generateItemDePedidoByPedido(

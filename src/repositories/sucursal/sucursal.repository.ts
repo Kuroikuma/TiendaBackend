@@ -72,6 +72,7 @@ export class SucursalRepository {
           deleted_at: producto.deleted_at,
           id: producto._id as mongoose.Types.ObjectId,
           sucursalId: sucursalId._id as mongoose.Types.ObjectId,
+          inventarioSucursalId: product._id as mongoose.Types.ObjectId,
         });
       }
     });

@@ -18,6 +18,7 @@ export interface IBranchProducts {
   stock: number;
   id: mongoose.Types.ObjectId;
   sucursalId: mongoose.Types.ObjectId;
+  inventarioSucursalId: mongoose.Types.ObjectId;
 }
 
 export interface IProductCreate {
@@ -29,6 +30,8 @@ export interface IProductCreate {
   sucursalId: mongoose.Types.ObjectId;
   grupoId: mongoose.Types.ObjectId;
   stock: number;
+  create_at: Date;
+  update_at: Date;
 }
 
 const productoSchema: Schema = new Schema(

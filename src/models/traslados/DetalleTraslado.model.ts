@@ -20,7 +20,7 @@ export interface IDetalleTrasladoEnvio {
   inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
   cantidad: number;
   comentarioEnvio:string;
-  archivosAdjuntos: string[];
+  archivosAdjuntos: string[] | null;
 }
 
 const detalleTrasladoSchema: Schema = new Schema(
@@ -36,9 +36,9 @@ const detalleTrasladoSchema: Schema = new Schema(
       required: true,
     },
     cantidad: { type: Number, required: true },
-    recibido: { type: Boolean, required: true },
-    regresado: { type: Boolean, required: true },
-    estado: { type: Boolean, required: true },
+    recibido: { type: Boolean },
+    regresado: { type: Boolean },
+    estado: { type: Boolean },
     archivosAdjuntos: { type: Array<string>, default: false },
     deleted_at: { type: Date, default: null },
   },
