@@ -1,6 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, ObjectId } from 'mongoose';
 import { ISucursal } from '../sucursales/Sucursal.model';
 import { IUser } from '../usuarios/User.model';
+import { IDetalleTrasladoEnvio } from './DetalleTraslado.model';
 
 export interface ITraslado extends Document {
   fechaRegistro: Date;
@@ -19,6 +20,17 @@ export interface ITraslado extends Document {
   firmaEnvio:string;
   firmaRecepcion:string;
   deleted_at: Date | null;
+}
+
+export interface ITrasladoEnvio {
+  sucursalOrigenId: string;
+  sucursalDestinoId: string;
+  listDetalleTrasladoStr: string;
+  listDetalleTraslado: IDetalleTrasladoEnvio[];
+  archivosAdjuntos: string[] | null;
+  firmaEnvio:string;
+  comentarioEnvio: string;
+  usuarioIdEnvia:string;
 }
 
 const trasladoSchema: Schema = new Schema(

@@ -23,6 +23,6 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       return res.status(500).json({ errors: [{ message: 'Error en la base de datos', details: err.message }] });
     default:
       console.error('Error inesperado:', err);
-      return res.status(500).json({ errors: [{ message: 'Ocurrió un error inesperado' }] });
+      return res.status(500).json({ errors: [{ message: err.message }] });
   }
 };

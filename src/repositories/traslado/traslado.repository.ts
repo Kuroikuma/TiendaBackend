@@ -1,5 +1,7 @@
 import { injectable } from 'tsyringe';
 import { ITraslado, Traslado } from 'src/models/traslados/Traslado.model';
+import { mongo } from 'mongoose';
+import { IDetalleTraslado } from 'src/models/traslados/DetalleTraslado.model';
 
 @injectable()
 export class TrasladoRepository {
@@ -60,4 +62,21 @@ export class TrasladoRepository {
       .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
   }
+  async saveAllDetalleTraslado(data: IDetalleTraslado[], session:mongo.ClientSession): Promise<void> {
+    await this.model.insertMany(data, { session });
+  }
+
+  async getLastTrasladoBySucursalId(sucursalId: string) {
+    try {
+        const ultimoTraslado = await this.model
+            .findOne({ sucursalId }) 
+            .sort({ fechaRegistro: -1 })
+       // Ejecuta la 
+
+        return ultimoTraslado; 
+    } catch (error) {
+        console.error('Error al obtener el último traslado:', error);
+        throw new Error('Error al obtener el último traslado');
+    }
+}
 }

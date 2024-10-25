@@ -33,6 +33,10 @@ export class UserService {
       throw new Error('Invalid credentials');
     }
 
+    if (user.deleted_at !== null) {
+      throw new Error('User deleted');
+    }
+
     const isMatch = await user.comparePassword(data.password!);
 
     if (!isMatch) {
