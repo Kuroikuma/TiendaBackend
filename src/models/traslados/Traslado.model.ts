@@ -13,30 +13,37 @@ export interface ITraslado extends Document {
   usuarioIdRecibe: mongoose.Types.ObjectId | IUser | null;
   estado: string;
   comentarioEnvio: string;
-  consecutivo: number;
+  consecutivo?: number;
   comentarioRecepcion: string | null;
-  estatusTraslado: string;
+  estatusTraslado?: string;
   archivosAdjuntos: string[] | null;
-  firmaEnvio:string;
-  firmaRecepcion:string;
+  firmaEnvio: string;
+  firmaRecepcion: string;
   deleted_at: Date | null;
 }
 
 export interface ITrasladoEnvio {
   sucursalOrigenId: string;
   sucursalDestinoId: string;
-  listDetalleTrasladoStr: string;
   listDetalleTraslado: IDetalleTrasladoEnvio[];
   archivosAdjuntos: string[] | null;
-  firmaEnvio:string;
+  firmaEnvio: string;
   comentarioEnvio: string;
-  usuarioIdEnvia:string;
+  usuarioIdEnvia: string;
 }
+
+export interface ISendTrasladoProducto {
+  firmaEnvio: string;
+  comentarioEnvio: string;
+  trasladoId: mongoose.Types.ObjectId;
+  traslado: ITraslado;
+}
+
 
 const trasladoSchema: Schema = new Schema(
   {
     fechaRegistro: { type: Date, required: true },
-    fechaEnvio: { type: Date, required: true },
+    fechaEnvio: { type: Date },
     fechaRecepcion: { type: Date, default: null },
     sucursalOrigenId: {
       type: Schema.Types.ObjectId,
@@ -51,7 +58,6 @@ const trasladoSchema: Schema = new Schema(
     usuarioIdEnvia: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
     usuarioIdRecibe: {
       type: Schema.Types.ObjectId,
@@ -60,9 +66,9 @@ const trasladoSchema: Schema = new Schema(
     },
     estado: { type: String, required: true },
     comentarioEnvio: { type: String, default: '' },
-    consecutivo: { type: Number, required: true },
+    consecutivo: { type: Number },
     comentarioRecepcion: { type: String, default: null },
-    estatusTraslado: { type: String, required: true },
+    estatusTraslado: { type: String },
     archivosAdjuntos: { type: Array<string>, default: null },
     firmaEnvio: { type: String, default: '' },
     firmaRecepcion: { type: String, default: '' },

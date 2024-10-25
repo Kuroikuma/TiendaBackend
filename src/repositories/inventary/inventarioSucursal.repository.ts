@@ -1,12 +1,5 @@
 import { injectable } from 'tsyringe';
-import { ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
-import { IProducto, Producto } from '../../models/inventario/Producto.model';
-import {
-  GrupoInventario,
-  IGrupoInventario,
-  IGrupoInventarioWithPopulate,
-} from '../../models/inventario/GrupoInventario.model';
-import { IInventarioSucursal, InventarioSucursal } from 'src/models/inventario/InventarioSucursal.model';
+import { IInventarioSucursal, InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { Types } from 'mongoose';
 
 @injectable()

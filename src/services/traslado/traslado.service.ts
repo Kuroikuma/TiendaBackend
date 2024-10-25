@@ -1,28 +1,18 @@
 import { injectable, inject } from 'tsyringe';
-import { ISucursal } from '../../models/sucursales/Sucursal.model';
-import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
-import {
-  IBranchProducts,
-  IProducto,
-} from 'src/models/inventario/Producto.model';
-import { ITrasladoEnvio } from 'src/models/traslados/Traslado.model';
-import { json } from 'body-parser';
+import { ITraslado, ITrasladoEnvio } from 'src/models/traslados/Traslado.model';
 import { IDetalleTrasladoEnvio } from 'src/models/traslados/DetalleTraslado.model';
 import { InventoryManagementService } from './InventoryManagement.service';
-import mongoose, { ObjectId, Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 @injectable()
-export class SucursalService {
+export class TrasladoService {
   constructor(
-    @inject(SucursalRepository) private repository: SucursalRepository,
-    @inject(InventoryManagementService)
-    private inventoryManagementService: InventoryManagementService
+    @inject(InventoryManagementService) private inventoryManagementService: InventoryManagementService
   ) {}
 
-  async postCreateEnvioProducto(model: Partial<ITrasladoEnvio>): Promise<null> {
-    let listDetalleTraslado: IDetalleTrasladoEnvio[] = JSON.parse(
-      JSON.stringify(model.listDetalleTrasladoStr)
-    );
+  async postCreateEnvioProducto(model: Partial<ITrasladoEnvio>): Promise<ITraslado> {
+    let listDetalleTraslado: IDetalleTrasladoEnvio[] = model.listDetalleTraslado!;
+    
     model.listDetalleTraslado = listDetalleTraslado;
 
     this.inventoryManagementService.init(
@@ -46,7 +36,10 @@ export class SucursalService {
     try {
       session.startTransaction();
 
-      var traslado = await this.inventoryManagementService.generatePedidoHerramienta();
+      var traslado = await this.inventoryManagementService.generatePedidoHerramienta(session);
+
+     
+      
       var listItemDePedidos =
         await this.inventoryManagementService.generateItemDePedidoByPedido(
           (traslado._id as mongoose.Types.ObjectId).toString(),
@@ -55,8 +48,27 @@ export class SucursalService {
           false,
           session
         );
-        
+
       await this.inventoryManagementService.subtractCantidadByDetalleTraslado(listItemDePedidos);
+
+      //  Haciendo el envio del pedido
+       
+       let sendTrasladoProducto = {
+           firmaEnvio: model.firmaEnvio == "undefined" ? "" : model.firmaEnvio!,
+           comentarioEnvio : model.comentarioEnvio!,
+           trasladoId : (traslado._id as mongoose.Types.ObjectId),
+           traslado : traslado,
+       };
+
+       await this.inventoryManagementService.sendPedidoHerramienta(sendTrasladoProducto, session);
+
+       await session.commitTransaction();
+       session.endSession();
+
+       console.log("llega2");
+       
+
+      return traslado;
 
     } catch (error) {
       console.log(error);
@@ -66,7 +78,5 @@ export class SucursalService {
 
       throw new Error('Error al crear producto');
     }
-
-    return null;
   }
 }

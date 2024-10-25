@@ -1,0 +1,28 @@
+@api = http://127.0.0.1:3000/api/transfer
+
+POST {{api}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5ODQyMjkzLCJleHAiOjE3Mjk4NDU4OTN9.v9jkZPN1Fyk5EQ8HIrI1O4CPUhcXuuL5kxRvJoQColU
+Content-Type: application/json
+
+{
+  "sucursalOrigenId": "67133f450dcdd2f9ee534c5c",
+  "sucursalDestinoId": "67154f3ef28d2ede3373196e",
+  "listDetalleTraslado": [
+    {
+      "inventarioSucursalId": "671344c3f6b75c84c0d41433",
+      "cantidad": 1,
+      "archivosAdjuntos": null,
+      "comentarioEnvio": "asdasd"
+    },
+    {
+      "inventarioSucursalId": "671494e9f0c2db8025a4627b",
+      "cantidad": 1,
+      "archivosAdjuntos": null,
+      "comentarioEnvio": "asdasd"
+    }
+  ],
+  "archivosAdjuntos": null,
+  "firmaEnvio": "asdasd",
+  "comentarioEnvio": "asdasd",
+  "usuarioIdEnvia": "670b6c11bf5cb2faef16b03f"
+}

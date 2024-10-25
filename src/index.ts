@@ -6,6 +6,7 @@ import branchRoutes from './routes/branch.routes';
 import productRoutes from './routes/inventario/producto.routes';
 import { errorHandler } from './middlewares/errorHandler';
 import grupoRoutes from './routes/inventario/grupo.routes';
+import productTransfer from './routes/traslado/traslado.routes';
 
 const express = require('express');
 const cors = require("cors");
@@ -28,6 +29,9 @@ app.use('/api/branches', branchRoutes);
 // rutas de inventario
 app.use('/api/inventory/products', productRoutes);
 app.use('/api/inventory/groups', grupoRoutes);
+
+//rutas de transferencia
+app.use('/api/transfer', productTransfer);
 
 // Middleware de manejo de errores
 app.use(errorHandler);

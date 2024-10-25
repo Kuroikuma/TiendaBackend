@@ -1,14 +1,19 @@
 import { injectable } from 'tsyringe';
-import { ITraslado, Traslado } from 'src/models/traslados/Traslado.model';
-import { mongo } from 'mongoose';
-import { IDetalleTraslado } from 'src/models/traslados/DetalleTraslado.model';
+import { ITraslado, Traslado } from '../../models/traslados/Traslado.model';
+import mongoose, { mongo } from 'mongoose';
+import {
+  DetalleTraslado,
+  IDetalleTraslado,
+} from '../../models/traslados/DetalleTraslado.model';
 
 @injectable()
 export class TrasladoRepository {
   private model: typeof Traslado;
+  private modelDetalleTraslado: typeof DetalleTraslado;
 
   constructor() {
     this.model = Traslado;
+    this.modelDetalleTraslado = DetalleTraslado;
   }
 
   async create(data: Partial<ITraslado>): Promise<ITraslado> {
@@ -36,9 +41,7 @@ export class TrasladoRepository {
     return await query.limit(limit).skip(skip).exec();
   }
 
-  async findByName(
-    name: string,
-  ): Promise<ITraslado | null> {
+  async findByName(name: string): Promise<ITraslado | null> {
     const Traslado = await this.model.findOne({ nombre: name });
 
     return Traslado;
@@ -46,9 +49,13 @@ export class TrasladoRepository {
 
   async update(
     id: string,
-    data: Partial<ITraslado>
+    data: Partial<ITraslado>,
+    session: mongoose.mongo.ClientSession
   ): Promise<ITraslado | null> {
-    return await this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+
+    return await this.model
+      .findByIdAndUpdate(id, { $set: data }, { new: true, session })
+      .exec();
   }
 
   async delete(id: string): Promise<ITraslado | null> {
@@ -62,21 +69,24 @@ export class TrasladoRepository {
       .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
   }
-  async saveAllDetalleTraslado(data: IDetalleTraslado[], session:mongo.ClientSession): Promise<void> {
-    await this.model.insertMany(data, { session });
+  async saveAllDetalleTraslado(
+    data: IDetalleTraslado[],
+    session: mongo.ClientSession
+  ): Promise<void> {
+    await this.modelDetalleTraslado.insertMany(data, { session });
   }
 
   async getLastTrasladoBySucursalId(sucursalId: string) {
     try {
-        const ultimoTraslado = await this.model
-            .findOne({ sucursalId }) 
-            .sort({ fechaRegistro: -1 })
-       // Ejecuta la 
+      const ultimoTraslado = await this.model
+        .findOne({ sucursalId })
+        .sort({ fechaRegistro: -1 });
+      // Ejecuta la
 
-        return ultimoTraslado; 
+      return ultimoTraslado;
     } catch (error) {
-        console.error('Error al obtener el último traslado:', error);
-        throw new Error('Error al obtener el último traslado');
+      console.error('Error al obtener el último traslado:', error);
+      throw new Error('Error al obtener el último traslado');
     }
-}
+  }
 }

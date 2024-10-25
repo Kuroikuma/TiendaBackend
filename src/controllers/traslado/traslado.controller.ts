@@ -1,17 +1,17 @@
-// import { injectable, inject } from 'tsyringe';
-// import { Request, Response, NextFunction } from 'express';
-// import { TrasladoService } from '../../services/traslado/InventoryManagement.service';
+import { injectable, inject } from 'tsyringe';
+import { Request, Response, NextFunction } from 'express';
+import { TrasladoService } from '../../services/traslado/traslado.service';
 
-// @injectable()
-// export class GrupoInventarioController {
-//   constructor(@inject(TrasladoService) private service: TrasladoService) {}
+@injectable()
+export class TrasladoController {
+  constructor(@inject(TrasladoService) private service: TrasladoService) {}
 
-//   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
-//     try {
-//       const group = await this.service.createGrupo(req.body);
-//       res.status(201).json(group);
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
-// }
+  async postCreateEnvioProducto(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const traslado = await this.service.postCreateEnvioProducto(req.body);
+      res.status(201).json(traslado);
+    } catch (error) {
+      next(error);
+    }
+  }
+}
