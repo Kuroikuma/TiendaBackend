@@ -7,6 +7,7 @@ import {
   IGrupoInventarioWithPopulate,
 } from '../../models/inventario/GrupoInventario.model';
 import { IInventarioSucursal, InventarioSucursal } from 'src/models/inventario/InventarioSucursal.model';
+import { Types } from 'mongoose';
 
 @injectable()
 export class InventarioSucursalRepository {
@@ -66,5 +67,30 @@ export class InventarioSucursalRepository {
     return await this.model
       .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
+  }
+  
+  async getListProductByInventarioSucursalIds(
+    sucursalId: string,
+    listInventarioSucursalId: string[]
+  ) {
+    // Convertir los strings a ObjectId si es necesario
+    const sucursalObjectId = new Types.ObjectId(sucursalId);
+    const idsToFind = listInventarioSucursalId.map(id => new Types.ObjectId(id));
+
+    // Hacer la consulta usando Mongoose
+    const listInventarioSucursal = await this.model.find({
+      bodegaId: sucursalObjectId,
+      estado: true, // Filtrar por estado de BodegaActivoDesglose
+      activoDesglose: { $exists: true }, // Verificar que el activoDesglose exista
+      _id: { $in: idsToFind }, // Usar $in para buscar los IDs
+    })
+      .populate({
+        path: 'productoId',
+        match: { delete_at: null }, // Filtrar por el estado de ActivoDesglose
+      })
+      .exec();
+
+    // Filtrar cualquier resultado donde no se haya hecho el populate exitosamente
+    return listInventarioSucursal.filter(bodega => bodega.productoId);
   }
 }

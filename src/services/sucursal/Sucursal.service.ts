@@ -14,7 +14,7 @@ export class SucursalService {
     const branchExists = await this.repository.findByName(data.nombre!);
 
     if (branchExists) {
-      throw new Error('User already exists');
+      throw new Error('branch already exists');
     }
 
     const newBranch = await this.repository.create(data);
@@ -23,11 +23,11 @@ export class SucursalService {
   }
 
   async getBranchById(id: string): Promise<ISucursal | null> {
-    const user = await this.repository.findById(id);
-    if (!user) {
+    const branch = await this.repository.findById(id);
+    if (!branch) {
       throw new Error('Branch not found');
     }
-    return user;
+    return branch;
   }
 
   async getAllBranch(

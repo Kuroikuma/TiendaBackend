@@ -6,15 +6,21 @@ import { ITraslado } from './Traslado.model';
 export interface IDetalleTraslado {
   inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
   trasladoId: mongoose.Types.ObjectId | ITraslado;
-  productoId: mongoose.Types.ObjectId | IProducto;
   cantidad: number;
-  recibido: boolean;
-  regresado: boolean;
-  estado: boolean;
+  recibido?: boolean;
+  regresado?: boolean;
+  estado?: boolean;
   archivosAdjuntos: string[];
   deleted_at: Date | null;
-  comentarioRecepcion:string;
+  comentarioRecepcion?:string;
   comentarioEnvio:string;
+}
+
+export interface IDetalleTrasladoEnvio {
+  inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
+  cantidad: number;
+  comentarioEnvio:string;
+  archivosAdjuntos: string[];
 }
 
 const detalleTrasladoSchema: Schema = new Schema(
@@ -27,11 +33,6 @@ const detalleTrasladoSchema: Schema = new Schema(
     trasladoId: {
       type: Schema.Types.ObjectId,
       ref: 'Traslado',
-      required: true,
-    },
-    productoId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Producto',
       required: true,
     },
     cantidad: { type: Number, required: true },
