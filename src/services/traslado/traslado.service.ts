@@ -151,7 +151,7 @@ export class TrasladoService {
         ) as IDetalleTraslado;
 
         if (item2.cantidad > element.cantidad) {
-          pedido.estatusTraslado = 'TerminadoIncompleto';
+          pedido.estatusTraslado = 'Terminado incompleto';
         }
 
         await this.trasladoRepository.saveAllDetalleTraslado(
