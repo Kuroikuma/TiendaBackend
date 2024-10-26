@@ -22,4 +22,7 @@ router.get('/recibidos', trasladoController.findPedidoRecibidosBySucursal.bind(t
 // Get de pedidos por recibir
 router.get('/recibir', trasladoController.findPedidoPorRecibirBySucursal.bind(trasladoController));
 
+// Get de pedido por id con item de pedido
+router.get('/:id/itemdepedido', trasladoController.findPedidoByIdWithItemDePedido.bind(trasladoController));
+
 export default router;

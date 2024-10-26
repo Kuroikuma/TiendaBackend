@@ -242,4 +242,15 @@ export class TrasladoService {
     }
   }
 
+  async findPedidoById(pedidoId: string) {
+    try {
+      const pedido = await this.trasladoRepository.findById(pedidoId);
+
+      return pedido;
+    } catch (error) {
+      console.error('Error al obtener el pedido:', error);
+      throw new Error('Error al obtener el pedido');
+    }
+  }
+
 }

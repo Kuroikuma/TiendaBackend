@@ -27,6 +27,10 @@ export interface ITraslado extends Document {
   deleted_at: Date | null;
 }
 
+export interface ITrasladoDto extends ITraslado {
+  listItemDePedido: IDetalleTraslado[];
+}
+
 export interface ITrasladoEnvio {
   sucursalOrigenId: string;
   sucursalDestinoId: string;
