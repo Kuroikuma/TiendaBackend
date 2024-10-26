@@ -186,4 +186,60 @@ export class TrasladoService {
       throw new Error('Error al enviar el pedido');
     }
   }
+
+  async findPedidoEnviadosBySucursal(sucursalId: string) {
+    try {
+      const listItemDePedidos = await this.trasladoRepository.findPedidoEnviadosBySucursal(sucursalId);
+
+      return listItemDePedidos;
+    } catch (error) {
+      console.error('Error al obtener los pedidos enviados:', error);
+      throw new Error('Error al obtener los pedidos enviados');
+    }
+  }
+  
+  async findPedidoRecibidosBySucursal(sucursalId: string) {
+    try {
+      const listItemDePedidos = await this.trasladoRepository.findPedidoRecibidosBySucursal(sucursalId);
+
+      return listItemDePedidos;
+    } catch (error) {
+      console.error('Error al obtener los pedidos recibidos:', error);
+      throw new Error('Error al obtener los pedidos recibidos');
+    }
+  }
+
+  async findPedidoPorRecibirBySucursal(sucursalId: string) {
+    try {
+      const listItemDePedidos = await this.trasladoRepository.findPedidoPorRecibirBySucursal(sucursalId);
+
+      return listItemDePedidos;
+    } catch (error) {
+      console.error('Error al obtener los pedidos por recibir:', error);
+      throw new Error('Error al obtener los pedidos por recibir');
+    }
+  }
+
+  async findPedidoEnProcesoBySucursal(sucursalId: string) {
+    try {
+      const listItemDePedidos = await this.trasladoRepository.findPedidoEnProcesoBySucursal(sucursalId);
+
+      return listItemDePedidos;
+    } catch (error) {
+      console.error('Error al obtener los pedidos en proceso:', error);
+      throw new Error('Error al obtener los pedidos en proceso');
+    }
+  }
+
+  async findAllItemDePedidoByPedido(pedidoId: string) {
+    try {
+      const listItemDePedidos = await this.trasladoRepository.findAllItemDePedidoByPedido(pedidoId);
+
+      return listItemDePedidos;
+    } catch (error) {
+      console.error('Error al obtener los item de pedido:', error);
+      throw new Error('Error al obtener los item de pedido');
+    }
+  }
+
 }

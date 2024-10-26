@@ -16,5 +16,6 @@ router.get('/', productController.getAll.bind(productController));
 router.put('/:id', productController.update.bind(productController));
 router.delete('/:id', productController.delete.bind(productController));
 router.patch('/:id/restore', productController.restore.bind(productController));
+router.get('/:id/transit', productController.findProductInTransitBySucursal.bind(productController));
 
 export default router;

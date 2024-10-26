@@ -1,7 +1,7 @@
 @api = http://127.0.0.1:3000/api/transfer
 
 POST {{api}}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTIzOTExLCJleHAiOjE3Mjk5Mjc1MTF9.H51G-XYdMBpaXG6ydHGqgeAUD4jnlz_OicoYt53NAc4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTI5ODcyLCJleHAiOjE3Mjk5MzM0NzJ9.OjC2Da3SZ1hWrt5rCPF7yeP5G0g5cz5cpsLhjqhKE1M
 Content-Type: application/json
 
 {

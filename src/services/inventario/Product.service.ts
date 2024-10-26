@@ -4,11 +4,18 @@ import {
   IProductCreate,
 } from '../../models/inventario/Producto.model';
 import { ProductoRepository } from '../../repositories/inventary/Producto.repository';
+import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
+import mongoose from 'mongoose';
+import { IDetalleTraslado } from '../../models/traslados/DetalleTraslado.model';
+import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
+import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 
 @injectable()
 export class ProductoService {
   constructor(
-    @inject(ProductoRepository) private repository: ProductoRepository
+    @inject(ProductoRepository) private repository: ProductoRepository,
+    @inject(TrasladoRepository) private trasladoRepository: TrasladoRepository,
+    @inject(InventarioSucursalRepository) private inventarioSucursalRepository: InventarioSucursalRepository
   ) {}
 
   async createProduct(
@@ -60,5 +67,28 @@ export class ProductoService {
 
   async restoreProduct(id: string): Promise<IProducto | null> {
     return this.repository.restore(id);
+  }
+
+  async findProductInTransitBySucursal(sucursaleId: string): Promise<IInventarioSucursal> {
+    const pedidosEnTransito = await this.trasladoRepository.findPedidoEnProcesoBySucursal(sucursaleId);
+
+    let itemsDePedido:IDetalleTraslado[] = [];
+    let listInventarioSucursalId:string[] = [];
+
+    for await (const element of pedidosEnTransito) {
+
+      let itemDePedido = await this.trasladoRepository.findAllItemDePedidoByPedido((element._id as mongoose.Types.ObjectId).toString());
+
+      itemsDePedido.push(...itemDePedido);
+    }
+
+    for await (const element of itemsDePedido) {
+      listInventarioSucursalId.push(element.inventarioSucursalId.toString());
+    }
+
+    let productos = await this.inventarioSucursalRepository.getListProductByInventarioSucursalIds(sucursaleId, listInventarioSucursalId);
+
+    //@ts-ignore
+    return productos
   }
 }

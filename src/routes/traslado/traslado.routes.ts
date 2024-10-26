@@ -9,31 +9,17 @@ const trasladoController = container.resolve(TrasladoController);
 
 router.use(authMiddleware);
 
-// Definir las rutas
+// Post de envio de pedido
 router.post('/', trasladoController.postCreateEnvioProducto.bind(trasladoController));
 router.post('/RecibirPedido', trasladoController.postCreateRecibirProducto.bind(trasladoController));
-// router.get(
-//   '/:id',
-//   authMiddleware,
-//   branchController.getById.bind(branchController)
-// );
-// router.get('/', authMiddleware, branchController.getAll.bind(branchController));
-// router.put(
-//   '/:id',
-//   authMiddleware,
-//   branchController.update.bind(branchController)
-// );
-// router.delete(
-//   '/:id',
-//   authMiddleware,
-//   branchController.delete.bind(branchController)
-// );
-// router.patch(
-//   '/:id/restore',
-//   authMiddleware,
-//   branchController.restore.bind(branchController)
-// );
 
-// router.get('/:id/products', authMiddleware, branchController.findBranchProducts.bind(branchController));
+// Get de pedidos enviados
+router.get('/enviados', trasladoController.findPedidoEnviadosBySucursal.bind(trasladoController));
+
+// Get de pedidos recibidos
+router.get('/recibidos', trasladoController.findPedidoRecibidosBySucursal.bind(trasladoController));
+
+// Get de pedidos por recibir
+router.get('/recibir', trasladoController.findPedidoPorRecibirBySucursal.bind(trasladoController));
 
 export default router;

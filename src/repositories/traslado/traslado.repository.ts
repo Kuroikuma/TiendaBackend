@@ -116,4 +116,50 @@ export class TrasladoRepository {
       throw new Error('Error al obtener el último traslado');
     }
   }
+
+  async findPedidoEnviadosBySucursal(sucursalId: string) {
+    try {
+      const listPedidos = await this.model.find({ sucursalOrigenId: sucursalId });
+
+      return listPedidos;
+    } catch (error) {
+      console.error('Error al obtener los pedidos enviados:', error);
+      throw new Error('Error al obtener los pedidos enviados');
+    }
+  }
+
+  async findPedidoRecibidosBySucursal(sucursalId: string) {
+    try {
+      const listPedidos = await this.model.find({ sucursalDestinoId: sucursalId });
+
+      return listPedidos;
+    } catch (error) {
+      console.error('Error al obtener los pedidos recibidos:', error);
+      throw new Error('Error al obtener los pedidos recibidos');
+    }
+  }
+
+  async findPedidoPorRecibirBySucursal(sucursalId: string) {
+    try {
+      const listPedidos = await this.model.find({ sucursalDestinoId: sucursalId });
+      const listPedidoPorRecibir = listPedidos.filter((pedido) => pedido.estatusTraslado === 'En Proceso');
+
+      return listPedidoPorRecibir;
+    } catch (error) {
+      console.error('Error al obtener los pedidos por recibir:', error);
+      throw new Error('Error al obtener los pedidos por recibir');
+    }
+  }
+
+  async findPedidoEnProcesoBySucursal(sucursalId: string) {
+    try {
+      const listPedidos = await this.model.find({ sucursalOrigenId: sucursalId });
+      const listPedidoEnProceso = listPedidos.filter((pedido) => pedido.estatusTraslado === 'En Proceso');
+
+      return listPedidoEnProceso;
+    } catch (error) {
+      console.error('Error al obtener los pedidos en proceso:', error);
+      throw new Error('Error al obtener los pedidos en proceso');
+    }
+  }
 }
