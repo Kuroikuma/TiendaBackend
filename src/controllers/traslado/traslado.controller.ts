@@ -14,4 +14,13 @@ export class TrasladoController {
       next(error);
     }
   }
+
+  async postCreateRecibirProducto(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const traslado = await this.service.postRecibirPedido(req.body);
+      res.status(201).json(traslado);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

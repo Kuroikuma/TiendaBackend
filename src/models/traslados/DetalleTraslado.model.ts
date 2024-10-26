@@ -3,7 +3,7 @@ import { IProducto } from '../inventario/Producto.model';
 import { IInventarioSucursal } from '../inventario/InventarioSucursal.model';
 import { ITraslado } from './Traslado.model';
 
-export interface IDetalleTraslado {
+export interface IDetalleTraslado extends Document {
   inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
   trasladoId: mongoose.Types.ObjectId | ITraslado;
   cantidad: number;
@@ -13,13 +13,35 @@ export interface IDetalleTraslado {
   archivosAdjuntos: string[];
   deleted_at: Date | null;
   comentarioRecepcion?:string;
-  comentarioEnvio:string;
+  comentarioEnvio?:string;
+}
+
+export interface IDetalleTrasladoCreate {
+  inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
+  trasladoId: mongoose.Types.ObjectId | ITraslado;
+  cantidad: number;
+  recibido?: boolean;
+  regresado?: boolean;
+  estado?: boolean;
+  archivosAdjuntos: string[];
+  deleted_at: Date | null;
+  comentarioRecepcion?:string;
+  comentarioEnvio?:string;
 }
 
 export interface IDetalleTrasladoEnvio {
   inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
   cantidad: number;
-  comentarioEnvio:string;
+  comentarioEnvio?:string;
+  archivosAdjuntos: string[] | null;
+}
+export interface IDetalleTrasladoRecepcion
+{
+  inventarioSucursalId: mongoose.Types.ObjectId;
+  cantidad: number;
+  comentarioRecibido:string;
+  recibido: boolean;
+  estadoEquipo: string;
   archivosAdjuntos: string[] | null;
 }
 
@@ -41,6 +63,8 @@ const detalleTrasladoSchema: Schema = new Schema(
     estado: { type: Boolean },
     archivosAdjuntos: { type: Array<string>, default: false },
     deleted_at: { type: Date, default: null },
+    comentarioRecepcion: { type: String, default: null },
+    comentarioEnvio: { type: String, default: null },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'update_at' },

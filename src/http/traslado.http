@@ -1,7 +1,7 @@
 @api = http://127.0.0.1:3000/api/transfer
 
 POST {{api}}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5ODQyMjkzLCJleHAiOjE3Mjk4NDU4OTN9.v9jkZPN1Fyk5EQ8HIrI1O4CPUhcXuuL5kxRvJoQColU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTIzOTExLCJleHAiOjE3Mjk5Mjc1MTF9.H51G-XYdMBpaXG6ydHGqgeAUD4jnlz_OicoYt53NAc4
 Content-Type: application/json
 
 {
@@ -10,13 +10,19 @@ Content-Type: application/json
   "listDetalleTraslado": [
     {
       "inventarioSucursalId": "671344c3f6b75c84c0d41433",
-      "cantidad": 1,
+      "cantidad": 4,
       "archivosAdjuntos": null,
       "comentarioEnvio": "asdasd"
     },
     {
       "inventarioSucursalId": "671494e9f0c2db8025a4627b",
-      "cantidad": 1,
+      "cantidad": 4,
+      "archivosAdjuntos": null,
+      "comentarioEnvio": "asdasd"
+    },
+    {
+      "inventarioSucursalId": "6715519ef28d2ede3373197b",
+      "cantidad": 4,
       "archivosAdjuntos": null,
       "comentarioEnvio": "asdasd"
     }
@@ -25,4 +31,43 @@ Content-Type: application/json
   "firmaEnvio": "asdasd",
   "comentarioEnvio": "asdasd",
   "usuarioIdEnvia": "670b6c11bf5cb2faef16b03f"
+}
+
+### Recibir pedido
+POST {{api}}/RecibirPedido
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTIzOTExLCJleHAiOjE3Mjk5Mjc1MTF9.H51G-XYdMBpaXG6ydHGqgeAUD4jnlz_OicoYt53NAc4
+Content-Type: application/json
+
+{
+  "trasladoId": "671c8dcc971ac5c1f1796444",
+  "listDetalleTraslado": [
+    {
+      "inventarioSucursalId": "671344c3f6b75c84c0d41433",
+      "cantidad": 4,
+      "archivosAdjuntos": ["foto1.jpg", "foto2.jpg"],
+      "comentarioRecibido": "Comentario Recibido",
+      "recibido": true,
+      "estadoEquipo": "Bien"
+    },
+    {
+      "inventarioSucursalId": "671494e9f0c2db8025a4627b",
+      "cantidad": 2,
+      "archivosAdjuntos": ["foto1.jpg", "foto2.jpg"],
+      "comentarioRecibido": "Comentario Recibido",
+      "recibido": true,
+      "estadoEquipo": "Bien"
+    },
+    {
+      "inventarioSucursalId": "6715519ef28d2ede3373197b",
+      "cantidad": 0,
+      "archivosAdjuntos": ["foto1.jpg", "foto2.jpg"],
+      "comentarioRecibido": "Comentario Recibido",
+      "recibido": false,
+      "estadoEquipo": "Bien"
+    }
+  ],
+  "archivosAdjuntos": ["foto1.jpg", "foto2.jpg"],
+  "firmaRecepcion": "firmaRecepcion",
+  "comentarioRecepcion": "Comentario Recepcion",
+  "usuarioIdRecibe": "67062bd1437ff3ebf183194c"
 }

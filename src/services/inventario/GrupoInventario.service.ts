@@ -58,4 +58,8 @@ export class GrupoInventarioService {
   async restoreGroup(id: string): Promise<IGrupoInventario | null> {
     return this.repository.restore(id);
   }
+
+  async findByIdWithProduct(id: string): Promise<IGrupoInventario | null> {
+    return await this.repository.findByIdWithProduct(id);
+  }
 }

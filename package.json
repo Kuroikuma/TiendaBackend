@@ -22,7 +22,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.0",
     "reflect-metadata": "^0.2.2",
-    "tsyringe": "^4.8.0"
+    "tsyringe": "^4.8.0",
+    "twilio": "^5.3.5"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
