@@ -77,16 +77,15 @@ export class InventarioSucursalRepository {
 
     // Hacer la consulta usando Mongoose
     const listInventarioSucursal = await this.model.find({
-      bodegaId: sucursalObjectId,
-      estado: true, // Filtrar por estado de BodegaActivoDesglose
-      activoDesglose: { $exists: true }, // Verificar que el activoDesglose exista
+      sucursalId: sucursalObjectId,
+      deleted_at: null, // Filtrar por estado de BodegaActivoDesglose
+      productoId: { $exists: true }, // Verificar que el activoDesglose exista
       _id: { $in: idsToFind }, // Usar $in para buscar los IDs
     })
       .populate({
         path: 'productoId',
         match: { delete_at: null }, // Filtrar por el estado de ActivoDesglose
       })
-      .exec();
 
     // Filtrar cualquier resultado donde no se haya hecho el populate exitosamente
     return listInventarioSucursal.filter(bodega => bodega.productoId);

@@ -1,7 +1,7 @@
 @api = http://127.0.0.1:3000/api/inventory/products
 
 POST {{api}}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJDYWplcm8iLCJpYXQiOjE3Mjk3NDYxNjksImV4cCI6MTcyOTc0OTc2OX0.yVdASLQanwWR2tlEQ4eJf18yNmGppJeTxCjq00Xsprc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTI5ODcyLCJleHAiOjE3Mjk5MzM0NzJ9.OjC2Da3SZ1hWrt5rCPF7yeP5G0g5cz5cpsLhjqhKE1M
 Content-Type: application/json
 
 {
@@ -13,3 +13,8 @@ Content-Type: application/json
     "stock":100,
     "sucursalId":"67133f450dcdd2f9ee534c5c"
 }
+
+### Producto en transito
+GET {{api}}/67133f450dcdd2f9ee534c5c/transit
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTI5ODcyLCJleHAiOjE3Mjk5MzM0NzJ9.OjC2Da3SZ1hWrt5rCPF7yeP5G0g5cz5cpsLhjqhKE1M
+Content-Type: application/json

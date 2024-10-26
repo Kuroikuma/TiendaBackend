@@ -23,4 +23,40 @@ export class TrasladoController {
       next(error);
     }
   }
+
+  async findPedidoEnviadosBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const traslado = await this.service.findPedidoEnviadosBySucursal(req.body);
+      res.status(201).json(traslado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findPedidoRecibidosBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const traslado = await this.service.findPedidoRecibidosBySucursal(req.body);
+      res.status(201).json(traslado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findPedidoPorRecibirBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const traslado = await this.service.findPedidoPorRecibirBySucursal(req.body);
+      res.status(201).json(traslado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // async findPedidoPorSucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
+  //   try {
+  //     const traslado = await this.service.findPedidoPorSucursal(req.body);
+  //     res.status(201).json(traslado);
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }
