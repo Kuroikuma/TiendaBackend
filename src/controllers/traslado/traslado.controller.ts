@@ -1,6 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { TrasladoService } from '../../services/traslado/traslado.service';
+import { ITraslado, ITrasladoDto } from 'src/models/traslados/Traslado.model';
 
 @injectable()
 export class TrasladoController {
@@ -46,6 +47,22 @@ export class TrasladoController {
     try {
       const traslado = await this.service.findPedidoPorRecibirBySucursal(req.body);
       res.status(201).json(traslado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findPedidoByIdWithItemDePedido(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const traslado = await this.service.findPedidoById(req.params.id);
+      const listItemDePedido = await this.service.findAllItemDePedidoByPedido(req.params.id);
+
+      let pedido = {
+        ...traslado,
+        listItemDePedido: listItemDePedido
+      }
+      
+      res.status(201).json(pedido);
     } catch (error) {
       next(error);
     }
