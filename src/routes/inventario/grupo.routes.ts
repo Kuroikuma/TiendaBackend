@@ -32,5 +32,10 @@ router.patch(
   authMiddleware,
   groupController.restore.bind(groupController)
 );
+router.get(
+  '/:id/products',
+  authMiddleware,
+  groupController.findByIdWithProduct.bind(groupController)
+);
 
 export default router;

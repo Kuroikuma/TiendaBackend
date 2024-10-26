@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { IInventarioSucursal, InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
-import { Types } from 'mongoose';
+import mongoose, { mongo, Types } from 'mongoose';
 
 @injectable()
 export class InventarioSucursalRepository {
@@ -11,18 +11,23 @@ export class InventarioSucursalRepository {
   }
 
   async create(data: Partial<IInventarioSucursal>): Promise<IInventarioSucursal> {
-    const grupo = new this.model(data);
-    return await grupo.save();
+    const inventarioSucursal = new this.model(data);
+    return await inventarioSucursal.save();
+  }
+
+  async createWithSession(data: Partial<IInventarioSucursal>, session: mongoose.mongo.ClientSession): Promise<IInventarioSucursal> {
+    const inventarioSucursal = new this.model(data);
+    return await inventarioSucursal.save({ session });
   }
 
   async findById(id: string): Promise<IInventarioSucursal | null> {
-    const grupo = await this.model.findById(id);
+    const inventarioSucursal = await this.model.findById(id);
 
-    if (!grupo) {
+    if (!inventarioSucursal) {
       return null;
     }
 
-    return grupo;
+    return inventarioSucursal;
   }
 
   async findAll(
@@ -38,9 +43,9 @@ export class InventarioSucursalRepository {
   async findByName(
     name: string,
   ): Promise<IInventarioSucursal | null> {
-    const grupo = await this.model.findOne({ nombre: name });
+    const inventarioSucursal = await this.model.findOne({ nombre: name });
 
-    return grupo;
+    return inventarioSucursal;
   }
 
   async update(
@@ -85,5 +90,29 @@ export class InventarioSucursalRepository {
 
     // Filtrar cualquier resultado donde no se haya hecho el populate exitosamente
     return listInventarioSucursal.filter(bodega => bodega.productoId);
+  }
+
+  async findBySucursalIdAndProductId(sucursarlIdStr:string, productoIdStr:string) {
+    let sucursalId = new mongoose.Types.ObjectId(sucursarlIdStr);
+    let productoId = new mongoose.Types.ObjectId(productoIdStr);
+    const inventarioSucursal = await this.model.find({sucursalId, productoId});
+
+    return inventarioSucursal[0];
+  }
+
+  async saveAllInventarioSucursal(data: IInventarioSucursal[], session: mongo.ClientSession): Promise<void> {
+    await this.model.insertMany(data, { session });
+  }
+
+  async updateAllInventarioSucursal(data: IInventarioSucursal[], session: mongo.ClientSession): Promise<void> {
+    const bulkOps = data.map((detalle) => ({
+        updateOne: {
+            filter: { _id: detalle._id },
+            update: { $set: detalle },
+            upsert: true
+        }
+    }));
+  
+    await this.model.bulkWrite(bulkOps, { session });
   }
 }

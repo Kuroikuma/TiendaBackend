@@ -4,6 +4,7 @@ import mongoose, { mongo } from 'mongoose';
 import {
   DetalleTraslado,
   IDetalleTraslado,
+  IDetalleTrasladoCreate,
 } from '../../models/traslados/DetalleTraslado.model';
 
 @injectable()
@@ -70,20 +71,46 @@ export class TrasladoRepository {
       .exec();
   }
   async saveAllDetalleTraslado(
-    data: IDetalleTraslado[],
+    data: IDetalleTrasladoCreate[],
     session: mongo.ClientSession
   ): Promise<void> {
     await this.modelDetalleTraslado.insertMany(data, { session });
   }
 
+  async updateAllDetalleTraslado(
+    data: IDetalleTraslado[],
+    session: mongo.ClientSession
+  ): Promise<void> {
+    const bulkOps = data.map((detalle) => ({
+      updateOne: {
+          filter: { _id: detalle._id },
+          update: { $set: detalle },
+          upsert: true
+      }
+  }));
+  
+  await this.modelDetalleTraslado.bulkWrite(bulkOps, { session });
+  }
+
   async getLastTrasladoBySucursalId(sucursalId: string) {
     try {
       const ultimoTraslado = await this.model
-        .findOne({ sucursalId })
+        .findOne({ sucursalDestinoId:sucursalId })
         .sort({ fechaRegistro: -1 });
       // Ejecuta la
 
       return ultimoTraslado;
+    } catch (error) {
+      console.error('Error al obtener el último traslado:', error);
+      throw new Error('Error al obtener el último traslado');
+    }
+  }
+
+  async findAllItemDePedidoByPedido(pedidoId: string) {
+    try {
+      const listItemDePedido = await this.modelDetalleTraslado.find({ trasladoId: pedidoId });
+
+      return listItemDePedido;
     } catch (error) {
       console.error('Error al obtener el último traslado:', error);
       throw new Error('Error al obtener el último traslado');

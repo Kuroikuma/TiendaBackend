@@ -1,9 +1,12 @@
 import mongoose, { Schema, Document, ObjectId } from 'mongoose';
 import { ISucursal } from '../sucursales/Sucursal.model';
 import { IUser } from '../usuarios/User.model';
-import { IDetalleTrasladoEnvio } from './DetalleTraslado.model';
+import { IDetalleTraslado, IDetalleTrasladoCreate, IDetalleTrasladoEnvio, IDetalleTrasladoRecepcion } from './DetalleTraslado.model';
+import { IHistorialInventario } from '../inventario/HistorialInventario.model';
+import { IInventarioSucursal } from '../inventario/InventarioSucursal.model';
 
 export interface ITraslado extends Document {
+  nombre: string;
   fechaRegistro: Date;
   fechaEnvio: Date;
   fechaRecepcion: Date | null;
@@ -32,6 +35,52 @@ export interface ITrasladoEnvio {
   usuarioIdEnvia: string;
 }
 
+export interface ITrasladoRecepcion {
+  trasladoId: string;
+  estatusTraslado?: string;
+  listDetalleTraslado: IDetalleTrasladoRecepcion[];
+  archivosAdjuntos: string[];
+
+  // Datos para enviar el pedido
+  firmaRecepcion: string;
+  comentarioRecepcion: string;
+  usuarioIdRecibe: string;
+}
+
+// const trasladoRecepcion: ITrasladoRecepcion = {
+//   trasladoId: "671c6cce94fd39f7e59b5304",
+//   listDetalleTraslado: [
+//     {
+//       inventarioSucursalId: "671c723694fd39f7e59b5312",
+//       cantidad: 4,
+//       archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
+//       comentarioRecibido: "Comentario Recibido",
+//       recibido: true,
+//       estadoEquipo: "Bien",
+//     },
+//     {
+//       inventarioSucursalId: "671c723694fd39f7e59b5313",
+//       cantidad: 2,
+//       archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
+//       comentarioRecibido: "Comentario Recibido",
+//       recibido: true,
+//       estadoEquipo: "Bien",
+//     },
+//     {
+//       inventarioSucursalId: "671c723694fd39f7e59b5314",
+//       cantidad: 0,
+//       archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
+//       comentarioRecibido: "Comentario Recibido",
+//       recibido: false,
+//       estadoEquipo: "Bien",
+//     },
+//   ],
+//   archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
+//   firmaRecepcion: "firmaRecepcion",
+//   comentarioRecepcion: "Comentario Recepcion",
+//   usuarioIdRecibe: "67062bd1437ff3ebf183194c",
+// };
+
 export interface ISendTrasladoProducto {
   firmaEnvio: string;
   comentarioEnvio: string;
@@ -39,9 +88,18 @@ export interface ISendTrasladoProducto {
   traslado: ITraslado;
 }
 
+export interface IResponseToAddCantidad{
+  listHistorialInventario: IHistorialInventario[];
+  listDetalleTrasladoAgregados: IDetalleTrasladoCreate[];
+  listDetalleTrasladoActualizado: IDetalleTraslado[];
+  listInventarioSucursalAgregados: IInventarioSucursal[];
+  listInventarioSucursalActualizado: IInventarioSucursal[];
+}
+
 
 const trasladoSchema: Schema = new Schema(
   {
+    nombre: { type: String },
     fechaRegistro: { type: Date, required: true },
     fechaEnvio: { type: Date },
     fechaRecepcion: { type: Date, default: null },

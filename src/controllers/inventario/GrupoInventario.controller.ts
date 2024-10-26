@@ -42,6 +42,22 @@ export class GrupoInventarioController {
     }
   }
 
+  async findByIdWithProduct(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const group = await this.service.findByIdWithProduct(
+        req.params.id
+      )
+
+      res.status(200).json(group);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const group = await this.service.updateGroup(req.params.id, req.body);

@@ -11,6 +11,7 @@ router.use(authMiddleware);
 
 // Definir las rutas
 router.post('/', trasladoController.postCreateEnvioProducto.bind(trasladoController));
+router.post('/RecibirPedido', trasladoController.postCreateRecibirProducto.bind(trasladoController));
 // router.get(
 //   '/:id',
 //   authMiddleware,
