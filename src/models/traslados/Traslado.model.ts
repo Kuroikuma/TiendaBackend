@@ -5,6 +5,8 @@ import { IDetalleTraslado, IDetalleTrasladoCreate, IDetalleTrasladoEnvio, IDetal
 import { IHistorialInventario } from '../inventario/HistorialInventario.model';
 import { IInventarioSucursal } from '../inventario/InventarioSucursal.model';
 
+type IEstatusPedido = 'Solicitado' | 'En Proceso' | 'Terminado' | 'Terminado incompleto';
+
 export interface ITraslado extends Document {
   nombre: string;
   fechaRegistro: Date;
@@ -18,7 +20,7 @@ export interface ITraslado extends Document {
   comentarioEnvio: string;
   consecutivo?: number;
   comentarioRecepcion: string | null;
-  estatusTraslado?: string;
+  estatusTraslado?: IEstatusPedido;
   archivosAdjuntos: string[] | null;
   firmaEnvio: string;
   firmaRecepcion: string;
@@ -37,7 +39,7 @@ export interface ITrasladoEnvio {
 
 export interface ITrasladoRecepcion {
   trasladoId: string;
-  estatusTraslado?: string;
+  estatusTraslado?: IEstatusPedido;
   listDetalleTraslado: IDetalleTrasladoRecepcion[];
   archivosAdjuntos: string[];
 

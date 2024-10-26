@@ -7,6 +7,8 @@ export interface IProducto extends Document {
   precio: mongoose.Types.Decimal128;
   monedaId: mongoose.Types.ObjectId | IMoneda;
   deleted_at: Date | null;
+  create_at?: Date;
+  update_at?: Date;
 }
 
 export interface IBranchProducts {
@@ -19,6 +21,8 @@ export interface IBranchProducts {
   id: mongoose.Types.ObjectId;
   sucursalId: mongoose.Types.ObjectId;
   inventarioSucursalId: mongoose.Types.ObjectId;
+  create_at: Date;
+  update_at: Date;
 }
 
 export interface IProductCreate {
