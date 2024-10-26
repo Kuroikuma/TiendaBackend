@@ -73,6 +73,8 @@ export class SucursalRepository {
           id: producto._id as mongoose.Types.ObjectId,
           sucursalId: sucursalId._id as mongoose.Types.ObjectId,
           inventarioSucursalId: product._id as mongoose.Types.ObjectId,
+          create_at: producto.create_at!,
+          update_at: producto.update_at!,
         });
       }
     });
