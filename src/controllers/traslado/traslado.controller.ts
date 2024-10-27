@@ -7,7 +7,11 @@ import { ITraslado, ITrasladoDto } from 'src/models/traslados/Traslado.model';
 export class TrasladoController {
   constructor(@inject(TrasladoService) private service: TrasladoService) {}
 
-  async postCreateEnvioProducto(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async postCreateEnvioProducto(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const traslado = await this.service.postCreateEnvioProducto(req.body);
       res.status(201).json(traslado);
@@ -16,7 +20,11 @@ export class TrasladoController {
     }
   }
 
-  async postCreateRecibirProducto(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async postCreateRecibirProducto(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const traslado = await this.service.postRecibirPedido(req.body);
       res.status(201).json(traslado);
@@ -25,43 +33,67 @@ export class TrasladoController {
     }
   }
 
-  async findPedidoEnviadosBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async findPedidoEnviadosBySucursal(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      const traslado = await this.service.findPedidoEnviadosBySucursal(req.body);
+      const traslado = await this.service.findPedidoEnviadosBySucursal(
+        req.body
+      );
       res.status(201).json(traslado);
     } catch (error) {
       next(error);
     }
   }
 
-  async findPedidoRecibidosBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async findPedidoRecibidosBySucursal(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      const traslado = await this.service.findPedidoRecibidosBySucursal(req.body);
+      const traslado = await this.service.findPedidoRecibidosBySucursal(
+        req.body
+      );
       res.status(201).json(traslado);
     } catch (error) {
       next(error);
     }
   }
 
-  async findPedidoPorRecibirBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async findPedidoPorRecibirBySucursal(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      const traslado = await this.service.findPedidoPorRecibirBySucursal(req.body);
+      const traslado = await this.service.findPedidoPorRecibirBySucursal(
+        req.params.id
+      );
       res.status(201).json(traslado);
     } catch (error) {
       next(error);
     }
   }
 
-  async findPedidoByIdWithItemDePedido(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async findPedidoByIdWithItemDePedido(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const traslado = await this.service.findPedidoById(req.params.id);
-      const listItemDePedido = await this.service.findAllItemDePedidoByPedido(req.params.id);
+      const listItemDePedido = await this.service.findAllItemDePedidoByPedido(
+        req.params.id
+      );
 
       let pedido = {
         ...traslado,
-        listItemDePedido: listItemDePedido
-      }
-      
+        listItemDePedido: listItemDePedido,
+      };
+
       res.status(201).json(pedido);
     } catch (error) {
       next(error);
