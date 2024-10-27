@@ -96,7 +96,7 @@ export class TrasladoService {
       await session.abortTransaction();
       session.endSession();
 
-      throw new Error('Error al enviar el pedido');
+      throw new Error(error.message);
     }
   }
 
@@ -136,8 +136,6 @@ export class TrasladoService {
 
       pedido.firmaRecepcion = model.firmaRecepcion!;
       for await (const element of model.listDetalleTraslado!) {
-        console.log(element.inventarioSucursalId);
-
         let responseAdd = await this.inventoryManagementService.addCantidad(
           element,
           (pedido.sucursalDestinoId as mongoose.Types.ObjectId).toString(),
@@ -185,7 +183,7 @@ export class TrasladoService {
       await session.abortTransaction();
       session.endSession();
 
-      throw new Error('Error al enviar el pedido');
+      throw new Error(error.message);
     }
   }
 
