@@ -103,7 +103,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
   async generatePedidoHerramienta(session: mongoose.mongo.ClientSession) {
     const ultimoPedido =
       await this.trasladoRepository.getLastTrasladoBySucursalId(
-        this.sucursalRecibeId.toString()
+        this.sucursalEnviaId.toString()
       );
     const idRegistro = this.usuarioEnviaId; // Aquí debes obtener el id del trabajador desde el contexto o sesión
 
