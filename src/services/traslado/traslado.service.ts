@@ -57,6 +57,8 @@ export class TrasladoService {
           session
         );
 
+      traslado.archivosAdjuntos = model.archivosAdjuntos ?? null;
+
       var listItemDePedidos =
         await this.inventoryManagementService.generateItemDePedidoByPedido(
           (traslado._id as mongoose.Types.ObjectId).toString(),
@@ -135,7 +137,7 @@ export class TrasladoService {
       pedido.firmaRecepcion = model.firmaRecepcion!;
       for await (const element of model.listDetalleTraslado!) {
         console.log(element.inventarioSucursalId);
-        
+
         let responseAdd = await this.inventoryManagementService.addCantidad(
           element,
           (pedido.sucursalDestinoId as mongoose.Types.ObjectId).toString(),
@@ -189,7 +191,8 @@ export class TrasladoService {
 
   async findPedidoEnviadosBySucursal(sucursalId: string) {
     try {
-      const listItemDePedidos = await this.trasladoRepository.findPedidoEnviadosBySucursal(sucursalId);
+      const listItemDePedidos =
+        await this.trasladoRepository.findPedidoEnviadosBySucursal(sucursalId);
 
       return listItemDePedidos;
     } catch (error) {
@@ -197,10 +200,11 @@ export class TrasladoService {
       throw new Error('Error al obtener los pedidos enviados');
     }
   }
-  
+
   async findPedidoRecibidosBySucursal(sucursalId: string) {
     try {
-      const listItemDePedidos = await this.trasladoRepository.findPedidoRecibidosBySucursal(sucursalId);
+      const listItemDePedidos =
+        await this.trasladoRepository.findPedidoRecibidosBySucursal(sucursalId);
 
       return listItemDePedidos;
     } catch (error) {
@@ -211,7 +215,10 @@ export class TrasladoService {
 
   async findPedidoPorRecibirBySucursal(sucursalId: string) {
     try {
-      const listItemDePedidos = await this.trasladoRepository.findPedidoPorRecibirBySucursal(sucursalId);
+      const listItemDePedidos =
+        await this.trasladoRepository.findPedidoPorRecibirBySucursal(
+          sucursalId
+        );
 
       return listItemDePedidos;
     } catch (error) {
@@ -222,7 +229,8 @@ export class TrasladoService {
 
   async findPedidoEnProcesoBySucursal(sucursalId: string) {
     try {
-      const listItemDePedidos = await this.trasladoRepository.findPedidoEnProcesoBySucursal(sucursalId);
+      const listItemDePedidos =
+        await this.trasladoRepository.findPedidoEnProcesoBySucursal(sucursalId);
 
       return listItemDePedidos;
     } catch (error) {
@@ -233,7 +241,8 @@ export class TrasladoService {
 
   async findAllItemDePedidoByPedido(pedidoId: string) {
     try {
-      const listItemDePedidos = await this.trasladoRepository.findAllItemDePedidoByPedido(pedidoId);
+      const listItemDePedidos =
+        await this.trasladoRepository.findAllItemDePedidoByPedido(pedidoId);
 
       return listItemDePedidos;
     } catch (error) {
@@ -252,5 +261,4 @@ export class TrasladoService {
       throw new Error('Error al obtener el pedido');
     }
   }
-
 }
