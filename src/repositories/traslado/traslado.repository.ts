@@ -53,7 +53,6 @@ export class TrasladoRepository {
     data: Partial<ITraslado>,
     session: mongoose.mongo.ClientSession
   ): Promise<ITraslado | null> {
-
     return await this.model
       .findByIdAndUpdate(id, { $set: data }, { new: true, session })
       .exec();
@@ -83,19 +82,19 @@ export class TrasladoRepository {
   ): Promise<void> {
     const bulkOps = data.map((detalle) => ({
       updateOne: {
-          filter: { _id: detalle._id },
-          update: { $set: detalle },
-          upsert: true
-      }
-  }));
-  
-  await this.modelDetalleTraslado.bulkWrite(bulkOps, { session });
+        filter: { _id: detalle._id },
+        update: { $set: detalle },
+        upsert: true,
+      },
+    }));
+
+    await this.modelDetalleTraslado.bulkWrite(bulkOps, { session });
   }
 
   async getLastTrasladoBySucursalId(sucursalId: string) {
     try {
       const ultimoTraslado = await this.model
-        .findOne({ sucursalOrigenId:sucursalId })
+        .findOne({ sucursalOrigenId: sucursalId })
         .sort({ fechaRegistro: -1 });
       // Ejecuta la
 
@@ -108,7 +107,27 @@ export class TrasladoRepository {
 
   async findAllItemDePedidoByPedido(pedidoId: string) {
     try {
-      const listItemDePedido = await this.modelDetalleTraslado.find({ trasladoId: pedidoId });
+      const listItemDePedido = await this.modelDetalleTraslado.find({
+        trasladoId: pedidoId,
+      });
+
+      return listItemDePedido;
+    } catch (error) {
+      console.error('Error al obtener el último traslado:', error);
+      throw new Error('Error al obtener el último traslado');
+    }
+  }
+
+  async findAllItemDePedidoByPedidoDto(pedidoId: string) {
+    try {
+      const listItemDePedido = await this.modelDetalleTraslado
+        .find({ trasladoId: pedidoId })
+        .populate({
+          path: 'inventarioSucursalId',
+          populate: {
+            path: 'productoId',
+          },
+        });
 
       return listItemDePedido;
     } catch (error) {
@@ -118,7 +137,7 @@ export class TrasladoRepository {
   }
 
   async findPedidoEnviadosBySucursal(sucursalId: string) {
-    try {      
+    try {
       const listPedidos = await this.model
         .find({ sucursalOrigenId: sucursalId })
         .populate([
@@ -164,7 +183,9 @@ export class TrasladoRepository {
           { path: 'sucursalDestinoId' },
         ]);
 
-      const listPedidoPorRecibir = listPedidos.filter((pedido) => pedido.estatusTraslado === 'En Proceso');
+      const listPedidoPorRecibir = listPedidos.filter(
+        (pedido) => pedido.estatusTraslado === 'En Proceso'
+      );
 
       return listPedidoPorRecibir;
     } catch (error) {
@@ -184,7 +205,9 @@ export class TrasladoRepository {
           { path: 'sucursalDestinoId' },
         ]);
 
-      const listPedidoEnProceso = listPedidos.filter((pedido) => pedido.estatusTraslado === 'En Proceso');
+      const listPedidoEnProceso = listPedidos.filter(
+        (pedido) => pedido.estatusTraslado === 'En Proceso'
+      );
 
       return listPedidoEnProceso;
     } catch (error) {
