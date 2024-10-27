@@ -44,7 +44,9 @@ export class ProductoRepository {
         throw new Error('Producto ya existente en la sucursal');
       }
 
-      const product = new this.model(data);
+      let productExist = await this.findProductByName(data.nombre!);
+
+      const product = productExist ? productExist : new this.model(data);
       const sucursal = await this.modelSucursal.findById(data.sucursalId);
       const grupo = await this.modelGrupoInventario.findById(data.grupoId);
 
@@ -56,28 +58,38 @@ export class ProductoRepository {
         throw new Error('Grupo no encontrado');
       }
 
-      let productSave = await product.save({ session });
+      let productSave = productExist ? productExist : await product.save({ session });
 
       let inventarioSucursal = new this.modelInventarioSucursal({
         productoId: productSave._id,
         sucursalId: sucursal._id,
         stock: data.stock,
         ultimo_movimiento: new Date(),
+        precio: data.precio,
       });
 
-      let productoGrupo = new this.modelProductoGrupo({
+      let productoGrupoExist = await this.modelProductoGrupo.findOne({
         productoId: productSave._id,
         grupoId: grupo._id,
       });
 
-      await inventarioSucursal.save({ session });
+      if (!productoGrupoExist) {
+        let productoGrupo = new this.modelProductoGrupo({
+          productoId: productSave._id,
+          grupoId: grupo._id,
+        });
 
-      await productoGrupo.save({ session });
+        await productoGrupo.save({ session });
+      }
+
+      await inventarioSucursal.save({ session });
 
       await session.commitTransaction();
       session.endSession();
 
-      const sucursalId = new mongoose.Types.ObjectId(data.sucursalId?.toString());
+      const sucursalId = new mongoose.Types.ObjectId(
+        data.sucursalId?.toString()
+      );
       let grupoId = new mongoose.Types.ObjectId(data.grupoId?.toString());
 
       let productoCreate: IProductCreate = {
@@ -94,7 +106,6 @@ export class ProductoRepository {
       };
 
       return productoCreate;
-
     } catch (error) {
       console.log(error);
 
@@ -136,9 +147,18 @@ export class ProductoRepository {
     const query = await this.modelInventarioSucursal.findOne({
       productoId: product._id,
       sucursalId: sucursalId,
+      deleted_at: null,
     });
 
     return query ? product : null;
+  }
+
+  async findProductByName(name: string): Promise<IProducto | null> {
+    const product = await this.model.findOne({ nombre: name });
+
+    if (!product) return null;
+
+    return product;
   }
 
   async update(
