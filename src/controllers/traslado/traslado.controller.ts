@@ -56,7 +56,7 @@ export class TrasladoController {
   ): Promise<void> {
     try {
       const traslado = await this.service.findPedidoRecibidosBySucursal(
-        req.body
+        req.params.id
       );
       res.status(201).json(traslado);
     } catch (error) {
