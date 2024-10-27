@@ -27,7 +27,7 @@ router.get(
 
 // Get de pedidos recibidos
 router.get(
-  '/recibidos',
+  '/:id/recibidos',
   trasladoController.findPedidoRecibidosBySucursal.bind(trasladoController)
 );
 
