@@ -292,8 +292,13 @@ export class InventoryManagementService implements IManageHerramientaModel {
       itemDePedido.archivosAdjuntos.concat(listFiles);
     }
 
+    //manejo de cantidad 0
+    if (model.cantidad == 0) {
+      itemDePedido.recibido = false;
+    }
+
     // Manejo de cantidades menores
-    if (itemDePedido.cantidad > model.cantidad) {
+    if ((itemDePedido.cantidad > model.cantidad) && model.cantidad > 0) {
       itemDePedido.recibido = false;
       itemDePedido.cantidad -= model.cantidad;
 
@@ -301,6 +306,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
         cantidad: itemDePedido.cantidad,
         inventarioSucursalId: itemDePedido.inventarioSucursalId,
         archivosAdjuntos: listFiles,
+        precio: model.precio,
       };
 
       let list: IDetalleTrasladoEnvio[] = [];
@@ -319,7 +325,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
     }
 
     // Actualización de cantidades en bodega
-    if (model.recibido) {
+    if (model.recibido && model.cantidad > 0) {
       if (inventarioSucursalRecibe) {
         inventarioSucursalRecibe.stock += model.cantidad;
         inventarioSucursalRecibe.ultimo_movimiento = new Date();
@@ -327,13 +333,14 @@ export class InventoryManagementService implements IManageHerramientaModel {
         response.listInventarioSucursalActualizado.push(
           inventarioSucursalRecibe
         );
-      } else {
+      } else if (model.cantidad > 0) {
         const inventarioSucursalRecibe = new InventarioSucursal({
           stock: model.cantidad,
           sucursalId: new mongoose.Types.ObjectId(bodegaId),
           productoId: inventarioSucursalEnvia.productoId,
           ultimo_movimiento: new Date(),
           deleted_at: null,
+          precio: model.precio,
         });
 
         response.listInventarioSucursalAgregados.push(inventarioSucursalRecibe);

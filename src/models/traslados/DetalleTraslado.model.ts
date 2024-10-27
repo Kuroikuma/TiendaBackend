@@ -7,6 +7,7 @@ export interface IDetalleTraslado extends Document {
   inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
   trasladoId: mongoose.Types.ObjectId | ITraslado;
   cantidad: number;
+  precio?:mongoose.Types.Decimal128;
   recibido?: boolean;
   regresado?: boolean;
   estado?: boolean;
@@ -32,6 +33,7 @@ export interface IDetalleTrasladoCreate {
 export interface IDetalleTrasladoEnvio {
   inventarioSucursalId: mongoose.Types.ObjectId | IInventarioSucursal;
   cantidad: number;
+  precio:mongoose.Types.Decimal128;
   comentarioEnvio?:string;
   archivosAdjuntos: string[] | null;
 }
@@ -39,6 +41,7 @@ export interface IDetalleTrasladoRecepcion
 {
   inventarioSucursalId: mongoose.Types.ObjectId;
   cantidad: number;
+  precio:mongoose.Types.Decimal128;
   comentarioRecibido:string;
   recibido: boolean;
   estadoEquipo: string;
@@ -58,6 +61,7 @@ const detalleTrasladoSchema: Schema = new Schema(
       required: true,
     },
     cantidad: { type: Number, required: true },
+    precio: { type: Schema.Types.Decimal128 },
     recibido: { type: Boolean },
     regresado: { type: Boolean },
     estado: { type: Boolean },

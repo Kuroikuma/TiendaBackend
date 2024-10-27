@@ -6,6 +6,7 @@ export interface IInventarioSucursal extends Document {
   productoId: mongoose.Types.ObjectId | IProducto;
   sucursalId: mongoose.Types.ObjectId | ISucursal;
   stock: number;
+  precio:mongoose.Types.Decimal128;
   ultimo_movimiento: Date;
   deleted_at: Date | null;
 }
@@ -23,6 +24,7 @@ const inventarioSucursalSchema: Schema = new Schema(
       required: true,
     },
     stock: { type: Number, required: true },
+    precio: { type: Schema.Types.Decimal128, required: true },
     ultimo_movimiento: { type: Date, required: true },
     deleted_at: { type: Date, default: null },
   },

@@ -58,24 +58,26 @@ export class SucursalRepository {
 
     let newProducts: IBranchProducts[] = [];
 
-    products.forEach((product) => {
-      if (product.deleted_at == null) {
-        let producto = product.productoId as IProducto;
-        let sucursalId = product.sucursalId as ISucursal;
+    products.forEach((inventarioSucursal) => {
+      if (inventarioSucursal.deleted_at == null) {
+        let producto = inventarioSucursal.productoId as IProducto;
+        let sucursalId = inventarioSucursal.sucursalId as ISucursal;
 
-        newProducts.push({
-          stock: product.stock,
-          nombre: producto.nombre,
-          descripcion: producto.descripcion,
-          precio: producto.precio,
-          monedaId: producto.monedaId,
-          deleted_at: producto.deleted_at,
-          id: producto._id as mongoose.Types.ObjectId,
-          sucursalId: sucursalId._id as mongoose.Types.ObjectId,
-          inventarioSucursalId: product._id as mongoose.Types.ObjectId,
-          create_at: producto.create_at!,
-          update_at: producto.update_at!,
-        });
+        if (producto.deleted_at == null) {
+          newProducts.push({
+            stock: inventarioSucursal.stock,
+            nombre: producto.nombre,
+            descripcion: producto.descripcion,
+            precio: inventarioSucursal.precio,
+            monedaId: producto.monedaId,
+            deleted_at: producto.deleted_at,
+            id: producto._id as mongoose.Types.ObjectId,
+            sucursalId: sucursalId._id as mongoose.Types.ObjectId,
+            inventarioSucursalId: inventarioSucursal._id as mongoose.Types.ObjectId,
+            create_at: producto.create_at!,
+            update_at: producto.update_at!,
+          });
+        }
       }
     });
 

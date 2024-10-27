@@ -1,18 +1,25 @@
 @api = http://127.0.0.1:3000/api/inventory/products
 
 POST {{api}}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTI5ODcyLCJleHAiOjE3Mjk5MzM0NzJ9.OjC2Da3SZ1hWrt5rCPF7yeP5G0g5cz5cpsLhjqhKE1M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMDQwOTQzLCJleHAiOjE3MzAwNDQ1NDN9.ZH10wB5Ic3jOvi3dscbxtbcMX0QLWrs2QPd6iGNNUG4
 Content-Type: application/json
 
 {
-    "nombre":"iPhone 15 Pro Max",
-    "descripcion":"El último modelo de iPhone con cámara mejorada, chip A17 Bionic, y pantalla de 6.7 pulgadas.",
-    "precio":1499.99,
-    "monedaId":"671342d4664051db7c1f8792",
-    "grupoId":"671341caef1cc47547aae694",
-    "stock":100,
-    "sucursalId":"67133f450dcdd2f9ee534c5c"
+    "nombre": "Huawei P50 Pro",
+    "descripcion": "El último modelo de Huawei con sistema de cámara cuádruple, procesador Kirin 9000, y pantalla OLED de 6.6 pulgadas.",
+    "precio":999.99,
+    "monedaId": "671342d4664051db7c1f8792",
+    "grupoId": "671aca0ea6e0841fd34fde57",
+    "stock": 45,
+    "sucursalId": "67133f450dcdd2f9ee534c5c"
 }
+
+
+
+
+
+
+
 
 ### Producto en transito
 GET {{api}}/67133f450dcdd2f9ee534c5c/transit
