@@ -15,7 +15,10 @@ import {
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
 import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
 import { inject, injectable } from 'tsyringe';
-import { IInventarioSucursal, InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
+import {
+  IInventarioSucursal,
+  InventarioSucursal,
+} from '../../models/inventario/InventarioSucursal.model';
 const accountSid = 'AC765fa1004417bf97128e3ca10824aacd';
 const authToken = 'f590cfbf94ad7e8c92d2b8538adccfee';
 const client = require('twilio')(accountSid, authToken);
@@ -68,16 +71,25 @@ export class InventoryManagementService implements IManageHerramientaModel {
     // this.usuarioRecibeId = usuarioIdRecibe;
   }
 
-  async initRecibir(sucursalEnviaId: string, sucursalRecibeId: string, pedidoId: string ): Promise<void> {
+  async initRecibir(
+    sucursalEnviaId: string,
+    sucursalRecibeId: string,
+    pedidoId: string
+  ): Promise<void> {
     this.sucursalEnviaId = new mongoose.Types.ObjectId(sucursalEnviaId);
     this.sucursalRecibeId = new mongoose.Types.ObjectId(sucursalRecibeId);
 
-    let listItemDePedidos = await this.trasladoRepository.findAllItemDePedidoByPedido(pedidoId);
+    let listItemDePedidos =
+      await this.trasladoRepository.findAllItemDePedidoByPedido(pedidoId);
 
     this._detalleTralado = listItemDePedidos;
   }
 
-  async initManage(sucursalEnviaId: string, sucursalRecibeId: string, listInventarioSucursalId: string[]): Promise<void> {
+  async initManage(
+    sucursalEnviaId: string,
+    sucursalRecibeId: string,
+    listInventarioSucursalId: string[]
+  ): Promise<void> {
     this.sucursalEnviaId = new mongoose.Types.ObjectId(sucursalEnviaId);
     this.sucursalRecibeId = new mongoose.Types.ObjectId(sucursalRecibeId);
 
@@ -155,6 +167,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
     }
 
     traslado.comentarioEnvio = model.comentarioEnvio;
+    traslado.archivosAdjuntos = model.traslado.archivosAdjuntos;
 
     await this.trasladoRepository.update(trasladoId, traslado, session);
   }
@@ -240,18 +253,26 @@ export class InventoryManagementService implements IManageHerramientaModel {
       listHistorialInventario: [],
       listDetalleTrasladoAgregados: [],
       listDetalleTrasladoActualizado: [],
-      listInventarioSucursalAgregados:[],
-      listInventarioSucursalActualizado:[]
+      listInventarioSucursalAgregados: [],
+      listInventarioSucursalActualizado: [],
     };
 
     // Validación inicial
-    const inventarioSucursalEnvia = await this.inventarioSucursalRepo.findById(model.inventarioSucursalId.toString());
-    const inventarioSucursalRecibe = await this.inventarioSucursalRepo.findBySucursalIdAndProductId(bodegaId, (inventarioSucursalEnvia?.productoId.toString() as string))
+    const inventarioSucursalEnvia = await this.inventarioSucursalRepo.findById(
+      model.inventarioSucursalId.toString()
+    );
+    const inventarioSucursalRecibe =
+      await this.inventarioSucursalRepo.findBySucursalIdAndProductId(
+        bodegaId,
+        inventarioSucursalEnvia?.productoId.toString() as string
+      );
 
     if (!inventarioSucursalEnvia) {
-      throw new Error('No se encontro en el inventario de la sucursal el producto.');
+      throw new Error(
+        'No se encontro en el inventario de la sucursal el producto.'
+      );
     }
-    
+
     const itemDePedido = this._detalleTralado.find(
       (a) =>
         (a.inventarioSucursalId as mongoose.Types.ObjectId).toString() ===
@@ -266,7 +287,8 @@ export class InventoryManagementService implements IManageHerramientaModel {
     itemDePedido.comentarioRecepcion = model.comentarioRecibido;
 
     if (listFiles.length > 0) {
-      if(itemDePedido.archivosAdjuntos === null) itemDePedido.archivosAdjuntos = [];
+      if (itemDePedido.archivosAdjuntos === null)
+        itemDePedido.archivosAdjuntos = [];
       itemDePedido.archivosAdjuntos.concat(listFiles);
     }
 
@@ -275,16 +297,22 @@ export class InventoryManagementService implements IManageHerramientaModel {
       itemDePedido.recibido = false;
       itemDePedido.cantidad -= model.cantidad;
 
-      const herramientaModel:IDetalleTrasladoEnvio = {
+      const herramientaModel: IDetalleTrasladoEnvio = {
         cantidad: itemDePedido.cantidad,
         inventarioSucursalId: itemDePedido.inventarioSucursalId,
         archivosAdjuntos: listFiles,
       };
 
-      let list:IDetalleTrasladoEnvio[] = [];
+      let list: IDetalleTrasladoEnvio[] = [];
       list.push(herramientaModel);
 
-      let newItemsDePedido = await this.generateItemDePedidoByPedido((itemDePedido.trasladoId as mongoose.Types.ObjectId).toString(), list, listFiles, true, session);
+      let newItemsDePedido = await this.generateItemDePedidoByPedido(
+        (itemDePedido.trasladoId as mongoose.Types.ObjectId).toString(),
+        list,
+        listFiles,
+        true,
+        session
+      );
 
       newItemsDePedido.forEach((item) => (item.recibido = true));
       response.listDetalleTrasladoAgregados.push(...newItemsDePedido);
@@ -296,9 +324,10 @@ export class InventoryManagementService implements IManageHerramientaModel {
         inventarioSucursalRecibe.stock += model.cantidad;
         inventarioSucursalRecibe.ultimo_movimiento = new Date();
 
-        response.listInventarioSucursalActualizado.push(inventarioSucursalRecibe);
+        response.listInventarioSucursalActualizado.push(
+          inventarioSucursalRecibe
+        );
       } else {
-
         const inventarioSucursalRecibe = new InventarioSucursal({
           stock: model.cantidad,
           sucursalId: new mongoose.Types.ObjectId(bodegaId),
