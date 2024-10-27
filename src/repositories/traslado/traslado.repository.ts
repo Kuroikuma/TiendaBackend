@@ -95,7 +95,7 @@ export class TrasladoRepository {
   async getLastTrasladoBySucursalId(sucursalId: string) {
     try {
       const ultimoTraslado = await this.model
-        .findOne({ sucursalDestinoId:sucursalId })
+        .findOne({ sucursalOrigenId:sucursalId })
         .sort({ fechaRegistro: -1 });
       // Ejecuta la
 
@@ -118,8 +118,15 @@ export class TrasladoRepository {
   }
 
   async findPedidoEnviadosBySucursal(sucursalId: string) {
-    try {
-      const listPedidos = await this.model.find({ sucursalOrigenId: sucursalId });
+    try {      
+      const listPedidos = await this.model
+        .find({ sucursalOrigenId: sucursalId })
+        .populate([
+          { path: 'usuarioIdEnvia' },
+          { path: 'usuarioIdRecibe' },
+          { path: 'sucursalOrigenId' },
+          { path: 'sucursalDestinoId' },
+        ]);
 
       return listPedidos;
     } catch (error) {
@@ -130,7 +137,14 @@ export class TrasladoRepository {
 
   async findPedidoRecibidosBySucursal(sucursalId: string) {
     try {
-      const listPedidos = await this.model.find({ sucursalDestinoId: sucursalId });
+      const listPedidos = await this.model
+        .find({ sucursalDestinoId: sucursalId })
+        .populate([
+          { path: 'usuarioIdEnvia' },
+          { path: 'usuarioIdRecibe' },
+          { path: 'sucursalOrigenId' },
+          { path: 'sucursalDestinoId' },
+        ]);
 
       return listPedidos;
     } catch (error) {
@@ -141,7 +155,15 @@ export class TrasladoRepository {
 
   async findPedidoPorRecibirBySucursal(sucursalId: string) {
     try {
-      const listPedidos = await this.model.find({ sucursalDestinoId: sucursalId });
+      const listPedidos = await this.model
+        .find({ sucursalDestinoId: sucursalId })
+        .populate([
+          { path: 'usuarioIdEnvia' },
+          { path: 'usuarioIdRecibe' },
+          { path: 'sucursalOrigenId' },
+          { path: 'sucursalDestinoId' },
+        ]);
+
       const listPedidoPorRecibir = listPedidos.filter((pedido) => pedido.estatusTraslado === 'En Proceso');
 
       return listPedidoPorRecibir;
@@ -153,7 +175,15 @@ export class TrasladoRepository {
 
   async findPedidoEnProcesoBySucursal(sucursalId: string) {
     try {
-      const listPedidos = await this.model.find({ sucursalOrigenId: sucursalId });
+      const listPedidos = await this.model
+        .find({ sucursalOrigenId: sucursalId })
+        .populate([
+          { path: 'usuarioIdEnvia' },
+          { path: 'usuarioIdRecibe' },
+          { path: 'sucursalOrigenId' },
+          { path: 'sucursalDestinoId' },
+        ]);
+
       const listPedidoEnProceso = listPedidos.filter((pedido) => pedido.estatusTraslado === 'En Proceso');
 
       return listPedidoEnProceso;
