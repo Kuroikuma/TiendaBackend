@@ -21,7 +21,7 @@ router.post(
 
 // Get de pedidos enviados
 router.get(
-  '/enviados',
+  '/:id/enviados',
   trasladoController.findPedidoEnviadosBySucursal.bind(trasladoController)
 );
 
