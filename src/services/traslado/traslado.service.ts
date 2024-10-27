@@ -237,10 +237,10 @@ export class TrasladoService {
     }
   }
 
-  async findAllItemDePedidoByPedido(pedidoId: string) {
+  async findAllItemDePedidoByPedidoDto(pedidoId: string) {
     try {
       const listItemDePedidos =
-        await this.trasladoRepository.findAllItemDePedidoByPedido(pedidoId);
+        await this.trasladoRepository.findAllItemDePedidoByPedidoDto(pedidoId);
 
       return listItemDePedidos;
     } catch (error) {

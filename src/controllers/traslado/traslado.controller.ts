@@ -68,12 +68,12 @@ export class TrasladoController {
   async findPedidoByIdWithItemDePedido(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const traslado = await this.service.findPedidoById(req.params.id);
-      const listItemDePedido = await this.service.findAllItemDePedidoByPedido(
+      const listItemDePedido = await this.service.findAllItemDePedidoByPedidoDto(
         req.params.id
       );
 
       let pedido = {
-        ...traslado,
+        traslado,
         listItemDePedido: listItemDePedido,
       };
 
