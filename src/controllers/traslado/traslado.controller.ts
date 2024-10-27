@@ -1,7 +1,6 @@
 import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { TrasladoService } from '../../services/traslado/traslado.service';
-import { ITraslado, ITrasladoDto } from 'src/models/traslados/Traslado.model';
 
 @injectable()
 export class TrasladoController {
@@ -33,27 +32,18 @@ export class TrasladoController {
     }
   }
 
-  async findPedidoEnviadosBySucursal(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async findPedidoEnviadosBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const traslado = await this.service.findPedidoEnviadosBySucursal(
-        req.params.id
-      );
 
+      const traslado = await this.service.findPedidoEnviadosBySucursal(req.params.id);
       res.status(201).json(traslado);
+
     } catch (error) {
       next(error);
     }
   }
 
-  async findPedidoRecibidosBySucursal(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async findPedidoRecibidosBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const traslado = await this.service.findPedidoRecibidosBySucursal(
         req.params.id
@@ -64,11 +54,7 @@ export class TrasladoController {
     }
   }
 
-  async findPedidoPorRecibirBySucursal(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async findPedidoPorRecibirBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const traslado = await this.service.findPedidoPorRecibirBySucursal(
         req.params.id
@@ -79,11 +65,7 @@ export class TrasladoController {
     }
   }
 
-  async findPedidoByIdWithItemDePedido(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async findPedidoByIdWithItemDePedido(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const traslado = await this.service.findPedidoById(req.params.id);
       const listItemDePedido = await this.service.findAllItemDePedidoByPedido(
