@@ -23,7 +23,14 @@ export class TrasladoRepository {
   }
 
   async findById(id: string): Promise<ITraslado | null> {
-    const Traslado = await this.model.findById(id);
+    const Traslado = await this.model
+      .findById(id)
+      .populate([
+        { path: 'usuarioIdEnvia' },
+        { path: 'usuarioIdRecibe' },
+        { path: 'sucursalOrigenId' },
+        { path: 'sucursalDestinoId' },
+      ]);
 
     if (!Traslado) {
       return null;
