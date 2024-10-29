@@ -172,7 +172,12 @@ export class TrasladoRepository {
           { path: 'sucursalDestinoId' },
         ]);
 
-      return listPedidos;
+        const listPedidoRecibidos = listPedidos.filter(
+          (pedido) => pedido.estatusTraslado === 'Terminado' || pedido.estatusTraslado === 'Terminado incompleto'
+        );
+  
+        return listPedidoRecibidos;
+
     } catch (error) {
       console.error('Error al obtener los pedidos recibidos:', error);
       throw new Error('Error al obtener los pedidos recibidos');
