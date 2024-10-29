@@ -20,7 +20,7 @@ import {
   InventarioSucursal,
 } from '../../models/inventario/InventarioSucursal.model';
 import fileUploadService from '../../services/fileUploadService';
-import { IFilesUpload } from 'src/gen/files';
+import { IFilesUpload } from '../../gen/files';
 const accountSid = 'AC765fa1004417bf97128e3ca10824aacd';
 const authToken = 'f590cfbf94ad7e8c92d2b8538adccfee';
 const client = require('twilio')(accountSid, authToken);

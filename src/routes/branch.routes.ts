@@ -34,5 +34,6 @@ router.patch(
 );
 
 router.get('/:id/products', authMiddleware, branchController.findBranchProducts.bind(branchController));
+router.get('/:id/products-shortages', authMiddleware, branchController.searchForStockProductsAtBranch.bind(branchController));
 
 export default router;

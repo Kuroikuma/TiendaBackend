@@ -11,6 +11,7 @@ router.use(authMiddleware);
 
 // Definir las rutas
 router.post('/', productController.create.bind(productController));
+router.get('/allProduct', productController.findAllProducts.bind(productController));
 router.get('/:id', productController.getById.bind(productController));
 router.get('/', productController.getAll.bind(productController));
 router.put('/:id', productController.update.bind(productController));

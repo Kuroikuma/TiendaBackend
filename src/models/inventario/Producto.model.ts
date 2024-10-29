@@ -24,6 +24,21 @@ export interface IBranchProducts {
   update_at: Date;
 }
 
+export interface IProductShortage {
+  nombre: string;
+  descripcion: string;
+  precio?: mongoose.Types.Decimal128;
+  monedaId: mongoose.Types.ObjectId | IMoneda;
+  deleted_at: Date | null;
+  id: mongoose.Types.ObjectId;
+  create_at: Date;
+  update_at: Date;
+}
+
+export interface IBranchProductsAll extends IBranchProducts {
+  nombreSucursal: string;
+}
+
 export interface IProductCreate {
   nombre: string;
   descripcion: string;

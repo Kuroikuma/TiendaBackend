@@ -1,7 +1,10 @@
 import { injectable } from 'tsyringe';
 import {
+  IBranchProducts,
+  IBranchProductsAll,
   IProductCreate,
   IProducto,
+  IProductShortage,
   Producto,
 } from '../../models/inventario/Producto.model';
 import { ISucursal, Sucursal } from '../../models/sucursales/Sucursal.model';
@@ -58,7 +61,9 @@ export class ProductoRepository {
         throw new Error('Grupo no encontrado');
       }
 
-      let productSave = productExist ? productExist : await product.save({ session });
+      let productSave = productExist
+        ? productExist
+        : await product.save({ session });
 
       let inventarioSucursal = new this.modelInventarioSucursal({
         productoId: productSave._id,
@@ -178,5 +183,41 @@ export class ProductoRepository {
     return await this.model
       .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
+  }
+
+  async findAllProducts(): Promise<IBranchProductsAll[]> {
+    
+    const products = await this.modelInventarioSucursal
+      .find({ deleted_at: null })
+      .populate([{ path: 'productoId' }, { path: 'sucursalId' }]);
+
+    let newProducts: IBranchProductsAll[] = [];
+
+    products.forEach((inventarioSucursal) => {
+      if (inventarioSucursal.deleted_at == null) {
+        let producto = inventarioSucursal.productoId as IProducto;
+        let sucursalId = inventarioSucursal.sucursalId as ISucursal;
+
+        if (producto.deleted_at == null) {
+          newProducts.push({
+            stock: inventarioSucursal.stock,
+            nombre: producto.nombre,
+            descripcion: producto.descripcion,
+            precio: inventarioSucursal.precio,
+            monedaId: producto.monedaId,
+            deleted_at: producto.deleted_at,
+            id: producto._id as mongoose.Types.ObjectId,
+            sucursalId: sucursalId._id as mongoose.Types.ObjectId,
+            inventarioSucursalId:
+              inventarioSucursal._id as mongoose.Types.ObjectId,
+            create_at: producto.create_at!,
+            update_at: producto.update_at!,
+            nombreSucursal: sucursalId.nombre,
+          });
+        }
+      }
+    });
+
+    return newProducts;
   }
 }

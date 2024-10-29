@@ -81,4 +81,14 @@ export class SucursalController {
       next(error);
     }
   }
+
+  async searchForStockProductsAtBranch(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      
+      const product = await this.service.searchForStockProductsAtBranch(req.params.id);
+      res.status(201).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
