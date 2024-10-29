@@ -19,9 +19,13 @@ import {
   IInventarioSucursal,
   InventarioSucursal,
 } from '../../models/inventario/InventarioSucursal.model';
+import fileUploadService from '../../services/fileUploadService';
+import { IFilesUpload } from 'src/gen/files';
 const accountSid = 'AC765fa1004417bf97128e3ca10824aacd';
 const authToken = 'f590cfbf94ad7e8c92d2b8538adccfee';
 const client = require('twilio')(accountSid, authToken);
+const shortid = require('shortid');
+
 
 interface IManageHerramientaModel {
   init(
@@ -175,7 +179,6 @@ export class InventoryManagementService implements IManageHerramientaModel {
   public async generateItemDePedidoByPedido(
     trasladoId: string,
     listDetalleTraslado: IDetalleTrasladoEnvio[],
-    listFiles: string[],
     isNoSave = false,
     session: mongoose.mongo.ClientSession
   ): Promise<IDetalleTrasladoCreate[]> {
@@ -184,12 +187,18 @@ export class InventoryManagementService implements IManageHerramientaModel {
     for (const producto of listDetalleTraslado) {
       let trasladoIdParsed = new mongoose.Types.ObjectId(trasladoId);
 
+      let dataFiles: IFilesUpload[] = producto.archivosAdjuntos?.map((file) => {
+        return { base64: file, name: shortid.generate() } as IFilesUpload;
+      }) as IFilesUpload[];
+
+      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+
       // Crear el objeto ItemDePedido
       const detalleTraslado: IDetalleTrasladoCreate = {
         cantidad: producto.cantidad,
         trasladoId: trasladoIdParsed,
         inventarioSucursalId: producto.inventarioSucursalId,
-        archivosAdjuntos: listFiles,
+        archivosAdjuntos: archivosAdjuntos,
         deleted_at: null,
         comentarioEnvio: producto.comentarioEnvio,
       };
@@ -285,11 +294,18 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
     itemDePedido.recibido = model.recibido;
     itemDePedido.comentarioRecepcion = model.comentarioRecibido;
+    itemDePedido.estadoProducto = model.estadoProducto;
+
+    let dataFiles: IFilesUpload[] = listFiles.map((file) => {
+      return { base64: file, name: shortid.generate() } as IFilesUpload;
+    }) as IFilesUpload[];
+
+    const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
 
     if (listFiles.length > 0) {
       if (itemDePedido.archivosAdjuntos === null)
         itemDePedido.archivosAdjuntos = [];
-      itemDePedido.archivosAdjuntos.concat(listFiles);
+      itemDePedido.archivosAdjuntosRecibido = archivosAdjuntos;
     }
 
     //manejo de cantidad 0
@@ -305,7 +321,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
       const herramientaModel: IDetalleTrasladoEnvio = {
         cantidad: itemDePedido.cantidad,
         inventarioSucursalId: itemDePedido.inventarioSucursalId,
-        archivosAdjuntos: listFiles,
+        archivosAdjuntosRecibido: archivosAdjuntos,
         precio: model.precio,
       };
 
@@ -315,12 +331,12 @@ export class InventoryManagementService implements IManageHerramientaModel {
       let newItemsDePedido = await this.generateItemDePedidoByPedido(
         (itemDePedido.trasladoId as mongoose.Types.ObjectId).toString(),
         list,
-        listFiles,
         true,
         session
       );
 
       newItemsDePedido.forEach((item) => (item.recibido = true));
+      newItemsDePedido.forEach((item) => (item.estadoProducto = "En Buen Estado"));
       response.listDetalleTrasladoAgregados.push(...newItemsDePedido);
     }
 

@@ -12,9 +12,11 @@ export interface IDetalleTraslado extends Document {
   regresado?: boolean;
   estado?: boolean;
   archivosAdjuntos: string[];
+  archivosAdjuntosRecibido: string[];
   deleted_at: Date | null;
   comentarioRecepcion?:string;
   comentarioEnvio?:string;
+  estadoProducto?: string;
 }
 
 export interface IDetalleTrasladoCreate {
@@ -28,6 +30,7 @@ export interface IDetalleTrasladoCreate {
   deleted_at: Date | null;
   comentarioRecepcion?:string;
   comentarioEnvio?:string;
+  estadoProducto?: string;
 }
 
 export interface IDetalleTrasladoEnvio {
@@ -35,7 +38,8 @@ export interface IDetalleTrasladoEnvio {
   cantidad: number;
   precio:mongoose.Types.Decimal128;
   comentarioEnvio?:string;
-  archivosAdjuntos: string[] | null;
+  archivosAdjuntos?: string[] | null;
+  archivosAdjuntosRecibido?: string[] | null;
 }
 export interface IDetalleTrasladoRecepcion
 {
@@ -45,7 +49,8 @@ export interface IDetalleTrasladoRecepcion
   comentarioRecibido:string;
   recibido: boolean;
   estadoEquipo: string;
-  archivosAdjuntos: string[] | null;
+  archivosAdjuntosRecibido: string[] | null;
+  estadoProducto?: string;
 }
 
 const detalleTrasladoSchema: Schema = new Schema(

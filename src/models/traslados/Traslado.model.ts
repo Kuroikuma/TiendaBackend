@@ -22,6 +22,7 @@ export interface ITraslado extends Document {
   comentarioRecepcion: string | null;
   estatusTraslado?: IEstatusPedido;
   archivosAdjuntos: string[] | null;
+  archivosAdjuntosRecibido: string[] | null;
   firmaEnvio: string;
   firmaRecepcion: string;
   deleted_at: Date | null;
@@ -35,7 +36,7 @@ export interface ITrasladoEnvio {
   sucursalOrigenId: string;
   sucursalDestinoId: string;
   listDetalleTraslado: IDetalleTrasladoEnvio[];
-  archivosAdjuntos: string[] | null;
+  archivosAdjuntos?: string[] | null;
   firmaEnvio: string;
   comentarioEnvio: string;
   usuarioIdEnvia: string;
@@ -45,7 +46,7 @@ export interface ITrasladoRecepcion {
   trasladoId: string;
   estatusTraslado?: IEstatusPedido;
   listDetalleTraslado: IDetalleTrasladoRecepcion[];
-  archivosAdjuntos: string[];
+  archivosAdjuntosRecibido: string[] | null;
 
   // Datos para enviar el pedido
   firmaRecepcion: string;

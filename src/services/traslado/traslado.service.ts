@@ -12,15 +12,16 @@ import { InventoryManagementService } from './InventoryManagement.service';
 import mongoose, { Types } from 'mongoose';
 import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
 import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
+import fileUploadService from '../fileUploadService';
+import { IFilesUpload } from 'src/gen/files';
+import shortid from 'shortid';
 
 @injectable()
 export class TrasladoService {
   constructor(
-    @inject(InventoryManagementService)
-    private inventoryManagementService: InventoryManagementService,
+    @inject(InventoryManagementService) private inventoryManagementService: InventoryManagementService,
     @inject(TrasladoRepository) private trasladoRepository: TrasladoRepository,
-    @inject(InventarioSucursalRepository)
-    private inventarioSucursalRepo: InventarioSucursalRepository
+    @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository
   ) {}
 
   async postCreateEnvioProducto(
@@ -57,13 +58,18 @@ export class TrasladoService {
           session
         );
 
-      traslado.archivosAdjuntos = model.archivosAdjuntos ?? null;
+        let dataFiles: IFilesUpload[] = model.archivosAdjuntos?.map((file) => {
+          return { base64: file, name: shortid.generate() } as IFilesUpload;
+        }) as IFilesUpload[];
+    
+        const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+
+      traslado.archivosAdjuntos = archivosAdjuntos;
 
       var listItemDePedidos =
         await this.inventoryManagementService.generateItemDePedidoByPedido(
           (traslado._id as mongoose.Types.ObjectId).toString(),
           model.listDetalleTraslado,
-          model.archivosAdjuntos as string[],
           false,
           session
         );
@@ -127,6 +133,14 @@ export class TrasladoService {
       pedido.comentarioRecepcion = model.comentarioRecepcion!;
       pedido.usuarioIdRecibe = new mongoose.Types.ObjectId(trabajadorId);
 
+      let dataFiles: IFilesUpload[] = model.archivosAdjuntosRecibido?.map((file) => {
+        return { base64: file, name: shortid.generate() } as IFilesUpload;
+      }) as IFilesUpload[];
+  
+      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+
+      pedido.archivosAdjuntosRecibido = archivosAdjuntos;
+
       if (
         model.listDetalleTraslado?.filter((detalle) => detalle.recibido)
           .length !== listItemDePedidos.length
@@ -139,7 +153,7 @@ export class TrasladoService {
         let responseAdd = await this.inventoryManagementService.addCantidad(
           element,
           (pedido.sucursalDestinoId as mongoose.Types.ObjectId).toString(),
-          element.archivosAdjuntos as string[],
+          element.archivosAdjuntosRecibido as string[],
           true,
           session
         );
@@ -170,8 +184,9 @@ export class TrasladoService {
           responseAdd.listInventarioSucursalActualizado,
           session
         );
-        await pedido.save();
       }
+
+      await pedido.save();
 
       await session.commitTransaction();
       session.endSession();
