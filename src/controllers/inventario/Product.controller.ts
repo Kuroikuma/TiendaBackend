@@ -81,4 +81,12 @@ export class ProductoController {
       next(error);
     }
   }
+  async findAllProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const product = await this.service.findAllProducts();
+      res.status(201).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

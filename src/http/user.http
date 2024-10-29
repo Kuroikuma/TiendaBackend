@@ -7,9 +7,9 @@ POST {{api}}
 Content-Type: application/json
 
 {
-    "username":"Carlos sguther",
-    "password":"Mapamapa84...",
-    "role":"Cajero"
+    "username":"root",
+    "password":"1234",
+    "role":"root"
 }
 
 ### login
@@ -17,8 +17,8 @@ POST {{api}}/login
 Content-Type: application/json
 
 {
-    "username":"Carlos guther",
-    "password":"Mapamapa84"
+    "username":"root",
+    "password":"1234"
 }
 
 ##obtner profile

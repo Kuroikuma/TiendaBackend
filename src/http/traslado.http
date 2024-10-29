@@ -77,7 +77,7 @@ Content-Type: application/json
 
 ### Get pedidos enviados
 Get {{api}}/67133f450dcdd2f9ee534c5c/enviados
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMDMzNzAxLCJleHAiOjE3MzAwMzczMDF9.HUTG9Jcfy7C5sOFqQpQv3ieq8vQNoEaw_8b1MdUTSds
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMjE4MDk1LCJleHAiOjE3MzAyMjE2OTV9.5RBoseJdKDPuxKRpBgybTvyux05GHI7TtpBx_wYYC78
 Content-Type: application/json
 
 ### get pedidos por id

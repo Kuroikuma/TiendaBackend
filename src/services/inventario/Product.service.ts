@@ -2,6 +2,8 @@ import { injectable, inject } from 'tsyringe';
 import {
   IProducto,
   IProductCreate,
+  IBranchProductsAll,
+  IProductShortage,
 } from '../../models/inventario/Producto.model';
 import { ProductoRepository } from '../../repositories/inventary/Producto.repository';
 import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
@@ -90,5 +92,9 @@ export class ProductoService {
 
     //@ts-ignore
     return productos
+  }
+
+  async findAllProducts(): Promise<IBranchProductsAll[]> {
+    return this.repository.findAllProducts();
   }
 }

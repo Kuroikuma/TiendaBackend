@@ -2,6 +2,7 @@ import { injectable } from 'tsyringe';
 import {
   IBranchProducts,
   IProducto,
+  IProductShortage,
   Producto,
 } from '../../models/inventario/Producto.model';
 import { Sucursal, ISucursal } from '../../models/sucursales/Sucursal.model';
@@ -107,7 +108,46 @@ export class SucursalRepository {
 
   async restore(id: string): Promise<ISucursal | null> {
     return await this.modelSucursal
-      .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
+    .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
+  }
+  async searchForStockProductsAtBranch(branchId: string): Promise<IProductShortage[]> {
+    
+    const products = await this.modelInventarioSucursal
+      .find({ deleted_at: null, sucursalId: branchId  })
+      .populate([{ path: 'productoId' }, { path: 'sucursalId' }]);
+
+    let newProducts: IProductShortage[] = [];
+
+
+    const idsToFind = products.map(element => element.productoId._id);
+
+    let listProductSinSucursal:IProducto[] = [];
+
+    if (idsToFind.length > 0) {
+      listProductSinSucursal = await this.model.find({
+        deleted_at: null,
+        _id: { $nin: idsToFind }, // Usar $nin para excluir los IDs en lugar de $ne
+      });
+    } else {
+      listProductSinSucursal = await this.model.find({
+        deleted_at: null
+      });
+    }
+
+
+    listProductSinSucursal.forEach(producto => {
+      newProducts.push({
+        nombre: producto.nombre,
+        descripcion: producto.descripcion,
+        monedaId: producto.monedaId,
+        deleted_at: producto.deleted_at,
+        id: producto._id as mongoose.Types.ObjectId,
+        create_at: producto.create_at!,
+        update_at: producto.update_at!,
+      });
+    });
+
+    return newProducts;
   }
 }
