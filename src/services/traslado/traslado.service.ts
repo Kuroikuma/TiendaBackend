@@ -80,8 +80,10 @@ export class TrasladoService {
 
       //  Haciendo el envio del pedido
 
+      const firmaEnvio = await fileUploadService.uploadFile(model.firmaEnvio!, shortid.generate());
+
       let sendTrasladoProducto = {
-        firmaEnvio: model.firmaEnvio == 'undefined' ? '' : model.firmaEnvio!,
+        firmaEnvio: model.firmaEnvio == 'undefined' ? '' : firmaEnvio,
         comentarioEnvio: model.comentarioEnvio!,
         trasladoId: traslado._id as mongoose.Types.ObjectId,
         traslado: traslado,
@@ -148,7 +150,9 @@ export class TrasladoService {
         pedido.estatusTraslado = 'Terminado incompleto';
       }
 
-      pedido.firmaRecepcion = model.firmaRecepcion!;
+      const firmaRecepcion = await fileUploadService.uploadFile(model.firmaRecepcion!, shortid.generate());
+
+      pedido.firmaRecepcion = firmaRecepcion;
       for await (const element of model.listDetalleTraslado!) {
         let responseAdd = await this.inventoryManagementService.addCantidad(
           element,
