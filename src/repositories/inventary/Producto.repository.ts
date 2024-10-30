@@ -1,10 +1,8 @@
 import { injectable } from 'tsyringe';
 import {
-  IBranchProducts,
   IBranchProductsAll,
   IProductCreate,
   IProducto,
-  IProductShortage,
   Producto,
 } from '../../models/inventario/Producto.model';
 import { ISucursal, Sucursal } from '../../models/sucursales/Sucursal.model';

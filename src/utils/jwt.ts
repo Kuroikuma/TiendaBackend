@@ -3,7 +3,7 @@ import { SignOptions, JwtPayload } from 'jsonwebtoken';
 import { Types } from 'mongoose'; // Para manejar ObjectId
 
 const jwtOptions: SignOptions = {
-  expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  expiresIn: process.env.JWT_EXPIRES_IN || '1d',
   algorithm: (process.env.JWT_ALGORITHM as jwt.Algorithm) || 'HS256',
 };
 
