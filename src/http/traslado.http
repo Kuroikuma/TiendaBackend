@@ -39,7 +39,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExY
 Content-Type: application/json
 
 {
-  "trasladoId": "671e69b1945f57c86c16dcc5",
+  "trasladoId": "67218ad91bddeb3dcac7623c",
   "listDetalleTraslado": [
     {
       "inventarioSucursalId": "671e5fa6ee2e8e2d1ebbf78a",

@@ -124,8 +124,8 @@ export class TrasladoService {
       var trabajadorId = model.usuarioIdRecibe!;
 
       this.inventoryManagementService.initRecibir(
-        (pedido?.sucursalOrigenId as Types.ObjectId).toString(),
-        (pedido?.sucursalDestinoId as Types.ObjectId).toString(),
+        (pedido?.sucursalOrigenId._id as Types.ObjectId).toString(),
+        (pedido?.sucursalDestinoId._id as Types.ObjectId).toString(),
         model.trasladoId!
       );
 
