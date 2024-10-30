@@ -31,6 +31,7 @@ export interface IDetalleTrasladoCreate {
   comentarioRecepcion?:string;
   comentarioEnvio?:string;
   estadoProducto?: string;
+  archivosAdjuntosRecibido?: string[];
 }
 
 export interface IDetalleTrasladoEnvio {
@@ -38,6 +39,7 @@ export interface IDetalleTrasladoEnvio {
   cantidad: number;
   precio:mongoose.Types.Decimal128;
   comentarioEnvio?:string;
+  comentarioRecibido?: string;
   archivosAdjuntos?: string[] | null;
   archivosAdjuntosRecibido?: string[] | null;
 }
@@ -74,6 +76,8 @@ const detalleTrasladoSchema: Schema = new Schema(
     deleted_at: { type: Date, default: null },
     comentarioRecepcion: { type: String, default: null },
     comentarioEnvio: { type: String, default: null },
+    estadoProducto: { type: String, default: null },
+    archivosAdjuntosRecibido: { type: Array<string>, default: false },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'update_at' },

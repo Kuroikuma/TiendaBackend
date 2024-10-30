@@ -39,10 +39,15 @@ class FileUploadService {
     });
   }
 
-  async uploadFiles(files: IFilesUpload[]): Promise<string[]> {
+  async uploadFiles(files: IFilesUpload[] | undefined): Promise<string[]> {
+    if (!files) {
+      return []; // Retorna un array vacío si files es undefined
+    }
+  
     const uploadPromises = files.map(({ base64, name }) => this.uploadFile(base64, name));
     return Promise.all(uploadPromises);
   }
+  
 }
 
 export default new FileUploadService();
