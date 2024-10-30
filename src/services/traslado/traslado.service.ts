@@ -15,6 +15,9 @@ import { InventarioSucursalRepository } from '../../repositories/inventary/inven
 import fileUploadService from '../fileUploadService';
 import { IFilesUpload } from '../../gen/files';
 import shortid from 'shortid';
+import { IInventarioSucursal } from 'src/models/inventario/InventarioSucursal.model';
+import { Request } from 'express';
+import { MovimientoInventario } from 'src/models/inventario/MovimientoInventario.model';
 
 @injectable()
 export class TrasladoService {
@@ -274,6 +277,48 @@ export class TrasladoService {
 
       return pedido;
     } catch (error) {
+      console.error('Error al obtener el pedido:', error);
+      throw new Error('Error al obtener el pedido');
+    }
+  }
+  async returnProductToBranch(itemDePedidoId: string, req:Request) {
+    const session = await mongoose.startSession();
+
+    try {
+
+      session.startTransaction();
+
+      const itemDePedido = (await this.trasladoRepository.findItemDePedidoById(itemDePedidoId) as IDetalleTraslado);
+      const inventarioSucursal = (await this.inventarioSucursalRepo.findById(itemDePedido.inventarioSucursalId.toString()) as IInventarioSucursal);
+     
+      inventarioSucursal.stock += itemDePedido.cantidad;
+      inventarioSucursal.ultimo_movimiento = new Date();
+
+      let inventarioSucursalActualizado = await this.inventarioSucursalRepo.update(itemDePedido.inventarioSucursalId.toString(), inventarioSucursal);
+
+      let user = req.user;
+
+      let movimientoInventario = new MovimientoInventario({
+        inventarioSucursalId: inventarioSucursal._id,
+        cantidadCambiada: itemDePedido.cantidad,
+        cantidadInicial: inventarioSucursal.stock,
+        cantidadFinal: inventarioSucursal.stock - itemDePedido.cantidad,
+        tipoMovimiento: 'devolución',
+        fechaMovimiento: new Date(),
+        usuarioId: user?.id,
+      });
+
+      movimientoInventario.save();
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return inventarioSucursalActualizado;
+    } catch (error) {
+
+      await session.abortTransaction();
+      session.endSession();
+
       console.error('Error al obtener el pedido:', error);
       throw new Error('Error al obtener el pedido');
     }
