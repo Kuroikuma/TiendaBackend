@@ -227,4 +227,15 @@ export class TrasladoRepository {
       throw new Error('Error al obtener los pedidos en proceso');
     }
   }
+
+  async findItemDePedidoById(itemDePedidoId: string) {
+    try {
+      const itemDePedido = await this.modelDetalleTraslado.findById(itemDePedidoId);
+
+      return itemDePedido;
+    } catch (error) {
+      console.error('Error al obtener el pedido:', error);
+      throw new Error('Error al obtener el pedido');
+    }
+  }
 }

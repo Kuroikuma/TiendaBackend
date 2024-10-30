@@ -43,4 +43,6 @@ router.get(
   trasladoController.findPedidoByIdWithItemDePedido.bind(trasladoController)
 );
 
+router.get('/:id/devolver-producto', trasladoController.returnProductToBranch.bind(trasladoController));
+
 export default router;

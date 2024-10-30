@@ -83,6 +83,15 @@ export class TrasladoController {
     }
   }
 
+  async returnProductToBranch(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const traslado = await this.service.returnProductToBranch(req.params.id, req);
+      res.status(201).json(traslado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // async findPedidoPorSucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
   //   try {
   //     const traslado = await this.service.findPedidoPorSucursal(req.body);
