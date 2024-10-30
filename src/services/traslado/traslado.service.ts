@@ -156,7 +156,7 @@ export class TrasladoService {
       for await (const element of model.listDetalleTraslado!) {
         let responseAdd = await this.inventoryManagementService.addCantidad(
           element,
-          (pedido.sucursalDestinoId as mongoose.Types.ObjectId).toString(),
+          (pedido.sucursalDestinoId._id as mongoose.Types.ObjectId).toString(),
           element.archivosAdjuntosRecibido as string[],
           true,
           session
