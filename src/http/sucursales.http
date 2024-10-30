@@ -15,8 +15,8 @@ Content-Type: application/json
 }
 
 ### get sucursales
-GET {{api}}/67133f450dcdd2f9ee534c5c/products
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMjIyMTA4LCJleHAiOjE3MzAyMjU3MDh9.3ex7qBW8ZXRKLEHIqnT65njJJV0iYsre7evpcnpeaRA
+GET {{api}}/671c8b866632409cf0f3a753/products
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMjUwOTA4LCJleHAiOjE3MzAyNTQ1MDh9.GhRc90fCk8jkPepSQsw0UN1QFt_9IF4owFNs1HpirjU
 
 ### get productos faltantes en la sucursal
 GET {{api}}/67133f450dcdd2f9ee534c5c/products-shortages

@@ -27,7 +27,6 @@ export interface IBranchProducts {
 export interface IProductShortage {
   nombre: string;
   descripcion: string;
-  precio?: mongoose.Types.Decimal128;
   monedaId: mongoose.Types.ObjectId | IMoneda;
   deleted_at: Date | null;
   id: mongoose.Types.ObjectId;
