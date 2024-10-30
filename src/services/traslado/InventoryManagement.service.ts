@@ -21,6 +21,7 @@ import {
 } from '../../models/inventario/InventarioSucursal.model';
 import fileUploadService from '../../services/fileUploadService';
 import { IFilesUpload } from '../../gen/files';
+import { MovimientoInventario } from 'src/models/inventario/MovimientoInventario.model';
 const accountSid = 'AC765fa1004417bf97128e3ca10824aacd';
 const authToken = 'f590cfbf94ad7e8c92d2b8538adccfee';
 const client = require('twilio')(accountSid, authToken);
@@ -178,7 +179,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
   public async generateItemDePedidoByPedido(
     trasladoId: string,
-    listDetalleTraslado: IDetalleTrasladoEnvio[],
+    listDetalleTraslado: IDetalleTrasladoEnvio[] | IDetalleTrasladoRecepcion[],
     isNoSave = false,
     session: mongoose.mongo.ClientSession
   ): Promise<IDetalleTrasladoCreate[]> {
@@ -187,7 +188,9 @@ export class InventoryManagementService implements IManageHerramientaModel {
     for (const producto of listDetalleTraslado) {
       let trasladoIdParsed = new mongoose.Types.ObjectId(trasladoId);
 
-      let dataFiles: IFilesUpload[] = producto.archivosAdjuntos?.map((file) => {
+      let archivosAdjuntosStr: string[] = (isNoSave ? producto.archivosAdjuntosRecibido : (producto as IDetalleTrasladoEnvio).archivosAdjuntos as string[]) || [];
+
+      let dataFiles: IFilesUpload[] = archivosAdjuntosStr.map((file) => {
         return { base64: file, name: shortid.generate() } as IFilesUpload;
       }) as IFilesUpload[];
 
@@ -198,9 +201,11 @@ export class InventoryManagementService implements IManageHerramientaModel {
         cantidad: producto.cantidad,
         trasladoId: trasladoIdParsed,
         inventarioSucursalId: producto.inventarioSucursalId,
-        archivosAdjuntos: archivosAdjuntos,
+        archivosAdjuntos: (isNoSave ? (producto as IDetalleTrasladoEnvio).archivosAdjuntos : archivosAdjuntos as string[]) || [],
+        archivosAdjuntosRecibido: (isNoSave ?  archivosAdjuntos : (producto as IDetalleTrasladoRecepcion).archivosAdjuntosRecibido  as string[]) || [],
         deleted_at: null,
-        comentarioEnvio: producto.comentarioEnvio,
+        comentarioEnvio: (producto as IDetalleTrasladoEnvio).comentarioEnvio,
+        comentarioRecepcion: (producto as IDetalleTrasladoRecepcion).comentarioRecibido || "",
       };
 
       listItems.push(detalleTraslado);
@@ -235,10 +240,24 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
     if (!inventarioSucursal)
       throw new Error('Herramienta no encontrada en la bodega');
+
     if (cantidad > inventarioSucursal.stock)
       throw new Error('Cantidad a sustraer es mayor a la disponible.');
 
+    let movimientoInventario = new MovimientoInventario({
+      inventarioSucursalId: inventarioSucursal._id,
+      cantidadCambiada: cantidad,
+      cantidadInicial: inventarioSucursal.stock,
+      cantidadFinal: inventarioSucursal.stock - cantidad,
+      tipoMovimiento: 'transferencia',
+      fechaMovimiento: new Date(),
+      usuarioId: this.usuarioEnviaId,
+    });
+
+    await movimientoInventario.save();
+
     inventarioSucursal.stock -= cantidad;
+    
     if (inventarioSucursal.stock === 0)
       inventarioSucursal.deleted_at = new Date();
 
@@ -296,16 +315,8 @@ export class InventoryManagementService implements IManageHerramientaModel {
     itemDePedido.comentarioRecepcion = model.comentarioRecibido;
     itemDePedido.estadoProducto = model.estadoProducto;
 
-    let dataFiles: IFilesUpload[] = listFiles.map((file) => {
-      return { base64: file, name: shortid.generate() } as IFilesUpload;
-    }) as IFilesUpload[];
-
-    const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
-
-    if (listFiles.length > 0) {
-      if (itemDePedido.archivosAdjuntos === null)
-        itemDePedido.archivosAdjuntos = [];
-      itemDePedido.archivosAdjuntosRecibido = archivosAdjuntos;
+    if (itemDePedido.archivosAdjuntos === null) {
+      itemDePedido.archivosAdjuntos = [];
     }
 
     //manejo de cantidad 0
@@ -319,10 +330,11 @@ export class InventoryManagementService implements IManageHerramientaModel {
       itemDePedido.cantidad -= model.cantidad;
 
       const herramientaModel: IDetalleTrasladoEnvio = {
-        cantidad: itemDePedido.cantidad,
+        cantidad: model.cantidad,
         inventarioSucursalId: itemDePedido.inventarioSucursalId,
-        archivosAdjuntosRecibido: archivosAdjuntos,
+        archivosAdjuntosRecibido: listFiles,
         precio: model.precio,
+        comentarioRecibido: model.comentarioRecibido,
       };
 
       let list: IDetalleTrasladoEnvio[] = [];
@@ -335,14 +347,40 @@ export class InventoryManagementService implements IManageHerramientaModel {
         session
       );
 
+      itemDePedido.archivosAdjuntosRecibido = newItemsDePedido[0].archivosAdjuntosRecibido as string[];
+
       newItemsDePedido.forEach((item) => (item.recibido = true));
       newItemsDePedido.forEach((item) => (item.estadoProducto = "En Buen Estado"));
       response.listDetalleTrasladoAgregados.push(...newItemsDePedido);
+    } else {
+
+      let dataFiles: IFilesUpload[] = listFiles.map((file) => {
+        return { base64: file, name: shortid.generate() } as IFilesUpload;
+      }) as IFilesUpload[];
+
+      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+
+      if (listFiles.length > 0) {
+        itemDePedido.archivosAdjuntosRecibido = archivosAdjuntos;
+      }
     }
 
     // Actualización de cantidades en bodega
     if (model.recibido && model.cantidad > 0) {
       if (inventarioSucursalRecibe) {
+
+        let movimientoInventario = new MovimientoInventario({
+          inventarioSucursalId: inventarioSucursalRecibe._id,
+          cantidadCambiada: model.cantidad,
+          cantidadInicial: inventarioSucursalRecibe.stock,
+          cantidadFinal: inventarioSucursalRecibe.stock - model.cantidad,
+          tipoMovimiento: 'transferencia',
+          fechaMovimiento: new Date(),
+          usuarioId: this.usuarioEnviaId,
+        });
+    
+        await movimientoInventario.save();
+
         inventarioSucursalRecibe.stock += model.cantidad;
         inventarioSucursalRecibe.ultimo_movimiento = new Date();
 

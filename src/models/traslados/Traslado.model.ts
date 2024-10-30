@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, ObjectId } from 'mongoose';
 import { ISucursal } from '../sucursales/Sucursal.model';
 import { IUser } from '../usuarios/User.model';
 import { IDetalleTraslado, IDetalleTrasladoCreate, IDetalleTrasladoEnvio, IDetalleTrasladoRecepcion } from './DetalleTraslado.model';
-import { IHistorialInventario } from '../inventario/HistorialInventario.model';
+import { IMovimientoInventario } from '../inventario/MovimientoInventario.model';
 import { IInventarioSucursal } from '../inventario/InventarioSucursal.model';
 
 type IEstatusPedido = 'Solicitado' | 'En Proceso' | 'Terminado' | 'Terminado incompleto';
@@ -54,40 +54,6 @@ export interface ITrasladoRecepcion {
   usuarioIdRecibe: string;
 }
 
-// const trasladoRecepcion: ITrasladoRecepcion = {
-//   trasladoId: "671c6cce94fd39f7e59b5304",
-//   listDetalleTraslado: [
-//     {
-//       inventarioSucursalId: "671c723694fd39f7e59b5312",
-//       cantidad: 4,
-//       archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
-//       comentarioRecibido: "Comentario Recibido",
-//       recibido: true,
-//       estadoEquipo: "Bien",
-//     },
-//     {
-//       inventarioSucursalId: "671c723694fd39f7e59b5313",
-//       cantidad: 2,
-//       archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
-//       comentarioRecibido: "Comentario Recibido",
-//       recibido: true,
-//       estadoEquipo: "Bien",
-//     },
-//     {
-//       inventarioSucursalId: "671c723694fd39f7e59b5314",
-//       cantidad: 0,
-//       archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
-//       comentarioRecibido: "Comentario Recibido",
-//       recibido: false,
-//       estadoEquipo: "Bien",
-//     },
-//   ],
-//   archivosAdjuntos: ["foto1.jpg", "foto2.jpg"],
-//   firmaRecepcion: "firmaRecepcion",
-//   comentarioRecepcion: "Comentario Recepcion",
-//   usuarioIdRecibe: "67062bd1437ff3ebf183194c",
-// };
-
 export interface ISendTrasladoProducto {
   firmaEnvio: string;
   comentarioEnvio: string;
@@ -96,7 +62,7 @@ export interface ISendTrasladoProducto {
 }
 
 export interface IResponseToAddCantidad{
-  listHistorialInventario: IHistorialInventario[];
+  listHistorialInventario: IMovimientoInventario[];
   listDetalleTrasladoAgregados: IDetalleTrasladoCreate[];
   listDetalleTrasladoActualizado: IDetalleTraslado[];
   listInventarioSucursalAgregados: IInventarioSucursal[];
@@ -135,6 +101,7 @@ const trasladoSchema: Schema = new Schema(
     comentarioRecepcion: { type: String, default: null },
     estatusTraslado: { type: String },
     archivosAdjuntos: { type: Array<string>, default: null },
+    archivosAdjuntosRecibido: { type: Array<string>, default: null },
     firmaEnvio: { type: String, default: '' },
     firmaRecepcion: { type: String, default: '' },
     deleted_at: { type: Date, default: null },

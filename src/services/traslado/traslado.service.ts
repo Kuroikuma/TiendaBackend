@@ -62,7 +62,7 @@ export class TrasladoService {
           return { base64: file, name: shortid.generate() } as IFilesUpload;
         }) as IFilesUpload[];
     
-        const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+        const archivosAdjuntos =  dataFiles.length ? await fileUploadService.uploadFiles(dataFiles) : [];
 
       traslado.archivosAdjuntos = archivosAdjuntos;
 
@@ -139,7 +139,7 @@ export class TrasladoService {
         return { base64: file, name: shortid.generate() } as IFilesUpload;
       }) as IFilesUpload[];
   
-      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+      const archivosAdjuntos = dataFiles.length ? await fileUploadService.uploadFiles(dataFiles) : [];
 
       pedido.archivosAdjuntosRecibido = archivosAdjuntos;
 
@@ -190,7 +190,7 @@ export class TrasladoService {
         );
       }
 
-      await pedido.save();
+      await pedido.save({session});
 
       await session.commitTransaction();
       session.endSession();
