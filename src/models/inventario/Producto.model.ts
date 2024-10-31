@@ -36,6 +36,18 @@ export interface IProductShortage {
   update_at: Date;
 }
 
+export interface IProductInTransit {
+  nombre: string;
+  descripcion: string;
+  ultimoMovimiento: Date;
+  stock: number;
+  precio: mongoose.Types.Decimal128;
+  monedaId: mongoose.Types.ObjectId | IMoneda;
+  consucutivoPedido: string;
+  id: mongoose.Types.ObjectId;
+  sucursalDestino: string;
+}
+
 export interface IBranchProductsAll extends IBranchProducts {
   nombreSucursal: string;
 }
