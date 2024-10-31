@@ -18,6 +18,9 @@ import shortid from 'shortid';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { Request } from 'express';
 import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
+import { notifyManagerOfIncomingProducts } from '../utils/slackService';
+import { ISucursal } from '../../models/sucursales/Sucursal.model';
+import { IProducto } from '../../models/inventario/Producto.model';
 
 @injectable()
 export class TrasladoService {
@@ -99,6 +102,19 @@ export class TrasladoService {
 
       await session.commitTransaction();
       session.endSession();
+
+      let username = "Ulisse Hurtado cabrera";
+      let channel = "#pedidos";
+      let branchName = (traslado.sucursalDestinoId as ISucursal).nombre;
+      let originBranch = (traslado.sucursalOrigenId as ISucursal).nombre;
+      let orderId = (traslado._id as mongoose.Types.ObjectId).toString();
+
+      let productList = listItemDePedidos.map((item) => ({
+        name: ((item.inventarioSucursalId as IInventarioSucursal).productoId as IProducto).nombre,
+        quantity: item.cantidad,
+      }));
+
+      notifyManagerOfIncomingProducts(channel, branchName, productList, orderId, originBranch);
 
       return traslado;
     } catch (error) {

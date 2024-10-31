@@ -79,8 +79,25 @@ export class TrasladoRepository {
   async saveAllDetalleTraslado(
     data: IDetalleTrasladoCreate[],
     session: mongo.ClientSession
-  ): Promise<void> {
-    await this.modelDetalleTraslado.insertMany(data, { session });
+  ): Promise<IDetalleTraslado[]> {
+     // Insertar los documentos
+  const insertedData = await this.modelDetalleTraslado.insertMany(data, { session });
+
+  // Obtener los IDs de los documentos insertados
+  const insertedIds = insertedData.map(item => (item._id as mongoose.Types.ObjectId).toString());
+
+  // Consultar los documentos insertados y aplicar populate
+  const populatedData = await this.modelDetalleTraslado
+    .find({ _id: { $in: insertedIds } })
+    .session(session) 
+    .populate({
+      path: 'inventarioSucursalId',
+      populate: {
+        path: 'productoId',
+      },
+    });
+
+  return populatedData; 
   }
 
   async updateAllDetalleTraslado(

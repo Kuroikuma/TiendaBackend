@@ -14,6 +14,7 @@ import { InventarioSucursalRepository } from '../../repositories/inventary/inven
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { ITraslado } from '../../models/traslados/Traslado.model';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
+import { IProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 
 @injectable()
 export class ProductoService {
@@ -123,5 +124,8 @@ export class ProductoService {
 
   async findAllProducts(): Promise<IBranchProductsAll[]> {
     return this.repository.findAllProducts();
+  }
+  async findProductoGrupoByProductId(productId: string): Promise<IProductosGrupos | null> {
+    return this.repository.findProductoGrupoByProductId(productId);
   }
 }
