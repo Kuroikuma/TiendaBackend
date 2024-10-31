@@ -3,6 +3,7 @@ import { injectable, inject } from 'tsyringe';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
 import { IBranchProducts, IProducto, IProductShortage } from '../../models/inventario/Producto.model';
+import { IInventarioSucursal } from 'src/models/inventario/InventarioSucursal.model';
 
 @injectable()
 export class SucursalService {
@@ -65,7 +66,7 @@ export class SucursalService {
     return this.repository.restore(id);
   }
 
-  async searchForStockProductsAtBranch(branchId: string): Promise<IProductShortage[]> {
+  async searchForStockProductsAtBranch(branchId: string): Promise<IInventarioSucursal[]> {
     return this.repository.searchForStockProductsAtBranch(branchId);
   }
 }
