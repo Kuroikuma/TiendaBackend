@@ -28,6 +28,8 @@ export interface IProductShortage {
   nombre: string;
   descripcion: string;
   monedaId: mongoose.Types.ObjectId | IMoneda;
+  grupoId: mongoose.Types.ObjectId;
+  grupoNombre: string;
   deleted_at: Date | null;
   id: mongoose.Types.ObjectId;
   create_at: Date;
