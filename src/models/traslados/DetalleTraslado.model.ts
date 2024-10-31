@@ -70,7 +70,7 @@ const detalleTrasladoSchema: Schema = new Schema(
     cantidad: { type: Number, required: true },
     precio: { type: Schema.Types.Decimal128 },
     recibido: { type: Boolean },
-    regresado: { type: Boolean },
+    regresado: { type: Boolean, default: false },
     estado: { type: Boolean },
     archivosAdjuntos: { type: Array<string>, default: false },
     deleted_at: { type: Date, default: null },

@@ -228,6 +228,24 @@ export class TrasladoRepository {
     }
   }
 
+  async findAllPedidoBySucursal(sucursalId: string) {
+    try {
+      const listPedidos = await this.model
+        .find({ sucursalOrigenId: sucursalId })
+        .populate([
+          { path: 'usuarioIdEnvia' },
+          { path: 'usuarioIdRecibe' },
+          { path: 'sucursalOrigenId' },
+          { path: 'sucursalDestinoId' },
+        ]);
+
+      return listPedidos;
+    } catch (error) {
+      console.error('Error al obtener los pedidos en proceso:', error);
+      throw new Error('Error al obtener los pedidos en proceso');
+    }
+  }
+
   async findItemDePedidoById(itemDePedidoId: string) {
     try {
       const itemDePedido = await this.modelDetalleTraslado.findById(itemDePedidoId);
@@ -236,6 +254,23 @@ export class TrasladoRepository {
     } catch (error) {
       console.error('Error al obtener el pedido:', error);
       throw new Error('Error al obtener el pedido');
+    }
+  }
+
+  async findAllItemDePedidoByPedidoByTransitProduct(pedidoId: string) {
+    try {
+      const listItemDePedido = await this.modelDetalleTraslado.find({
+        trasladoId: pedidoId,
+      });
+
+      const listItemDePedidoTransitProduct = listItemDePedido.filter(
+        (itemDePedido) => itemDePedido.recibido === false && !itemDePedido.regresado
+      );
+
+      return listItemDePedidoTransitProduct;
+    } catch (error) {
+      console.error('Error al obtener el último traslado:', error);
+      throw new Error('Error al obtener el último traslado');
     }
   }
 }
