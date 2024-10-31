@@ -8,17 +8,21 @@ import {
 import { Sucursal, ISucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import mongoose from 'mongoose';
+import { IProductosGrupos, ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
+import { IGrupoInventario } from '../../models/inventario/GrupoInventario.model';
 
 @injectable()
 export class SucursalRepository {
   private model: typeof Producto;
   private modelSucursal: typeof Sucursal;
   private modelInventarioSucursal: typeof InventarioSucursal;
+  private modelProductosGrupos: typeof ProductosGrupos;
 
   constructor() {
     this.model = Producto;
     this.modelSucursal = Sucursal;
     this.modelInventarioSucursal = InventarioSucursal;
+    this.modelProductosGrupos = ProductosGrupos;
   }
 
   async create(data: Partial<ISucursal>): Promise<ISucursal> {
@@ -135,7 +139,20 @@ export class SucursalRepository {
       });
     }
 
-    listProductSinSucursal.forEach(producto => {
+    let idsToFindGrupos = listProductSinSucursal.map(element => element.id);
+
+    let grupos = await this.modelProductosGrupos.find({
+      deleted_at: null,
+      productoId: { $in: idsToFindGrupos },
+    }).populate('grupoId');
+
+    listProductSinSucursal.forEach((producto) => {
+
+      let productoGrupo = (grupos.find((grupo) => grupo.productoId.toString() ===(producto._id as mongoose.Types.ObjectId).toString()) as IProductosGrupos)
+      let grupo = productoGrupo.grupoId
+      let grupoNombre = (grupo as IGrupoInventario).nombre;
+      let grupoId = grupo._id as mongoose.Types.ObjectId;
+
       newProducts.push({
         nombre: producto.nombre,
         descripcion: producto.descripcion,
@@ -144,7 +161,8 @@ export class SucursalRepository {
         id: producto._id as mongoose.Types.ObjectId,
         create_at: producto.create_at!,
         update_at: producto.update_at!,
-        
+        grupoId: grupoId,
+        grupoNombre: grupoNombre,
       });
     });
 

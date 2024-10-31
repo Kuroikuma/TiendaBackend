@@ -15,9 +15,9 @@ import { InventarioSucursalRepository } from '../../repositories/inventary/inven
 import fileUploadService from '../fileUploadService';
 import { IFilesUpload } from '../../gen/files';
 import shortid from 'shortid';
-import { IInventarioSucursal } from 'src/models/inventario/InventarioSucursal.model';
+import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { Request } from 'express';
-import { MovimientoInventario } from 'src/models/inventario/MovimientoInventario.model';
+import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
 
 @injectable()
 export class TrasladoService {
