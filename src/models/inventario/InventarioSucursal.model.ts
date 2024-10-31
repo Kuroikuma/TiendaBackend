@@ -9,7 +9,7 @@ export interface IInventarioSucursal extends Document {
   precio:mongoose.Types.Decimal128;
   ultimo_movimiento: Date;
   deleted_at: Date | null;
-  puntoReOrden: number;
+  puntoReCompra: number;
 }
 
 const inventarioSucursalSchema: Schema = new Schema(
@@ -27,7 +27,7 @@ const inventarioSucursalSchema: Schema = new Schema(
     stock: { type: Number, required: true },
     precio: { type: Schema.Types.Decimal128, required: true },
     ultimo_movimiento: { type: Date, required: true },
-    puntoReOrden: { type: Number, required: true },
+    puntoReCompra: { type: Number, required: true },
     deleted_at: { type: Date, default: null },
   },
   {
