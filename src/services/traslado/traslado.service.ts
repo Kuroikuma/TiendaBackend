@@ -12,7 +12,7 @@ import { InventoryManagementService } from './InventoryManagement.service';
 import mongoose, { Types } from 'mongoose';
 import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
 import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
-import fileUploadService from '../fileUploadService';
+import fileUploadService from '../utils/fileUploadService';
 import { IFilesUpload } from '../../gen/files';
 import shortid from 'shortid';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';

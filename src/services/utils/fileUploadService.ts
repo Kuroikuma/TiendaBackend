@@ -1,5 +1,5 @@
-import { base64ToFile, IFilesUpload } from '../gen/files';
-import { bucket } from '../firebase'; // Asegúrate de importar tu configuración de Firebase
+import { base64ToFile, IFilesUpload } from '../../gen/files';
+import { bucket } from '../../firebase'; // Asegúrate de importar tu configuración de Firebase
 
 class FileUploadService {
   async uploadFile(base64String: string, name:string): Promise<string> {

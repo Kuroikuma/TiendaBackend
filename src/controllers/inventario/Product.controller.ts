@@ -1,6 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { ProductoService } from '../../services/inventario/Product.service';
+import { sendChannelMessage } from '../../services/utils/slackService';
 
 @injectable()
 export class ProductoController {
@@ -75,6 +76,9 @@ export class ProductoController {
 
   async findProductInTransitBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+
+      sendChannelMessage("#guarera", `Se ha enviado un nuevo producto a la sucursal ${req.params.id}`);
+
       const product = await this.service.findProductInTransitBySucursal(req.params.id);
       res.status(201).json(product);
     } catch (error) {
