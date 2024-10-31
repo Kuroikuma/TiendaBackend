@@ -81,6 +81,7 @@ export class SucursalRepository {
             inventarioSucursalId: inventarioSucursal._id as mongoose.Types.ObjectId,
             create_at: producto.create_at!,
             update_at: producto.update_at!,
+            puntoReCompra: inventarioSucursal.puntoReCompra,
           });
         }
       }

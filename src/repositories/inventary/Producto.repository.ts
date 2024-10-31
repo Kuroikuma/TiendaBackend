@@ -69,6 +69,7 @@ export class ProductoRepository {
         stock: data.stock,
         ultimo_movimiento: new Date(),
         precio: data.precio,
+        puntoReCompra: data.puntoReCompra,
       });
 
       let productoGrupoExist = await this.modelProductoGrupo.findOne({
@@ -106,6 +107,7 @@ export class ProductoRepository {
         stock: data.stock!,
         create_at: new Date(),
         update_at: new Date(),
+        puntoReCompra: data.puntoReCompra!,
       };
 
       return productoCreate;
@@ -211,6 +213,7 @@ export class ProductoRepository {
             create_at: producto.create_at!,
             update_at: producto.update_at!,
             nombreSucursal: sucursalId.nombre,
+            puntoReCompra: inventarioSucursal.puntoReCompra,
           });
         }
       }
