@@ -127,7 +127,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
       sucursalOrigenId: this.sucursalEnviaId,
     });
 
-    await newPedido.save({ session });
+    (await newPedido.save({ session })).populate(["sucursalOrigenId", "sucursalDestinoId", "usuarioIdEnvia", "usuarioIdRecibe"]);
 
     // client.messages
     //   .create({
@@ -179,11 +179,11 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
   public async generateItemDePedidoByPedido(
     trasladoId: string,
-    listDetalleTraslado: IDetalleTrasladoEnvio[] | IDetalleTrasladoRecepcion[],
+    listDetalleTraslado: IDetalleTrasladoEnvio[] | IDetalleTrasladoRecepcion[] | IDetalleTraslado[],
     isNoSave = false,
     session: mongoose.mongo.ClientSession
   ): Promise<IDetalleTrasladoCreate[]> {
-    const listItems: IDetalleTrasladoCreate[] = [];
+    let listItems: IDetalleTrasladoCreate[] = [];
 
     for (const producto of listDetalleTraslado) {
       let trasladoIdParsed = new mongoose.Types.ObjectId(trasladoId);
@@ -213,7 +213,8 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
     // Guardar en la base de datos si `isNoSave` es falso
     if (!isNoSave) {
-      await this.trasladoRepository.saveAllDetalleTraslado(listItems, session);
+     let newItems = await this.trasladoRepository.saveAllDetalleTraslado(listItems, session);
+     listItems = newItems;
     }
 
     return listItems;
@@ -225,7 +226,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
     for (const item of listItems) {
       await this.subtractCantidad(
         item.cantidad,
-        item.inventarioSucursalId as mongoose.Types.ObjectId
+        item.inventarioSucursalId._id as mongoose.Types.ObjectId
       );
     }
   }

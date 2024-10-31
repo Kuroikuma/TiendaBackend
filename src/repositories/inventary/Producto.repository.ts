@@ -8,7 +8,7 @@ import {
 import { ISucursal, Sucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import mongoose from 'mongoose';
-import { ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
+import { IProductosGrupos, ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 import { GrupoInventario } from '../../models/inventario/GrupoInventario.model';
 import { ObjectId } from 'mongoose';
 
@@ -217,5 +217,14 @@ export class ProductoRepository {
     });
 
     return newProducts;
+  }
+   async findProductoGrupoByProductId(productId: string): Promise<IProductosGrupos | null> {
+    const productoGrupo = await this.modelProductoGrupo.findOne({ productoId: productId }).populate('grupoId');
+
+    if (!productoGrupo) {
+      return null;
+    }
+
+    return productoGrupo;
   }
 }

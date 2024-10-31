@@ -2,8 +2,8 @@
 import { injectable, inject } from 'tsyringe';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
-import { IBranchProducts, IProducto, IProductShortage } from '../../models/inventario/Producto.model';
-import { IInventarioSucursal } from 'src/models/inventario/InventarioSucursal.model';
+import { IBranchProducts } from '../../models/inventario/Producto.model';
+import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 
 @injectable()
 export class SucursalService {
