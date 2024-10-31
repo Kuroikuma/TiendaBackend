@@ -75,14 +75,14 @@ export class ProductoService {
   }
 
   async findProductInTransitBySucursal(sucursaleId: string): Promise<IInventarioSucursal> {
-    const pedidosEnTransito = await this.trasladoRepository.findPedidoEnProcesoBySucursal(sucursaleId);
+    const pedidosEnTransito = await this.trasladoRepository.findAllPedidoBySucursal(sucursaleId);
 
     let itemsDePedido:IDetalleTraslado[] = [];
     let listInventarioSucursalId:string[] = [];
 
     for await (const element of pedidosEnTransito) {
 
-      let itemDePedido = await this.trasladoRepository.findAllItemDePedidoByPedido((element._id as mongoose.Types.ObjectId).toString());
+      let itemDePedido = await this.trasladoRepository.findAllItemDePedidoByPedidoByTransitProduct((element._id as mongoose.Types.ObjectId).toString());
 
       itemsDePedido.push(...itemDePedido);
     }

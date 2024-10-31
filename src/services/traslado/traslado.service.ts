@@ -290,11 +290,14 @@ export class TrasladoService {
 
       const itemDePedido = (await this.trasladoRepository.findItemDePedidoById(itemDePedidoId) as IDetalleTraslado);
       const inventarioSucursal = (await this.inventarioSucursalRepo.findById(itemDePedido.inventarioSucursalId.toString()) as IInventarioSucursal);
+
+      itemDePedido.regresado = true;
      
       inventarioSucursal.stock += itemDePedido.cantidad;
       inventarioSucursal.ultimo_movimiento = new Date();
 
       let inventarioSucursalActualizado = await this.inventarioSucursalRepo.update(itemDePedido.inventarioSucursalId.toString(), inventarioSucursal);
+      itemDePedido.save();
 
       let user = req.user;
 
