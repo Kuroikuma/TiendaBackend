@@ -114,7 +114,7 @@ export class TrasladoService {
         quantity: item.cantidad,
       }));
 
-      notifyManagerOfIncomingProducts(channel, branchName, productList, orderId, originBranch);
+      notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch);
 
       return traslado;
     } catch (error) {

@@ -72,7 +72,7 @@ type Product = {
 };
 
 export const notifyManagerOfIncomingProducts = async (
-  channel: string,
+  username: string,
   branchName: string,
   productList: Product[],
   orderId: string,
@@ -82,7 +82,7 @@ export const notifyManagerOfIncomingProducts = async (
   const slackToken = process.env.SLACK_BOT_TOKEN;
   const slackClient = new WebClient(slackToken);
 
-  // let userId = await getUserId(username);
+  let userId = await getUserId(username);
 
   const currentDate = new Date().toLocaleString();
 
@@ -99,7 +99,7 @@ export const notifyManagerOfIncomingProducts = async (
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `*Hola , un nuevo pedido ha sido enviado a la sucursal de ${branchName}.*`
+          text: `*Hola <@${username}>, un nuevo pedido ha sido enviado a la sucursal de ${branchName}.*`
         }
       },
       {
@@ -142,10 +142,10 @@ export const notifyManagerOfIncomingProducts = async (
 
   try {
     await slackClient.chat.postMessage({
-      channel: channel,
+      channel: (userId as string),
       ...message
     });
-    console.log(`Notificación enviada a  sobre el envío de productos a ${branchName}.`);
+    console.log(`Notificación enviada a ${username} sobre el envío de productos a ${branchName}.`);
   } catch (error) {
     console.error('Error enviando notificación al encargado de la sucursal:', error);
   }
