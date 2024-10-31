@@ -115,57 +115,91 @@ export class SucursalRepository {
     .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
   }
-  async searchForStockProductsAtBranch(branchId: string): Promise<IInventarioSucursal[]> {
+  // async searchForStockProductsAtBranch(branchId: string): Promise<IInventarioSucursal[]> {
     
+  //   const products = await this.modelInventarioSucursal
+  //     .find({ deleted_at: null, sucursalId: branchId  })
+  //     .populate([{ path: 'productoId' }, { path: 'sucursalId' }]);
+
+  //   let newProducts: IProductShortage[] = [];
+
+
+  //   const idsToFind = products.map(element => element.productoId._id);
+
+  //   let listProductSinSucursal:IInventarioSucursal[] = [];
+
+  //   if (idsToFind.length > 0) {
+  //     listProductSinSucursal = await this.modelInventarioSucursal.find({
+  //       deleted_at: null,
+  //       productoId: { $nin: idsToFind }, // Usar $nin para excluir los IDs en lugar de $ne
+  //     }).populate(["productoId", "sucursalId"]);
+  //   } else {
+  //     listProductSinSucursal = await this.modelInventarioSucursal.find({
+  //       deleted_at: null
+  //     });
+  //   }
+
+  //   // let idsToFindGrupos = listProductSinSucursal.map(element => element.id);
+
+  //   // let grupos = await this.modelProductosGrupos.find({
+  //   //   deleted_at: null,
+  //   //   productoId: { $in: idsToFindGrupos },
+  //   // }).populate('grupoId');
+
+  //   // listProductSinSucursal.forEach((producto) => {
+
+  //   //   let productoGrupo = (grupos.find((grupo) => grupo.productoId.toString() ===(producto._id as mongoose.Types.ObjectId).toString()) as IProductosGrupos)
+  //   //   let grupo = productoGrupo.grupoId
+  //   //   let grupoNombre = (grupo as IGrupoInventario).nombre;
+  //   //   let grupoId = grupo._id as mongoose.Types.ObjectId;
+
+  //   //   newProducts.push({
+  //   //     nombre: producto.nombre,
+  //   //     descripcion: producto.descripcion,
+  //   //     monedaId: producto.monedaId,
+  //   //     deleted_at: producto.deleted_at,
+  //   //     id: producto._id as mongoose.Types.ObjectId,
+  //   //     create_at: producto.create_at!,
+  //   //     update_at: producto.update_at!,
+  //   //     grupoId: grupoId,
+  //   //     grupoNombre: grupoNombre,
+  //   //   });
+  //   // });
+
+  //   return listProductSinSucursal;
+  // }
+
+  async searchForStockProductsAtBranch(branchId: string): Promise<IInventarioSucursal[]> {
     const products = await this.modelInventarioSucursal
-      .find({ deleted_at: null, sucursalId: branchId  })
+      .find({ deleted_at: null, sucursalId: branchId })
       .populate([{ path: 'productoId' }, { path: 'sucursalId' }]);
-
-    let newProducts: IProductShortage[] = [];
-
-
+  
     const idsToFind = products.map(element => element.productoId._id);
-
-    let listProductSinSucursal:IInventarioSucursal[] = [];
-
+  
+    let listProductSinSucursal: IInventarioSucursal[] = [];
+  
     if (idsToFind.length > 0) {
       listProductSinSucursal = await this.modelInventarioSucursal.find({
         deleted_at: null,
-        productoId: { $nin: idsToFind }, // Usar $nin para excluir los IDs en lugar de $ne
+        productoId: { $nin: idsToFind }, // Excluir IDs en lugar de $ne
       }).populate(["productoId", "sucursalId"]);
     } else {
       listProductSinSucursal = await this.modelInventarioSucursal.find({
         deleted_at: null
-      });
+      }).populate(["productoId", "sucursalId"]);
     }
-
-    // let idsToFindGrupos = listProductSinSucursal.map(element => element.id);
-
-    // let grupos = await this.modelProductosGrupos.find({
-    //   deleted_at: null,
-    //   productoId: { $in: idsToFindGrupos },
-    // }).populate('grupoId');
-
-    // listProductSinSucursal.forEach((producto) => {
-
-    //   let productoGrupo = (grupos.find((grupo) => grupo.productoId.toString() ===(producto._id as mongoose.Types.ObjectId).toString()) as IProductosGrupos)
-    //   let grupo = productoGrupo.grupoId
-    //   let grupoNombre = (grupo as IGrupoInventario).nombre;
-    //   let grupoId = grupo._id as mongoose.Types.ObjectId;
-
-    //   newProducts.push({
-    //     nombre: producto.nombre,
-    //     descripcion: producto.descripcion,
-    //     monedaId: producto.monedaId,
-    //     deleted_at: producto.deleted_at,
-    //     id: producto._id as mongoose.Types.ObjectId,
-    //     create_at: producto.create_at!,
-    //     update_at: producto.update_at!,
-    //     grupoId: grupoId,
-    //     grupoNombre: grupoNombre,
-    //   });
-    // });
-
-    return listProductSinSucursal;
+  
+    // Filtrar los duplicados de productoId
+    const uniqueProductsMap = new Map<string, IInventarioSucursal>();
+    for (const product of listProductSinSucursal) {
+      const productId = (product.productoId._id as mongoose.Types.ObjectId).toString();
+      if (!uniqueProductsMap.has(productId)) {
+        uniqueProductsMap.set(productId, product);
+      }
+    }
+  
+    // Convertir el Map a un array
+    return Array.from(uniqueProductsMap.values());
   }
+  
 }
