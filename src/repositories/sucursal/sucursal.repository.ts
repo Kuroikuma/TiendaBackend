@@ -6,7 +6,7 @@ import {
   Producto,
 } from '../../models/inventario/Producto.model';
 import { Sucursal, ISucursal } from '../../models/sucursales/Sucursal.model';
-import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
+import { IInventarioSucursal, InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import mongoose from 'mongoose';
 import { IProductosGrupos, ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 import { IGrupoInventario } from '../../models/inventario/GrupoInventario.model';
@@ -115,7 +115,7 @@ export class SucursalRepository {
     .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
   }
-  async searchForStockProductsAtBranch(branchId: string): Promise<IProductShortage[]> {
+  async searchForStockProductsAtBranch(branchId: string): Promise<IInventarioSucursal[]> {
     
     const products = await this.modelInventarioSucursal
       .find({ deleted_at: null, sucursalId: branchId  })
@@ -126,46 +126,46 @@ export class SucursalRepository {
 
     const idsToFind = products.map(element => element.productoId._id);
 
-    let listProductSinSucursal:IProducto[] = [];
+    let listProductSinSucursal:IInventarioSucursal[] = [];
 
     if (idsToFind.length > 0) {
-      listProductSinSucursal = await this.model.find({
+      listProductSinSucursal = await this.modelInventarioSucursal.find({
         deleted_at: null,
-        _id: { $nin: idsToFind }, // Usar $nin para excluir los IDs en lugar de $ne
-      });
+        productoId: { $nin: idsToFind }, // Usar $nin para excluir los IDs en lugar de $ne
+      }).populate(["productoId", "sucursalId"]);
     } else {
-      listProductSinSucursal = await this.model.find({
+      listProductSinSucursal = await this.modelInventarioSucursal.find({
         deleted_at: null
       });
     }
 
-    let idsToFindGrupos = listProductSinSucursal.map(element => element.id);
+    // let idsToFindGrupos = listProductSinSucursal.map(element => element.id);
 
-    let grupos = await this.modelProductosGrupos.find({
-      deleted_at: null,
-      productoId: { $in: idsToFindGrupos },
-    }).populate('grupoId');
+    // let grupos = await this.modelProductosGrupos.find({
+    //   deleted_at: null,
+    //   productoId: { $in: idsToFindGrupos },
+    // }).populate('grupoId');
 
-    listProductSinSucursal.forEach((producto) => {
+    // listProductSinSucursal.forEach((producto) => {
 
-      let productoGrupo = (grupos.find((grupo) => grupo.productoId.toString() ===(producto._id as mongoose.Types.ObjectId).toString()) as IProductosGrupos)
-      let grupo = productoGrupo.grupoId
-      let grupoNombre = (grupo as IGrupoInventario).nombre;
-      let grupoId = grupo._id as mongoose.Types.ObjectId;
+    //   let productoGrupo = (grupos.find((grupo) => grupo.productoId.toString() ===(producto._id as mongoose.Types.ObjectId).toString()) as IProductosGrupos)
+    //   let grupo = productoGrupo.grupoId
+    //   let grupoNombre = (grupo as IGrupoInventario).nombre;
+    //   let grupoId = grupo._id as mongoose.Types.ObjectId;
 
-      newProducts.push({
-        nombre: producto.nombre,
-        descripcion: producto.descripcion,
-        monedaId: producto.monedaId,
-        deleted_at: producto.deleted_at,
-        id: producto._id as mongoose.Types.ObjectId,
-        create_at: producto.create_at!,
-        update_at: producto.update_at!,
-        grupoId: grupoId,
-        grupoNombre: grupoNombre,
-      });
-    });
+    //   newProducts.push({
+    //     nombre: producto.nombre,
+    //     descripcion: producto.descripcion,
+    //     monedaId: producto.monedaId,
+    //     deleted_at: producto.deleted_at,
+    //     id: producto._id as mongoose.Types.ObjectId,
+    //     create_at: producto.create_at!,
+    //     update_at: producto.update_at!,
+    //     grupoId: grupoId,
+    //     grupoNombre: grupoNombre,
+    //   });
+    // });
 
-    return newProducts;
+    return listProductSinSucursal;
   }
 }
