@@ -4,6 +4,7 @@ import {
   IProductCreate,
   IBranchProductsAll,
   IProductShortage,
+  IProductInTransit,
 } from '../../models/inventario/Producto.model';
 import { ProductoRepository } from '../../repositories/inventary/Producto.repository';
 import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
@@ -11,6 +12,8 @@ import mongoose from 'mongoose';
 import { IDetalleTraslado } from '../../models/traslados/DetalleTraslado.model';
 import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
+import { ITraslado } from '../../models/traslados/Traslado.model';
+import { ISucursal } from '../../models/sucursales/Sucursal.model';
 
 @injectable()
 export class ProductoService {
@@ -90,8 +93,32 @@ export class ProductoService {
 
     let productos = await this.inventarioSucursalRepository.getListProductByInventarioSucursalIds(sucursaleId, listInventarioSucursalId);
 
+    let productInTransit:IProductInTransit[] = [];
+
+    itemsDePedido.forEach(element => {
+      let inventarioSucursal = (productos.find(product => product.id === element.inventarioSucursalId.toString()) as IInventarioSucursal);
+      let pedido = (pedidosEnTransito.find(pedido => pedido.id === element.trasladoId.toString()) as ITraslado);
+      let producto = (inventarioSucursal.productoId as IProducto);
+      let sucursalDestino = (pedido.sucursalDestinoId as ISucursal);
+
+      
+      if (inventarioSucursal && pedido) {
+        productInTransit.push({
+          nombre: producto.nombre,
+          descripcion: producto.descripcion,
+          ultimoMovimiento: inventarioSucursal.ultimo_movimiento,
+          stock: element.cantidad,
+          precio: inventarioSucursal.precio,
+          monedaId: producto.monedaId,
+          consucutivoPedido: pedido.nombre,
+          id: element._id as mongoose.Types.ObjectId,
+          sucursalDestino: sucursalDestino.nombre,
+        });
+      }
+    });
+
     //@ts-ignore
-    return productos
+    return productInTransit
   }
 
   async findAllProducts(): Promise<IBranchProductsAll[]> {
