@@ -17,6 +17,7 @@ export interface IBranchProducts {
   monedaId: mongoose.Types.ObjectId | IMoneda;
   deleted_at: Date | null;
   stock: number;
+  puntoReCompra: number;
   id: mongoose.Types.ObjectId;
   sucursalId: mongoose.Types.ObjectId;
   inventarioSucursalId: mongoose.Types.ObjectId;
@@ -63,6 +64,7 @@ export interface IProductCreate {
   stock: number;
   create_at: Date;
   update_at: Date;
+  puntoReCompra: number;
 }
 
 const productoSchema: Schema = new Schema(

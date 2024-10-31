@@ -1,17 +1,18 @@
 @api = http://127.0.0.1:3000/api/inventory/products
 
 POST {{api}}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMjIyMTA4LCJleHAiOjE3MzAyMjU3MDh9.3ex7qBW8ZXRKLEHIqnT65njJJV0iYsre7evpcnpeaRA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmYTNkOGFjMWI0Y2UyZWYzNTNkYyIsInVzZXJuYW1lIjoiQWRtaW5QYWxpIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzMwNDEzMDAwLCJleHAiOjE3MzA0OTk0MDB9.Fk3ZlEsNd8A5MMvP3G_pHuUlJzRE4tfGNvE7Vh7SOks
 Content-Type: application/json
 
 {
-    "nombre": "Nokia XR20",
+    "nombre": "Nokia XR20 Compra",
     "descripcion": "Un teléfono robusto diseñado para durar, con cámara dual de 48MP y pantalla de 6.67 pulgadas, ideal para actividades al aire libre.",
     "precio": 499.99,
     "monedaId": "671342d4664051db7c1f8792",
     "grupoId": "671aca0ea6e0841fd34fde57",
     "stock": 30,
-    "sucursalId": "671ae0285c63b9b3b87a02c8"
+    "sucursalId": "671ae0285c63b9b3b87a02c8",
+    "puntoReCompra": 10
 }
 
 
