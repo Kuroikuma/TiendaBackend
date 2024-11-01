@@ -70,15 +70,12 @@ export class ProductoController {
       const branch = await this.service.restoreProduct(req.params.id);
       res.status(200).json(branch);
     } catch (error) {
-      next(error);
+      next(error); 
     }
   }
 
   async findProductInTransitBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-
-      sendChannelMessage("#guarera", `Se ha enviado un nuevo producto a la sucursal ${req.params.id}`);
-
       const product = await this.service.findProductInTransitBySucursal(req.params.id);
       res.status(201).json(product);
     } catch (error) {

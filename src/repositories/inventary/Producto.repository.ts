@@ -7,10 +7,12 @@ import {
 } from '../../models/inventario/Producto.model';
 import { ISucursal, Sucursal } from '../../models/sucursales/Sucursal.model';
 import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { IProductosGrupos, ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 import { GrupoInventario } from '../../models/inventario/GrupoInventario.model';
 import { ObjectId } from 'mongoose';
+import { DetalleTraslado, IDetalleTraslado } from '../../models/traslados/DetalleTraslado.model';
+import { Traslado } from '../../models/traslados/Traslado.model';
 
 @injectable()
 export class ProductoRepository {
@@ -19,6 +21,8 @@ export class ProductoRepository {
   private modelInventarioSucursal: typeof InventarioSucursal;
   private modelProductoGrupo: typeof ProductosGrupos;
   private modelGrupoInventario: typeof GrupoInventario;
+  private modelDetalleTraslado: typeof DetalleTraslado;
+  private modelTraslado: typeof Traslado;
 
   constructor() {
     this.model = Producto;
@@ -26,6 +30,8 @@ export class ProductoRepository {
     this.modelInventarioSucursal = InventarioSucursal;
     this.modelProductoGrupo = ProductosGrupos;
     this.modelGrupoInventario = GrupoInventario;
+    this.modelTraslado = Traslado;
+    this.modelDetalleTraslado = DetalleTraslado;
   }
 
   async create(data: Partial<IProductCreate>): Promise<IProductCreate | null> {
@@ -246,5 +252,20 @@ export class ProductoRepository {
     }
 
     return productoGrupo;
+  }
+
+  async findProductInTransitByInventarioSucursalId(inventarioSucursalId: string): Promise<boolean> {
+    const listDetalleTraslado = (await this.modelDetalleTraslado.findOne({ inventarioSucursalId: inventarioSucursalId }) as IDetalleTraslado[]);
+
+    const idsToFind = (listDetalleTraslado.map(detalle => (detalle.trasladoId as mongoose.Types.ObjectId).toString()));
+
+    // Hacer la consulta usando Mongoose
+    const listTraslado = await this.modelTraslado.find({
+      deleted_at: null, // Filtrar por estado de BodegaActivoDesglose
+      estatusTraslado: "En Proceso",
+      _id: { $in: idsToFind }, // Usar $in para buscar los IDs
+    })
+
+    return listTraslado.length > 0;
   }
 }
