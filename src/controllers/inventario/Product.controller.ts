@@ -2,6 +2,7 @@ import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { ProductoService } from '../../services/inventario/Product.service';
 import { sendChannelMessage } from '../../services/utils/slackService';
+import { CustomJwtPayload } from '../../utils/jwt';
 
 @injectable()
 export class ProductoController {
@@ -9,7 +10,7 @@ export class ProductoController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const branch = await this.service.createProduct(req.body);
+      const branch = await this.service.createProduct(req.body, (req.user as CustomJwtPayload));
       res.status(201).json(branch);
     } catch (error) {
       next(error);
@@ -76,8 +77,6 @@ export class ProductoController {
 
   async findProductInTransitBySucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-
-      sendChannelMessage("#guarera", `Se ha enviado un nuevo producto a la sucursal ${req.params.id}`);
 
       const product = await this.service.findProductInTransitBySucursal(req.params.id);
       res.status(201).json(product);

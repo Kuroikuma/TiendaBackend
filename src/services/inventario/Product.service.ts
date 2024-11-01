@@ -15,21 +15,29 @@ import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.
 import { ITraslado } from '../../models/traslados/Traslado.model';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { IProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
+import { CustomJwtPayload } from 'src/utils/jwt';
 
 @injectable()
 export class ProductoService {
   constructor(
     @inject(ProductoRepository) private repository: ProductoRepository,
     @inject(TrasladoRepository) private trasladoRepository: TrasladoRepository,
-    @inject(InventarioSucursalRepository) private inventarioSucursalRepository: InventarioSucursalRepository
+    @inject(InventarioSucursalRepository)
+    private inventarioSucursalRepository: InventarioSucursalRepository
   ) {}
 
   async createProduct(
-    data: Partial<IProductCreate>
-  ): Promise<IProductCreate | null> {
-    const newBranch = await this.repository.create(data);
+    data: Partial<IProductCreate>,
+    user: CustomJwtPayload
+  ): Promise<IProductCreate | IProducto> {
 
-    return newBranch;
+    let isGeneralProduct = user.role === 'root' ? (data.sucursalId! ? false : true) : false;
+
+    if (isGeneralProduct) {
+      return (await this.repository.createGeneralProducts(data) as IProducto);
+    } else {
+      return (await this.repository.create(data) as IProductCreate);
+    }
   }
 
   async getProductById(id: string): Promise<IProducto | null> {
@@ -75,15 +83,20 @@ export class ProductoService {
     return this.repository.restore(id);
   }
 
-  async findProductInTransitBySucursal(sucursaleId: string): Promise<IInventarioSucursal> {
-    const pedidosEnTransito = await this.trasladoRepository.findAllPedidoBySucursal(sucursaleId);
+  async findProductInTransitBySucursal(
+    sucursaleId: string
+  ): Promise<IInventarioSucursal> {
+    const pedidosEnTransito =
+      await this.trasladoRepository.findAllPedidoBySucursal(sucursaleId);
 
-    let itemsDePedido:IDetalleTraslado[] = [];
-    let listInventarioSucursalId:string[] = [];
+    let itemsDePedido: IDetalleTraslado[] = [];
+    let listInventarioSucursalId: string[] = [];
 
     for await (const element of pedidosEnTransito) {
-
-      let itemDePedido = await this.trasladoRepository.findAllItemDePedidoByPedidoByTransitProduct((element._id as mongoose.Types.ObjectId).toString());
+      let itemDePedido =
+        await this.trasladoRepository.findAllItemDePedidoByPedidoByTransitProduct(
+          (element._id as mongoose.Types.ObjectId).toString()
+        );
 
       itemsDePedido.push(...itemDePedido);
     }
@@ -92,17 +105,24 @@ export class ProductoService {
       listInventarioSucursalId.push(element.inventarioSucursalId.toString());
     }
 
-    let productos = await this.inventarioSucursalRepository.getListProductByInventarioSucursalIds(sucursaleId, listInventarioSucursalId);
+    let productos =
+      await this.inventarioSucursalRepository.getListProductByInventarioSucursalIds(
+        sucursaleId,
+        listInventarioSucursalId
+      );
 
-    let productInTransit:IProductInTransit[] = [];
+    let productInTransit: IProductInTransit[] = [];
 
-    itemsDePedido.forEach(element => {
-      let inventarioSucursal = (productos.find(product => product.id === element.inventarioSucursalId.toString()) as IInventarioSucursal);
-      let pedido = (pedidosEnTransito.find(pedido => pedido.id === element.trasladoId.toString()) as ITraslado);
-      let producto = (inventarioSucursal.productoId as IProducto);
-      let sucursalDestino = (pedido.sucursalDestinoId as ISucursal);
+    itemsDePedido.forEach((element) => {
+      let inventarioSucursal = productos.find(
+        (product) => product.id === element.inventarioSucursalId.toString()
+      ) as IInventarioSucursal;
+      let pedido = pedidosEnTransito.find(
+        (pedido) => pedido.id === element.trasladoId.toString()
+      ) as ITraslado;
+      let producto = inventarioSucursal.productoId as IProducto;
+      let sucursalDestino = pedido.sucursalDestinoId as ISucursal;
 
-      
       if (inventarioSucursal && pedido) {
         productInTransit.push({
           nombre: producto.nombre,
@@ -119,13 +139,15 @@ export class ProductoService {
     });
 
     //@ts-ignore
-    return productInTransit
+    return productInTransit;
   }
 
   async findAllProducts(): Promise<IBranchProductsAll[]> {
     return this.repository.findAllProducts();
   }
-  async findProductoGrupoByProductId(productId: string): Promise<IProductosGrupos | null> {
+  async findProductoGrupoByProductId(
+    productId: string
+  ): Promise<IProductosGrupos | null> {
     return this.repository.findProductoGrupoByProductId(productId);
   }
 

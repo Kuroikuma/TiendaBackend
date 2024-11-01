@@ -59,7 +59,7 @@ export interface IProductCreate {
   precio: mongoose.Types.Decimal128;
   monedaId: mongoose.Types.ObjectId | IMoneda;
   deleted_at: Date | null;
-  sucursalId: mongoose.Types.ObjectId;
+  sucursalId?: mongoose.Types.ObjectId;
   grupoId: mongoose.Types.ObjectId;
   stock: number;
   create_at: Date;
