@@ -12,6 +12,8 @@ export class DescuentoRepository {
 
   constructor() {
     this.model = Descuento;
+    this.modelDescuentoProducto = DescuentosProductos;
+    this.modelDescuentoGrupo = DescuentoGrupo;
   }
 
   async create(data: Partial<IDescuentoCreate>, session: mongoose.mongo.ClientSession): Promise<IDescuento> {

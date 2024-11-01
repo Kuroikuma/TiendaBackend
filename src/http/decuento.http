@@ -12,11 +12,9 @@ Content-Type: application/json
   "fechaFin": "2024-08-31T23:59:59.000Z",
   "minimoCompra": 100,
   "minimoCantidad": 2,
-  "activo": true,
-  "moneda_id": "64b7f1b4b4f1b5f1c7e7f2a9",
+  "activo": "true",
+  "moneda_id": "671342d4664051db7c1f8792",
   "codigoDescunto": "VERANO2024",
-  "deleted_at": null,
   "tipoDescuentoEntidad": "Product",
-  "ProductId": "64b7f1b4b4f1b5f1c7e7f2b8",
-  "GroupId": "64b7f1b4b4f1b5f1c7e7f2c7"
+  "productId": "6720fc058ac1b4ce2ef353f6"
 }
