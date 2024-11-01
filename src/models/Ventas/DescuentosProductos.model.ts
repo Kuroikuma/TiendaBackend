@@ -4,7 +4,7 @@ import { IProducto } from '../inventario/Producto.model';
 
 export interface IDescuentosProductos extends Document {
   descuentoId: mongoose.Types.ObjectId | IDescuento;
-  productoId: mongoose.Types.ObjectId | IProducto;
+  productId: mongoose.Types.ObjectId | IProducto;
   deleted_at: Date | null;
 }
 
@@ -15,7 +15,7 @@ const descuentosProductosSchema: Schema = new Schema(
       ref: 'Descuento',
       required: true,
     },
-    productoId: {
+    productId: {
       type: Schema.Types.ObjectId,
       ref: 'Producto',
       required: true,
