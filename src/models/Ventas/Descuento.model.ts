@@ -11,12 +11,31 @@ export interface IDescuento extends Document {
   minimoCantidad: number;
   activo: boolean;
   moneda_id: mongoose.Types.ObjectId | IMoneda;
+  codigoDescunto: string
   deleted_at: Date | null;
+}
+
+export interface IDescuentoCreate {
+  nombre: string;
+  tipoDescuento: 'porcentaje' | 'valor';
+  valorDescuento: number;
+  fechaInicio: Date;
+  fechaFin: Date;
+  minimoCompra: number;
+  minimoCantidad: number;
+  activo: boolean;
+  moneda_id: mongoose.Types.ObjectId;
+  codigoDescunto: string
+  deleted_at: Date | null;
+  tipoDescuentoEntidad: 'Product' | 'Group',
+  productId?: mongoose.Types.ObjectId,
+  groupId?: mongoose.Types.ObjectId,
 }
 
 const descuentoSchema: Schema = new Schema(
   {
     nombre: { type: String, required: true },
+    codigoDescunto: { type: String, required: true },
     tipoDescuento: {
       type: String,
       enum: ['porcentaje', 'valor'],
