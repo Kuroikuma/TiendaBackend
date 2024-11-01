@@ -10,7 +10,6 @@ import { InventarioSucursal } from '../../models/inventario/InventarioSucursal.m
 import mongoose from 'mongoose';
 import { IProductosGrupos, ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 import { GrupoInventario } from '../../models/inventario/GrupoInventario.model';
-import { ObjectId } from 'mongoose';
 
 @injectable()
 export class ProductoRepository {
@@ -59,6 +58,7 @@ export class ProductoRepository {
         throw new Error('Grupo no encontrado');
       }
 
+
       let productSave = productExist
         ? productExist
         : await product.save({ session });
@@ -72,19 +72,14 @@ export class ProductoRepository {
         puntoReCompra: data.puntoReCompra,
       });
 
-      let productoGrupoExist = await this.modelProductoGrupo.findOne({
+
+      let productoGrupo = new this.modelProductoGrupo({
         productoId: productSave._id,
         grupoId: grupo._id,
+        sucursalId: sucursal._id,
       });
 
-      if (!productoGrupoExist) {
-        let productoGrupo = new this.modelProductoGrupo({
-          productoId: productSave._id,
-          grupoId: grupo._id,
-        });
-
-        await productoGrupo.save({ session });
-      }
+      await productoGrupo.save({ session });
 
       await inventarioSucursal.save({ session });
 
@@ -119,6 +114,59 @@ export class ProductoRepository {
 
       throw new Error('Error al crear producto');
     }
+  }
+
+  async createGeneralProducts(data: Partial<IProductCreate>): Promise<IProducto | null> {
+    const session = await mongoose.startSession();
+
+    try {
+
+      session.startTransaction();
+
+      let isProductExist = await this.findProductByName(data.nombre!);
+      let grupo = await this.modelGrupoInventario.findById(data.grupoId!);
+
+      if (isProductExist) {
+        throw new Error('Producto ya existente');
+      }
+
+      if(!grupo) {
+        throw new Error('Grupo no encontrado');
+      }
+
+      const product = new this.model(data);
+
+      let productSave = await product.save({ session });
+
+      let productoGrupoExist = await this.modelProductoGrupo.findOne({
+        productoId: productSave._id,
+        grupoId: grupo._id,
+      });
+
+      if (!productoGrupoExist) {
+        let productoGrupo = new this.modelProductoGrupo({
+          productoId: productSave._id,
+          grupoId: grupo._id,
+        });
+
+        await productoGrupo.save({ session });
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return productSave;
+
+
+    }catch (error) {
+      console.log(error);
+
+      await session.abortTransaction();
+      session.endSession();
+
+      throw new Error(error.message);
+    }
+
   }
 
   async findById(id: string): Promise<IProducto | null> {

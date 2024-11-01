@@ -17,7 +17,7 @@ POST {{api}}/login
 Content-Type: application/json
 
 {
-    "username":"Guther Duarte",
+    "username":"root",
     "password":"1234"
 }
 
