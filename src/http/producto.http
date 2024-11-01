@@ -21,22 +21,13 @@ GET {{api}}/allProduct
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMjE4MDk1LCJleHAiOjE3MzAyMjE2OTV9.5RBoseJdKDPuxKRpBgybTvyux05GHI7TtpBx_wYYC78
 Content-Type: application/json
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### Producto en transito
 GET {{api}}/67133f450dcdd2f9ee534c5c/transit
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGI2YzExYmY1Y2IyZmFlZjE2YjAzZiIsInVzZXJuYW1lIjoiQ2FybG9zIGd1dGhlciIsInJvbGUiOiJyb290IiwiaWF0IjoxNzI5OTI5ODcyLCJleHAiOjE3Mjk5MzM0NzJ9.OjC2Da3SZ1hWrt5rCPF7yeP5G0g5cz5cpsLhjqhKE1M
+Content-Type: application/json
+
+
+### Producto en transito
+PATCH  {{api}}/restore
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmYTNkOGFjMWI0Y2UyZWYzNTNkYyIsInVzZXJuYW1lIjoiR3V0aGVyIER1YXJ0ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDQyMDAwNiwiZXhwIjoxNzMwNTA2NDA2fQ.pr444_3KGYfHv7bOUWS-teSFp2m7WCUH7V17EWU6yu0
 Content-Type: application/json

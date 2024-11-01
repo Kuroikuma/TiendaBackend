@@ -1,5 +1,16 @@
 import { WebClient } from '@slack/web-api';
 
+interface ProductReorder {
+  name: string;
+  currentQuantity: number;
+  reorderPoint: number;
+}
+
+type Product = {
+  name: string;
+  quantity: number;
+};
+
 const getUserId = async (username: string): Promise<string | null> => {
 
   const slackToken = process.env.SLACK_BOT_TOKEN;
@@ -66,23 +77,19 @@ export const sendDirectMessage = async (username: string, message: string): Prom
   }
 };
 
-type Product = {
-  name: string;
-  quantity: number;
-};
-
 export const notifyManagerOfIncomingProducts = async (
-  channel: string,
+  username: string,
   branchName: string,
   productList: Product[],
   orderId: string,
-  originBranch: string
+  originBranch: string,
+  channel: string
 ) => {
+
+  let userId = await getUserId(username);
 
   const slackToken = process.env.SLACK_BOT_TOKEN;
   const slackClient = new WebClient(slackToken);
-
-  // let userId = await getUserId(username);
 
   const currentDate = new Date().toLocaleString();
 
@@ -99,7 +106,7 @@ export const notifyManagerOfIncomingProducts = async (
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `*Hola , un nuevo pedido ha sido enviado a la sucursal de ${branchName}.*`
+          text: `*Hola <@${userId}>, un nuevo pedido ha sido enviado a la sucursal de ${branchName}.*`
         }
       },
       {
@@ -142,11 +149,68 @@ export const notifyManagerOfIncomingProducts = async (
 
   try {
     await slackClient.chat.postMessage({
-      channel: channel,
+      channel: (channel as string),
       ...message
     });
-    console.log(`Notificación enviada a  sobre el envío de productos a ${branchName}.`);
+    console.log(`Notificación enviada a ${username} sobre el envío de productos a ${branchName}.`);
   } catch (error) {
     console.error('Error enviando notificación al encargado de la sucursal:', error);
   }
 };
+
+export const notifyReorderThreshold = async (
+  username: string,
+  branchName: string,
+  lowStockProducts: ProductReorder[],
+  channel: string
+) => {
+
+  let userId = await getUserId(username);
+
+  const slackToken = process.env.SLACK_BOT_TOKEN;
+  const slackClient = new WebClient(slackToken);
+
+  const productDetails = lowStockProducts.map((product) => {
+    return `• *${product.name}*: Cantidad actual: ${product.currentQuantity}, Punto de reorden: ${product.reorderPoint}`;
+  }).join("\n");
+
+  const message = {
+    text: `:warning: *Alerta de Inventario Bajo en ${branchName}*`,
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*¡Atención <@${userId}>!* Los siguientes productos en la sucursal *${branchName}* han alcanzado o superado su nivel de reorden.`
+        }
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*Productos con bajo inventario:*\n${productDetails}\n\n*Es necesario realizar una nueva orden para evitar rupturas de stock.*`
+        }
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: `:truck: _Este mensaje es una notificación automática de control de inventario._`
+          }
+        ]
+      }
+    ]
+  };
+
+  try {
+    await slackClient.chat.postMessage({
+      channel: channel,  // ID del usuario encargado de la sucursal
+      ...message
+    });
+    console.log(`Notificación de reorden enviada a ${userId} para la sucursal ${branchName}.`);
+  } catch (error) {
+    console.error('Error enviando notificación de reorden:', error);
+  }
+};
+

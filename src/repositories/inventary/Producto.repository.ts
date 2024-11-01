@@ -185,6 +185,23 @@ export class ProductoRepository {
       .exec();
   }
 
+  async restoreAll(): Promise<{ modifiedCount: number }> {
+    const result = await this.model.updateMany(
+      { deleted_at: { $ne: null } },
+      { deleted_at: null }
+    );
+  
+    return { modifiedCount: result.modifiedCount };
+  }
+
+  async resetPuntoReCompra(): Promise<{ modifiedCount: number }> {
+    const result = await this.modelInventarioSucursal.updateMany(
+      { puntoReCompra: 20 }
+    );
+  
+    return { modifiedCount: result.modifiedCount };
+  }
+
   async findAllProducts(): Promise<IBranchProductsAll[]> {
     
     const products = await this.modelInventarioSucursal

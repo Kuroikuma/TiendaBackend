@@ -10,11 +10,13 @@ import { IInventarioSucursal, InventarioSucursal } from '../../models/inventario
 import mongoose from 'mongoose';
 import { IProductosGrupos, ProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
 import { IGrupoInventario } from '../../models/inventario/GrupoInventario.model';
+import { IUser, User } from '../../models/usuarios/User.model';
 
 @injectable()
 export class SucursalRepository {
   private model: typeof Producto;
   private modelSucursal: typeof Sucursal;
+  private modelUser: typeof User;
   private modelInventarioSucursal: typeof InventarioSucursal;
   private modelProductosGrupos: typeof ProductosGrupos;
 
@@ -23,6 +25,7 @@ export class SucursalRepository {
     this.modelSucursal = Sucursal;
     this.modelInventarioSucursal = InventarioSucursal;
     this.modelProductosGrupos = ProductosGrupos;
+    this.modelUser = User;
   }
 
   async create(data: Partial<ISucursal>): Promise<ISucursal> {
@@ -116,59 +119,6 @@ export class SucursalRepository {
     .findByIdAndUpdate(id, { deleted_at: null }, { new: true })
       .exec();
   }
-  // async searchForStockProductsAtBranch(branchId: string): Promise<IInventarioSucursal[]> {
-    
-  //   const products = await this.modelInventarioSucursal
-  //     .find({ deleted_at: null, sucursalId: branchId  })
-  //     .populate([{ path: 'productoId' }, { path: 'sucursalId' }]);
-
-  //   let newProducts: IProductShortage[] = [];
-
-
-  //   const idsToFind = products.map(element => element.productoId._id);
-
-  //   let listProductSinSucursal:IInventarioSucursal[] = [];
-
-  //   if (idsToFind.length > 0) {
-  //     listProductSinSucursal = await this.modelInventarioSucursal.find({
-  //       deleted_at: null,
-  //       productoId: { $nin: idsToFind }, // Usar $nin para excluir los IDs en lugar de $ne
-  //     }).populate(["productoId", "sucursalId"]);
-  //   } else {
-  //     listProductSinSucursal = await this.modelInventarioSucursal.find({
-  //       deleted_at: null
-  //     });
-  //   }
-
-  //   // let idsToFindGrupos = listProductSinSucursal.map(element => element.id);
-
-  //   // let grupos = await this.modelProductosGrupos.find({
-  //   //   deleted_at: null,
-  //   //   productoId: { $in: idsToFindGrupos },
-  //   // }).populate('grupoId');
-
-  //   // listProductSinSucursal.forEach((producto) => {
-
-  //   //   let productoGrupo = (grupos.find((grupo) => grupo.productoId.toString() ===(producto._id as mongoose.Types.ObjectId).toString()) as IProductosGrupos)
-  //   //   let grupo = productoGrupo.grupoId
-  //   //   let grupoNombre = (grupo as IGrupoInventario).nombre;
-  //   //   let grupoId = grupo._id as mongoose.Types.ObjectId;
-
-  //   //   newProducts.push({
-  //   //     nombre: producto.nombre,
-  //   //     descripcion: producto.descripcion,
-  //   //     monedaId: producto.monedaId,
-  //   //     deleted_at: producto.deleted_at,
-  //   //     id: producto._id as mongoose.Types.ObjectId,
-  //   //     create_at: producto.create_at!,
-  //   //     update_at: producto.update_at!,
-  //   //     grupoId: grupoId,
-  //   //     grupoNombre: grupoNombre,
-  //   //   });
-  //   // });
-
-  //   return listProductSinSucursal;
-  // }
 
   async searchForStockProductsAtBranch(branchId: string): Promise<IInventarioSucursal[]> {
     const products = await this.modelInventarioSucursal
@@ -201,6 +151,12 @@ export class SucursalRepository {
   
     // Convertir el Map a un array
     return Array.from(uniqueProductsMap.values());
+  }
+
+  async findUserAdminForBranch(branchId: string): Promise<IUser | null> {
+    const query = this.modelUser.findOne({ sucursalId: branchId, role: "admin" });
+
+    return await query.exec();
   }
   
 }

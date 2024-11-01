@@ -18,16 +18,19 @@ import shortid from 'shortid';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { Request } from 'express';
 import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
-import { notifyManagerOfIncomingProducts } from '../utils/slackService';
+import { notifyManagerOfIncomingProducts, notifyReorderThreshold } from '../utils/slackService';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { IProducto } from '../../models/inventario/Producto.model';
+import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
+import { IUser } from '../../models/usuarios/User.model';
 
 @injectable()
 export class TrasladoService {
   constructor(
     @inject(InventoryManagementService) private inventoryManagementService: InventoryManagementService,
     @inject(TrasladoRepository) private trasladoRepository: TrasladoRepository,
-    @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository
+    @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository,
+    @inject(SucursalRepository) private sucursalRepo: SucursalRepository
   ) {}
 
   async postCreateEnvioProducto(
@@ -100,11 +103,14 @@ export class TrasladoService {
         session
       );
 
+      let usuario = await this.sucursalRepo.findUserAdminForBranch((traslado.sucursalDestinoId._id as mongoose.Types.ObjectId).toString());
+
       await session.commitTransaction();
       session.endSession();
 
-      let username = "Ulisse Hurtado cabrera";
+      let username = (usuario as IUser).username;
       let channel = "#pedidos";
+      let channel2 = "#alertas-reorden";
       let branchName = (traslado.sucursalDestinoId as ISucursal).nombre;
       let originBranch = (traslado.sucursalOrigenId as ISucursal).nombre;
       let orderId = (traslado._id as mongoose.Types.ObjectId).toString();
@@ -114,7 +120,17 @@ export class TrasladoService {
         quantity: item.cantidad,
       }));
 
-      notifyManagerOfIncomingProducts(channel, branchName, productList, orderId, originBranch);
+      let productListReOrder = listItemDePedidos
+        .filter((item) => (item.inventarioSucursalId as IInventarioSucursal).stock < (item.inventarioSucursalId as IInventarioSucursal).puntoReCompra)
+        .map((item) => ({
+          name: ((item.inventarioSucursalId as IInventarioSucursal).productoId as IProducto).nombre,
+          currentQuantity: (item.inventarioSucursalId as IInventarioSucursal).stock,
+          reorderPoint: (item.inventarioSucursalId as IInventarioSucursal).puntoReCompra,
+        }));
+
+
+      notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
+      notifyReorderThreshold(username, branchName, productListReOrder, channel2);
 
       return traslado;
     } catch (error) {

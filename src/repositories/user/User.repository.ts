@@ -1,5 +1,5 @@
 import { injectable } from 'tsyringe';
-import User, { IUser } from '../../models/usuarios/User.model';
+import { IUser, User } from '../../models/usuarios/User.model';
 import { Sucursal } from '../../models/sucursales/Sucursal.model';
 
 @injectable()
