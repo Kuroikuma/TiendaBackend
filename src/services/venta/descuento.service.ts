@@ -27,8 +27,8 @@ export class DescuentoService {
       const newDescuento = await this.repository.create(data, session);
 
       let tipoDescuentoEntidad = data.tipoDescuentoEntidad!;
-      let productId = data.productId!;
-      let groupId = data.groupId!;
+      let productId = new mongoose.Types.ObjectId(data.productId!);
+      let groupId = new mongoose.Types.ObjectId(data.groupId!);
       let descuentoId = newDescuento._id as mongoose.Types.ObjectId;
 
       if (tipoDescuentoEntidad === 'Product') {
