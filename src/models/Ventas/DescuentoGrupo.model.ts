@@ -1,10 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IDescuento } from './Descuento.model';
 import { IGrupoInventario } from '../inventario/GrupoInventario.model';
+import { ISucursal, Sucursal } from '../sucursales/Sucursal.model';
 
 export interface IDescuentoGrupo extends Document {
   descuentoId: mongoose.Types.ObjectId | IDescuento;
   grupoId: mongoose.Types.ObjectId | IGrupoInventario;
+  sucursalId?: mongoose.Types.ObjectId | ISucursal;
   deleted_at: Date | null;
 }
 
@@ -19,6 +21,10 @@ const descuentoGrupoSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'GrupoInventario',
       required: true,
+    },
+    sucursalId: {
+      type: Schema.Types.ObjectId,
+      ref: Sucursal,
     },
     deleted_at: { type: Date, default: null },
   },

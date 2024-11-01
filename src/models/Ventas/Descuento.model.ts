@@ -30,6 +30,7 @@ export interface IDescuentoCreate {
   tipoDescuentoEntidad: 'Product' | 'Group',
   productId?: mongoose.Types.ObjectId,
   groupId?: mongoose.Types.ObjectId,
+  sucursalId?: mongoose.Types.ObjectId,
 }
 
 const descuentoSchema: Schema = new Schema(
