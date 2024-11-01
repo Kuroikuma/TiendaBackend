@@ -101,4 +101,12 @@ export class ProductoController {
       next(error);
     }
   }
+  async restoreAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { modifiedCount } = await this.service.restoreAll();
+      res.status(200).json({ modifiedCount });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

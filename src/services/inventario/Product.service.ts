@@ -128,4 +128,8 @@ export class ProductoService {
   async findProductoGrupoByProductId(productId: string): Promise<IProductosGrupos | null> {
     return this.repository.findProductoGrupoByProductId(productId);
   }
+
+  async restoreAll(): Promise<{ modifiedCount: number }> {
+    return this.repository.restoreAll();
+  }
 }
