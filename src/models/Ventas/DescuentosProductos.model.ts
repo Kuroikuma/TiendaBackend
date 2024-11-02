@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { IDescuento } from './Descuento.model';
-import { IProducto } from '../inventario/Producto.model';
+import { Descuento, IDescuento } from './Descuento.model';
+import { IProducto, Producto } from '../inventario/Producto.model';
 import { ISucursal, Sucursal } from '../sucursales/Sucursal.model';
 
 export interface IDescuentosProductos extends Document {
@@ -14,12 +14,12 @@ const descuentosProductosSchema: Schema = new Schema(
   {
     descuentoId: {
       type: Schema.Types.ObjectId,
-      ref: 'Descuento',
+      ref: Descuento,
       required: true,
     },
     productId: {
       type: Schema.Types.ObjectId,
-      ref: 'Producto',
+      ref: Producto,
       required: true,
     },
     sucursalId: {
