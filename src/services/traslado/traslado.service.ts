@@ -23,6 +23,7 @@ import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { IProducto } from '../../models/inventario/Producto.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
 import { IUser } from '../../models/usuarios/User.model';
+import { notifyWhatsappManagerOfIncomingProducts, notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
 
 @injectable()
 export class TrasladoService {
@@ -115,6 +116,7 @@ export class TrasladoService {
       let originBranch = (traslado.sucursalOrigenId as ISucursal).nombre;
       let orderId = (traslado._id as mongoose.Types.ObjectId).toString();
 
+
       let productList = listItemDePedidos.map((item) => ({
         name: ((item.inventarioSucursalId as IInventarioSucursal).productoId as IProducto).nombre,
         quantity: item.cantidad,
@@ -128,9 +130,10 @@ export class TrasladoService {
           reorderPoint: (item.inventarioSucursalId as IInventarioSucursal).puntoReCompra,
         }));
 
-
-      notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
-      notifyReorderThreshold(username, branchName, productListReOrder, channel2);
+      // notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
+      // notifyReorderThreshold(username, branchName, productListReOrder, channel2);
+      notifyWhatsappManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch);
+      notifyWhatsappReorderThreshold(username, branchName, productListReOrder);
 
       return traslado;
     } catch (error) {

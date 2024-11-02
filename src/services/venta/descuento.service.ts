@@ -77,6 +77,10 @@ export class DescuentoService {
     return descuento;
   }
 
+  async getAllDescuentos(): Promise<IDescuento[]> {
+    return this.repository.findAll();
+  }
+
   async getDescuentoBySucursalId(sucursalId: string): Promise<IListDescuentoResponse> {
     return this.repository.findBySucursalId(sucursalId);
   }
