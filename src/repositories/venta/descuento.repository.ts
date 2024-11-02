@@ -60,16 +60,17 @@ export class DescuentoRepository {
     const queryGrupos = await this.modelDescuentoGrupo.find({ deleted_at: null }).populate("descuentoId", "groupId", "sucursalId");
 
     queryProductos.forEach((descuentoProducto) => {
-      if (!(descuentoProducto.descuentoId as IDescuento).activo ) {
-        // throw new Error("Descuento inactivo");  
-      }
+      let descuento = (descuentoProducto.descuentoId as IDescuento);
+      let fechaInicio = descuento.fechaInicio;
+      let fechaFin = descuento.fechaFin;
 
-      let fechaInicio = (descuentoProducto.descuentoId as IDescuento).fechaInicio;
-      let fechaFin = (descuentoProducto.descuentoId as IDescuento).fechaFin;
+      if (!descuento.activo) {
+        return;
+      }
 
       if (fechaInicio && fechaFin) {
         if (fechaInicio > hoy || fechaFin < hoy) {
-          // throw new Error("Descuento no activado");
+          return
         }
       }
       
@@ -83,17 +84,17 @@ export class DescuentoRepository {
     });
 
     queryGrupos.forEach((descuentoGrupo) => {
+      let descuento = (descuentoGrupo.descuentoId as IDescuento);
+      let fechaInicio = descuento.fechaInicio;
+      let fechaFin = descuento.fechaFin;
 
-      if (!(descuentoGrupo.descuentoId as IDescuento).activo ) {
-        // throw new Error("Descuento inactivo");  
+      if (!descuento.activo ) {
+        return;
       }
-
-      let fechaInicio = (descuentoGrupo.descuentoId as IDescuento).fechaInicio;
-      let fechaFin = (descuentoGrupo.descuentoId as IDescuento).fechaFin;
 
       if (fechaInicio && fechaFin) {
         if (fechaInicio > hoy || fechaFin < hoy) {
-          // throw new Error("Descuento no activado");
+          return;
         }
       }
       

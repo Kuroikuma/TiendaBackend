@@ -29,10 +29,20 @@ export class DescuentoService {
       const newDescuento = await this.repository.create(data, session);
 
       let tipoDescuentoEntidad = data.tipoDescuentoEntidad!;
-      let productId = new mongoose.Types.ObjectId(data.productId!);
-      let groupId = new mongoose.Types.ObjectId(data.groupId!);
+      let productId = data.productId ? new mongoose.Types.ObjectId(data.productId) : undefined;
+      let groupId = data.groupId ? new mongoose.Types.ObjectId(data.groupId) : undefined;
       let descuentoId = newDescuento._id as mongoose.Types.ObjectId;
       let sucursalId = data.sucursalId ? new mongoose.Types.ObjectId(data.sucursalId) : undefined;
+      let minimoCompra = data.minimoCompra ? data.minimoCompra : undefined;
+      let minimoCantidad = data.minimoCantidad ? data.minimoCantidad : undefined;
+
+      if (!minimoCompra && !minimoCantidad) {
+        throw new Error('Debe especificar minimoCompra o minimoCantidad');
+      }
+
+      if (!productId && !groupId) {
+        throw new Error('Debe especificar el producto o el grupo');
+      }
 
       if (tipoDescuentoEntidad === 'Product') {
         let descuentoProducto = {
@@ -65,7 +75,7 @@ export class DescuentoService {
       await session.abortTransaction();
       session.endSession();
 
-      throw new Error('Error al crear el descuento');
+      throw new Error(error.message);
     }
   }
 
