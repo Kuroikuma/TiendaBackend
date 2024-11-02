@@ -58,7 +58,7 @@ export class DescuentoService {
       } else if (tipoDescuentoEntidad === 'Group') {
         let descuentoGrupo = {
           descuentoId,
-          groupId,
+          grupoId: groupId,
           sucursalId,
         };
 

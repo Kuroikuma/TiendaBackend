@@ -16,7 +16,7 @@ export interface IDescuento extends Document {
   codigoDescunto: string
   deleted_at: Date | null;
 }
-
+// "sucursalId": "671ae0285c63b9b3b87a02c8"
 export interface IDescuentoCreate {
   nombre: string;
   tipoDescuento: 'porcentaje' | 'valor';

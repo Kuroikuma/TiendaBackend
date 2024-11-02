@@ -2,7 +2,7 @@ import { injectable } from 'tsyringe';
 import { Descuento, IDescuento, IDescuentoCreate, IListDescuentoResponse} from '../../models/Ventas/Descuento.model';
 import { DescuentoGrupo, IDescuentoGrupo } from '../../models/Ventas/DescuentoGrupo.model';
 import { DescuentosProductos, IDescuentosProductos } from '../../models/Ventas/DescuentosProductos.model';
-import mongoose from 'mongoose';
+import mongoose, { mongo } from 'mongoose';
 import { ISucursal } from 'src/models/sucursales/Sucursal.model';
 
 @injectable()
@@ -56,8 +56,8 @@ export class DescuentoRepository {
     let hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const queryProductos = await this.modelDescuentoProducto.find({ deleted_at: null }).populate(["descuentoId", "productId", "sucursalId"]);
-    const queryGrupos = await this.modelDescuentoGrupo.find({ deleted_at: null }).populate("descuentoId", "groupId", "sucursalId");
+    const queryProductos = await this.modelDescuentoProducto.find({ deleted_at: null }).populate(["descuentoId"]);
+    const queryGrupos = await this.modelDescuentoGrupo.find({ deleted_at: null }).populate("descuentoId");
 
     queryProductos.forEach((descuentoProducto) => {
       let descuento = (descuentoProducto.descuentoId as IDescuento);
@@ -69,13 +69,13 @@ export class DescuentoRepository {
       }
 
       if (fechaInicio && fechaFin) {
-        if (fechaInicio > hoy || fechaFin < hoy) {
+        if (fechaInicio < hoy && fechaFin > hoy) {
           return
         }
       }
       
       if (descuentoProducto.sucursalId) {
-        if ((descuentoProducto.sucursalId as ISucursal).id === sucursalId) {
+        if ((descuentoProducto.sucursalId as mongo.ObjectId).toString() === sucursalId) {
           descuentosPorProductosEnSucursal.push(descuentoProducto);
         }
       } else {
@@ -93,13 +93,13 @@ export class DescuentoRepository {
       }
 
       if (fechaInicio && fechaFin) {
-        if (fechaInicio > hoy || fechaFin < hoy) {
+        if (fechaInicio < hoy && fechaFin > hoy) {
           return;
         }
       }
       
       if (descuentoGrupo.sucursalId) {
-        if ((descuentoGrupo.sucursalId as ISucursal).id === sucursalId) {
+        if ((descuentoGrupo.sucursalId as mongo.ObjectId).toString() === sucursalId) {
           descuentosPorGruposEnSucursal.push(descuentoGrupo);
         }
       } else {
