@@ -23,8 +23,8 @@ export interface IDescuentoCreate {
   valorDescuento: number;
   fechaInicio: Date;
   fechaFin: Date;
-  minimoCompra: number;
-  minimoCantidad: number;
+  minimoCompra?: number;
+  minimoCantidad?: number;
   activo: boolean;
   moneda_id: mongoose.Types.ObjectId;
   codigoDescunto: string
