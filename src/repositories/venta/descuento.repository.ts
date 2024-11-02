@@ -1,8 +1,9 @@
 import { injectable } from 'tsyringe';
-import { Descuento, IDescuento, IDescuentoCreate} from '../../models/Ventas/Descuento.model';
+import { Descuento, IDescuento, IDescuentoCreate, IListDescuentoResponse} from '../../models/Ventas/Descuento.model';
 import { DescuentoGrupo, IDescuentoGrupo } from '../../models/Ventas/DescuentoGrupo.model';
 import { DescuentosProductos, IDescuentosProductos } from '../../models/Ventas/DescuentosProductos.model';
 import mongoose from 'mongoose';
+import { ISucursal } from 'src/models/sucursales/Sucursal.model';
 
 @injectable()
 export class DescuentoRepository {
@@ -40,14 +41,73 @@ export class DescuentoRepository {
     return descuento;
   }
 
-  async findAll(
-    filters: any = {},
-    limit: number = 10,
-    skip: number = 0
-  ): Promise<IDescuento[]> {
-    const query = this.model.find({ ...filters, deleted_at: null });
+  async findBySucursalId(sucursalId: string): Promise<IListDescuentoResponse> {
+    const descuentosPorProductosGenerales: IDescuentosProductos[] = [];
+    const descuentosPorProductosEnSucursal: IDescuentosProductos[] = [];
+    const descuentosPorGruposGenerales: IDescuentoGrupo[] = [];
+    const descuentosPorGruposEnSucursal: IDescuentoGrupo[] = [];
 
-    return await query.limit(limit).skip(skip).exec();
+    let hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const queryProductos = await this.modelDescuentoProducto.find({ deleted_at: null }).populate(["descuentoId", "productoId", "sucursalId"]);
+    const queryGrupos = await this.modelDescuentoGrupo.find({ deleted_at: null }).populate("descuentoId", "groupId", "sucursalId");
+
+    queryProductos.forEach((descuentoProducto) => {
+      if (!(descuentoProducto.descuentoId as IDescuento).activo ) {
+        throw new Error("Descuento inactivo");  
+      }
+
+      let fechaInicio = (descuentoProducto.descuentoId as IDescuento).fechaInicio;
+      let fechaFin = (descuentoProducto.descuentoId as IDescuento).fechaFin;
+
+      if (fechaInicio && fechaFin) {
+        if (fechaInicio > hoy || fechaFin < hoy) {
+          throw new Error("Descuento no activado");
+        }
+      }
+      
+      if (descuentoProducto.sucursalId) {
+        if ((descuentoProducto.sucursalId as ISucursal).id === sucursalId) {
+          descuentosPorProductosEnSucursal.push(descuentoProducto);
+        }
+      } else {
+        descuentosPorProductosGenerales.push(descuentoProducto);
+      }
+    });
+
+    queryGrupos.forEach((descuentoGrupo) => {
+
+      if (!(descuentoGrupo.descuentoId as IDescuento).activo ) {
+        throw new Error("Descuento inactivo");  
+      }
+
+      let fechaInicio = (descuentoGrupo.descuentoId as IDescuento).fechaInicio;
+      let fechaFin = (descuentoGrupo.descuentoId as IDescuento).fechaFin;
+
+      if (fechaInicio && fechaFin) {
+        if (fechaInicio > hoy || fechaFin < hoy) {
+          throw new Error("Descuento no activado");
+        }
+      }
+      
+      if (descuentoGrupo.sucursalId) {
+        if ((descuentoGrupo.sucursalId as ISucursal).id === sucursalId) {
+          descuentosPorGruposEnSucursal.push(descuentoGrupo);
+        }
+      } else {
+        descuentosPorGruposGenerales.push(descuentoGrupo);
+      }
+    });
+
+    const listDescuentos = {
+      descuentosPorProductosGenerales,
+      descuentosPorProductosEnSucursal,
+      descuentosPorGruposGenerales,
+      descuentosPorGruposEnSucursal,
+    };
+
+    return listDescuentos;
   }
 
   async findByName(

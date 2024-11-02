@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IMoneda } from '../moneda/Moneda.model';
+import { IDescuentosProductos } from './DescuentosProductos.model';
+import { IDescuentoGrupo } from './DescuentoGrupo.model';
 
 export interface IDescuento extends Document {
   nombre: string;
@@ -31,6 +33,13 @@ export interface IDescuentoCreate {
   productId?: mongoose.Types.ObjectId,
   groupId?: mongoose.Types.ObjectId,
   sucursalId?: mongoose.Types.ObjectId,
+}
+
+export interface IListDescuentoResponse {
+  descuentosPorProductosGenerales: IDescuentosProductos[];
+  descuentosPorProductosEnSucursal: IDescuentosProductos[];
+  descuentosPorGruposGenerales: IDescuentoGrupo[];
+  descuentosPorGruposEnSucursal: IDescuentoGrupo[];
 }
 
 const descuentoSchema: Schema = new Schema(
