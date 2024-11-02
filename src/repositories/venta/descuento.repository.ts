@@ -18,7 +18,7 @@ export class DescuentoRepository {
   }
 
   async create(data: Partial<IDescuentoCreate>, session: mongoose.mongo.ClientSession): Promise<IDescuento> {
-    const descuento = new this.model(data);
+    const descuento = new this.model({...data, activo: true});
     return await descuento.save({ session });
   }
 
@@ -88,7 +88,7 @@ export class DescuentoRepository {
       let fechaInicio = descuento.fechaInicio;
       let fechaFin = descuento.fechaFin;
 
-      if (!descuento.activo ) {
+      if (!descuento.activo) {
         return;
       }
 
