@@ -275,7 +275,8 @@ export class InventoryManagementService implements IManageHerramientaModel {
     bodegaId: string,
     listFiles: string[],
     isNoSave = false,
-    session: mongoose.mongo.ClientSession
+    session: mongoose.mongo.ClientSession,
+    usuarioIdRecibe: string
   ): Promise<IResponseToAddCantidad> {
     // Inicialización del response
     const response: IResponseToAddCantidad = {
@@ -374,10 +375,10 @@ export class InventoryManagementService implements IManageHerramientaModel {
           inventarioSucursalId: inventarioSucursalRecibe._id,
           cantidadCambiada: model.cantidad,
           cantidadInicial: inventarioSucursalRecibe.stock,
-          cantidadFinal: inventarioSucursalRecibe.stock - model.cantidad,
+          cantidadFinal: inventarioSucursalRecibe.stock + model.cantidad,
           tipoMovimiento: 'transferencia',
           fechaMovimiento: new Date(),
-          usuarioId: this.usuarioEnviaId,
+          usuarioId: usuarioIdRecibe,
         });
     
         await movimientoInventario.save();

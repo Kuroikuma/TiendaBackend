@@ -197,7 +197,8 @@ export class TrasladoService {
           (pedido.sucursalDestinoId._id as mongoose.Types.ObjectId).toString(),
           element.archivosAdjuntosRecibido as string[],
           true,
-          session
+          session,
+          model.usuarioIdRecibe!
         );
 
         var item2 = listItemDePedidos.find(
