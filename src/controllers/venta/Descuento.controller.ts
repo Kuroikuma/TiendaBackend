@@ -28,6 +28,15 @@ export class DescuentoController {
     }
   }
 
+  async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const descuentos = await this.service.getAllDescuentos();
+      res.status(200).json(descuentos);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getBySucursalId(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params.id;
