@@ -20,54 +20,62 @@ export const notifyWhatsappManagerOfIncomingProducts = async (
   orderId: string,
   originBranch: string,
 ) => {
+  const productDetails = productList
+    .map((product, index) => `*${index + 1}.* ${product.name} - *Cantidad:* ${product.quantity}`)
+    .join('\n'); 
 
   const currentDate = new Date().toLocaleString();
   const totalQuantity = productList.reduce((total, product) => total + product.quantity, 0);
-  const totalProduct = productList.length
+  const totalProduct = productList.length;
 
-  const templateParams = [
-    username, // {{1}} - ID o nombre del usuario
-    branchName, // {{2}} - Nombre de la sucursal
-    currentDate, // {{3}} - Fecha del envío
-    orderId, // {{4}} - ID del pedido
-    originBranch, // {{5}} - Sucursal de origen
-    productList, // {{6}} - Detalles del pedido
-    totalProduct, // {{7}} - Total de artículos
-    totalQuantity, // {{8}} - Cantidad total de productos
-  ];
+  // Crear un objeto con las variables de contenido
+  const contentVariables = {
+    '1': username,              // {{1}} - ID o nombre del usuario
+    '2': branchName,            // {{2}} - Nombre de la sucursal
+    '3': currentDate,           // {{3}} - Fecha del envío
+    '4': orderId,               // {{4}} - ID del pedido
+    '5': originBranch,          // {{5}} - Sucursal de origen
+    '6': productDetails,        // {{6}} - Detalles del pedido en formato lista
+    '7': totalProduct.toString(), // {{7}} - Total de artículos (convertido a string)
+    '8': totalQuantity.toString(), // {{8}} - Cantidad total de productos (convertido a string)
+  };
 
   client.messages
     .create({
-          from: 'whatsapp:+14155238886',
-          contentSid: 'HX2132887ac453819cef448bd31d4b1bf3',
-          // contentVariables: '{"1":"Junior Hurtado","2":"Audifonos","3":"Juigalpa", "4":"10", "5":"20"}',
-          templateParams: templateParams,
-          to: 'whatsapp:+50558851605',
-        })
+      from: 'whatsapp:+14155238886',
+      contentSid: 'HX6951120bd3833aff5b75c99790f67bba',
+      contentVariables: JSON.stringify(contentVariables), // Convierte a cadena JSON
+      to: 'whatsapp:+50558851605',
+    })
     .then((message) => console.log(`Mensaje enviado con SID: ${message.sid}`))
     .catch((error) => console.error(`Error al enviar el mensaje: ${error}`));
 };
+
 
 export const notifyWhatsappReorderThreshold = async (
   username: string,
   branchName: string,
   productList: ProductReorder[],
 ) => {
+  const productDetails = productList.map((product) => {
+    return `• *${product.name}*: Cantidad actual: ${product.currentQuantity}, Punto de reorden: ${product.reorderPoint}`;
+  }).join("\n");
 
-  const templateParams = [
-    branchName, // {{1}} - ID o nombre del usuario
-    username, // {{2}} - Nombre de la sucursal
-    productList, // {{3}} - Fecha del envío
-  ];
+  // Crear un objeto con las variables de contenido
+  const contentVariables = {
+    '1': branchName,         // {{1}} - Nombre de la sucursal
+    '2': username,           // {{2}} - ID o nombre del usuario
+    '3': productDetails,     // {{3}} - Detalles del pedido
+  };
 
   client.messages
     .create({
-          from: 'whatsapp:+14155238886',
-          contentSid: 'HX9ef6ee663e504074313eaacce2056b1b',
-          // contentVariables: '{"1":"Junior Hurtado","2":"Audifonos","3":"Juigalpa", "4":"10", "5":"20"}',
-          templateParams: templateParams,
-          to: 'whatsapp:+50558851605',
-        })
+      from: 'whatsapp:+14155238886',
+      contentSid: 'HX9ef6ee663e504074313eaacce2056b1b',
+      contentVariables: JSON.stringify(contentVariables), // Asegúrate de enviar las variables en formato JSON
+      to: 'whatsapp:+50558851605',
+    })
     .then((message) => console.log(`Mensaje enviado con SID: ${message.sid}`))
     .catch((error) => console.error(`Error al enviar el mensaje: ${error}`));
 };
+
