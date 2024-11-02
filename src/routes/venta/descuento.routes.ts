@@ -16,7 +16,7 @@ router.post(
   descuentoController.create.bind(descuentoController)
 );
 router.get(
-  '/:id/sucursal',
+  '/:id/branch',
   authMiddleware,
   descuentoController.getBySucursalId.bind(descuentoController)
 );
