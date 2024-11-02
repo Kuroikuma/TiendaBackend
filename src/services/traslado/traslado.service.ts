@@ -130,8 +130,8 @@ export class TrasladoService {
           reorderPoint: (item.inventarioSucursalId as IInventarioSucursal).puntoReCompra,
         }));
 
-      notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
-      notifyReorderThreshold(username, branchName, productListReOrder, channel2);
+      // notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
+      // notifyReorderThreshold(username, branchName, productListReOrder, channel2);
       notifyWhatsappManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch);
       notifyWhatsappReorderThreshold(username, branchName, productListReOrder);
 
