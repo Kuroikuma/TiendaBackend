@@ -48,6 +48,7 @@ export interface IDetalleTrasladoRecepcion
   inventarioSucursalId: mongoose.Types.ObjectId;
   cantidad: number;
   precio:mongoose.Types.Decimal128;
+  puntoReCompra:number;
   comentarioRecibido:string;
   recibido: boolean;
   estadoEquipo: string;
