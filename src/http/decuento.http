@@ -18,3 +18,8 @@ Content-Type: application/json
   "tipoDescuentoEntidad": "Product",
   "productId": "6720fc058ac1b4ce2ef353f6"
 }
+
+###
+
+GET {{api}}/67133f450dcdd2f9ee534c5c/branch
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwNTgwMTEzLCJleHAiOjE3MzA2NjY1MTN9.RhbS1wMmOoTHNkPwrB38OE0ePldPahrgWEBHK1U1_o8
