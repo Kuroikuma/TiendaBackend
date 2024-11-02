@@ -41,6 +41,12 @@ export class DescuentoRepository {
     return descuento;
   }
 
+  async findAll(): Promise<IDescuento[]> {
+    const descuentos = await this.model.find({ deleted_at: null });
+
+    return descuentos;
+  }
+
   async findBySucursalId(sucursalId: string): Promise<IListDescuentoResponse> {
     const descuentosPorProductosGenerales: IDescuentosProductos[] = [];
     const descuentosPorProductosEnSucursal: IDescuentosProductos[] = [];

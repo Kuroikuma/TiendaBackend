@@ -15,6 +15,7 @@ router.post(
   authMiddleware,
   descuentoController.create.bind(descuentoController)
 );
+router.get('/', authMiddleware, descuentoController.getAll.bind(descuentoController));
 router.get(
   '/:id/branch',
   authMiddleware,
