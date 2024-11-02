@@ -30,12 +30,8 @@ export class DescuentoController {
 
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { limit = 10, skip = 0, ...filters } = req.query;
-      const descuento = await this.service.getAllDescuento(
-        filters,
-        Number(limit),
-        Number(skip)
-      );
+      const id = req.params.id;
+      const descuento = await this.service.getAllDescuento(id);
       res.status(200).json(descuento);
     } catch (error) {
       next(error);

@@ -2,6 +2,7 @@ import { injectable, inject } from 'tsyringe';
 import {
   IDescuento,
   IDescuentoCreate,
+  IListDescuentoResponse,
 } from '../../models/Ventas/Descuento.model';
 import { DescuentoRepository } from '../../repositories/venta/descuento.repository';
 import mongoose from 'mongoose';
@@ -76,12 +77,8 @@ export class DescuentoService {
     return descuento;
   }
 
-  async getAllDescuento(
-    filters: any,
-    limit: number,
-    skip: number
-  ): Promise<IDescuento[]> {
-    return this.repository.findAll(filters, limit, skip);
+  async getAllDescuento(sucursalId: string): Promise<IListDescuentoResponse> {
+    return this.repository.findAll(sucursalId);
   }
 
   async updateDescuento(
