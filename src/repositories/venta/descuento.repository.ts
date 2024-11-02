@@ -41,7 +41,7 @@ export class DescuentoRepository {
     return descuento;
   }
 
-  async findAll(sucursalId: string): Promise<IListDescuentoResponse> {
+  async findBySucursalId(sucursalId: string): Promise<IListDescuentoResponse> {
     const descuentosPorProductosGenerales: IDescuentosProductos[] = [];
     const descuentosPorProductosEnSucursal: IDescuentosProductos[] = [];
     const descuentosPorGruposGenerales: IDescuentoGrupo[] = [];

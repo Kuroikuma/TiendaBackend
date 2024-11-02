@@ -77,8 +77,8 @@ export class DescuentoService {
     return descuento;
   }
 
-  async getAllDescuento(sucursalId: string): Promise<IListDescuentoResponse> {
-    return this.repository.findAll(sucursalId);
+  async getDescuentoBySucursalId(sucursalId: string): Promise<IListDescuentoResponse> {
+    return this.repository.findBySucursalId(sucursalId);
   }
 
   async updateDescuento(

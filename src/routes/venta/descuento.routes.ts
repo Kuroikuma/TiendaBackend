@@ -16,14 +16,14 @@ router.post(
   descuentoController.create.bind(descuentoController)
 );
 router.get(
+  '/:id/sucursal',
+  authMiddleware,
+  descuentoController.getBySucursalId.bind(descuentoController)
+);
+router.get(
   '/:id',
   authMiddleware,
   descuentoController.getById.bind(descuentoController)
-);
-router.get(
-  '/',
-  authMiddleware,
-  descuentoController.getAll.bind(descuentoController)
 );
 router.put(
   '/:id',
