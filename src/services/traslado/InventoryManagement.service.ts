@@ -396,6 +396,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
           ultimo_movimiento: new Date(),
           deleted_at: null,
           precio: model.precio,
+          puntoReCompra: model.puntoReCompra,
         });
 
         response.listInventarioSucursalAgregados.push(inventarioSucursalRecibe);
