@@ -112,7 +112,7 @@ export class ProductoRepository {
       await session.abortTransaction();
       session.endSession();
 
-      throw new Error('Error al crear producto');
+      throw new Error(error.message);
     }
   }
 
