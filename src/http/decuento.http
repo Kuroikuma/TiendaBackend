@@ -18,3 +18,8 @@ Content-Type: application/json
   "tipoDescuentoEntidad": "Product",
   "productId": "6720fc058ac1b4ce2ef353f6"
 }
+
+###
+
+GET {{api}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmYTNkOGFjMWI0Y2UyZWYzNTNkYyIsInVzZXJuYW1lIjoiR3V0aGVyIER1YXJ0ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDQ4MTY4MiwiZXhwIjoxNzMwNTY4MDgyfQ.r6-6qmD8nY0a9fNxwGj76J2fjgbpXdqxKAd_ob1W_WQ

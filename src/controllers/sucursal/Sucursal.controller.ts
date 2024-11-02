@@ -30,7 +30,7 @@ export class SucursalController {
 
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { limit = 10, skip = 0, ...filters } = req.query;
+      const { limit = 50, skip = 0, ...filters } = req.query;
       const branch = await this.service.getAllBranch(
         filters,
         Number(limit),
@@ -42,7 +42,11 @@ export class SucursalController {
     }
   }
 
-  async findBranchProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async findBranchProducts(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const branch = await this.service.findBranchProducts(req.params.id);
       res.status(200).json(branch);
@@ -82,10 +86,15 @@ export class SucursalController {
     }
   }
 
-  async searchForStockProductsAtBranch(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async searchForStockProductsAtBranch(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      
-      const product = await this.service.searchForStockProductsAtBranch(req.params.id);
+      const product = await this.service.searchForStockProductsAtBranch(
+        req.params.id
+      );
       res.status(201).json(product);
     } catch (error) {
       next(error);
