@@ -111,7 +111,7 @@ export class TrasladoService {
       await session.commitTransaction();
       session.endSession();
 
-      let username = (usuario as IUser).username;
+      let username = "Arleys Gatica";
       let channel = "#pedidos";
       let channel2 = "#alertas-reorden";
       let branchName = (traslado.sucursalDestinoId as ISucursal).nombre;
