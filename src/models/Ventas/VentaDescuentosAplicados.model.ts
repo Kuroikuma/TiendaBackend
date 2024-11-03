@@ -1,39 +1,41 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose;
+import mongoose, { Schema, Document } from "mongoose";
 
-export interface IVentaDescuentosAplicados {
+export type ITipoAplicacion = 'PRODUCTO' | 'GRUPO';
+export type ITipoDescuento = 'PORCENTAJE' | 'FIJO';
+
+export interface IVentaDescuentosAplicados extends Document {
   ventaId: mongoose.Types.ObjectId;
-  descuentoProductoId: mongoose.Types.ObjectId;
-  descuentoCategoriaId: mongoose.Types.ObjectId;
-  tipoAplicacion: string;
+  descuentosProductosId?: mongoose.Types.ObjectId | null;
+  descuentoGrupoId?: mongoose.Types.ObjectId | null;
+  tipoAplicacion: ITipoAplicacion;
   valor: mongoose.Types.Decimal128;
-  tipo: string;
+  tipo: ITipoDescuento;
   monto: mongoose.Types.Decimal128;
 }
 
-const ventaDescuentosAplicadosSchema = new Schema({
+const ventaDescuentosAplicadosSchema = new Schema<IVentaDescuentosAplicados>({
   ventaId: {
     type: Schema.Types.ObjectId,
-    ref: 'ventas', // Nombre de la colección de ventas
+    ref: 'Venta',
     required: true
   },
-  descuentoProductoId: {
+  descuentosProductosId: {
     type: Schema.Types.ObjectId,
-    ref: 'descuentoProducto', // Nombre de la colección de descuentos a nivel de producto
+    ref: 'DescuentosProductos',
     default: null
   },
-  descuentoCategoriaId: {
+  descuentoGrupoId: {
     type: Schema.Types.ObjectId,
-    ref: 'descuentoCategoria', // Nombre de la colección de descuentos a nivel de categoría
+    ref: 'DescuentoGrupo',
     default: null
   },
   tipoAplicacion: {
     type: String,
-    enum: ['PRODUCTO', 'CATEGORIA'],
+    enum: ['PRODUCTO', 'GRUPO'],
     required: true
   },
   valor: {
-    type: mongoose.Types.Decimal128, // Para soportar decimales
+    type: mongoose.Types.Decimal128,
     required: true
   },
   tipo: {
@@ -42,11 +44,14 @@ const ventaDescuentosAplicadosSchema = new Schema({
     required: true
   },
   monto: {
-    type: mongoose.Types.Decimal128, // Para el monto calculado del descuento
+    type: mongoose.Types.Decimal128,
     required: true
   }
 }, {
-  timestamps: { createdAt: 'created_at', updatedAt: 'update_at' },
+  timestamps: { createdAt: 'created_at', updatedAt: 'updatedAt' } // Corregido a `updatedAt`
 });
 
-module.exports = mongoose.model('ventaDescuentosAplicados', ventaDescuentosAplicadosSchema);
+export const VentaDescuentosAplicados = mongoose.model<IVentaDescuentosAplicados>(
+  'VentaDescuentosAplicados',
+  ventaDescuentosAplicadosSchema
+);

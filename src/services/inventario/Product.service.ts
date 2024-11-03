@@ -15,7 +15,7 @@ import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.
 import { ITraslado } from '../../models/traslados/Traslado.model';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { IProductosGrupos } from '../../models/inventario/ProductosGrupo.model';
-import { CustomJwtPayload } from 'src/utils/jwt';
+import { CustomJwtPayload } from '../../utils/jwt';
 
 @injectable()
 export class ProductoService {
@@ -151,7 +151,11 @@ export class ProductoService {
     return this.repository.findProductoGrupoByProductId(productId);
   }
 
-  async restoreAll(): Promise<{ modifiedCount: number }> {
-    return this.repository.restoreAll();
+  async restoreAll(): Promise<void> {
+    return this.repository.removeDuplicateInventario();
+  }
+
+  async findRepeatedProductsInInventario(): Promise<any[]> {
+    return this.repository.findRepeatedProductsInInventario();
   }
 }

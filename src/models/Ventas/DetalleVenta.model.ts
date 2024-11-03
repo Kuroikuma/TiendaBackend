@@ -9,6 +9,7 @@ export interface IDetalleVenta extends Document {
   cantidad: number;
   subtotal: mongoose.Types.Decimal128;
   total: mongoose.Types.Decimal128;
+  tipoCliente: 'Regular' | 'Proveedor';
   descuento: mongoose.Types.Decimal128;
   deleted_at: Date | null;
 }
@@ -19,6 +20,11 @@ const detalleVentaSchema: Schema = new Schema(
     productoId: {
       type: Schema.Types.ObjectId,
       ref: 'Producto',
+      required: true,
+    },
+    tipoCliente: {
+      type: String,
+      enum: ['Regular', 'Proveedor'],
       required: true,
     },
     precio: { type: Schema.Types.Decimal128, required: true },

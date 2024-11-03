@@ -3,7 +3,6 @@ import { Descuento, IDescuento, IDescuentoCreate, IListDescuentoResponse} from '
 import { DescuentoGrupo, IDescuentoGrupo } from '../../models/Ventas/DescuentoGrupo.model';
 import { DescuentosProductos, IDescuentosProductos } from '../../models/Ventas/DescuentosProductos.model';
 import mongoose, { mongo } from 'mongoose';
-import { ISucursal } from 'src/models/sucursales/Sucursal.model';
 
 @injectable()
 export class DescuentoRepository {
