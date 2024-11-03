@@ -24,6 +24,7 @@ import { IProducto } from '../../models/inventario/Producto.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
 import { IUser } from '../../models/usuarios/User.model';
 import { notifyWhatsappManagerOfIncomingProducts, notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
+import { CustomJwtPayload } from '../../utils/jwt';
 
 @injectable()
 export class TrasladoService {
@@ -35,7 +36,8 @@ export class TrasladoService {
   ) {}
 
   async postCreateEnvioProducto(
-    model: Partial<ITrasladoEnvio>
+    model: Partial<ITrasladoEnvio>,
+    user: CustomJwtPayload
   ): Promise<ITraslado> {
     let listDetalleTraslado: IDetalleTrasladoEnvio[] =
       model.listDetalleTraslado!;
@@ -132,7 +134,7 @@ export class TrasladoService {
 
       // notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
       // notifyReorderThreshold(username, branchName, productListReOrder, channel2);
-      notifyWhatsappManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch);
+      notifyWhatsappManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, user.username);
       listItemDePedidos.length > 0 && notifyWhatsappReorderThreshold(username, branchName, productListReOrder)
 
       return traslado;

@@ -1,6 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
 import { TrasladoService } from '../../services/traslado/traslado.service';
+import { CustomJwtPayload } from '../../utils/jwt';
 
 @injectable()
 export class TrasladoController {
@@ -12,7 +13,7 @@ export class TrasladoController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const traslado = await this.service.postCreateEnvioProducto(req.body);
+      const traslado = await this.service.postCreateEnvioProducto(req.body, req.user as CustomJwtPayload);
       res.status(201).json(traslado);
     } catch (error) {
       next(error);
