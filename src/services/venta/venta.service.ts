@@ -9,9 +9,9 @@ import { InventarioSucursalRepository } from '../../repositories/inventary/inven
 import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
-import { IUser } from 'src/models/usuarios/User.model';
-import { CustomJwtPayload } from 'src/utils/jwt';
-import { ISucursal } from 'src/models/sucursales/Sucursal.model';
+import { IUser } from '../../models/usuarios/User.model';
+import { CustomJwtPayload } from '../../utils/jwt';
+import { ISucursal } from '../../models/sucursales/Sucursal.model';
 
 @injectable()
 export class VentaService {
