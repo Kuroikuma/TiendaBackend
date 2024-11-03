@@ -6,6 +6,7 @@ import {
   IGrupoInventario,
   IGrupoInventarioWithPopulate,
 } from '../../models/inventario/GrupoInventario.model';
+import mongoose from 'mongoose';
 
 @injectable()
 export class GrupoInventarioRepository {
@@ -33,14 +34,20 @@ export class GrupoInventarioRepository {
 
     return grupo;
   }
-  async findByIdWithProduct(id: string): Promise<IGrupoInventario | null> {
+  async findByIdWithProduct(id: string): Promise<IGrupoInventarioWithPopulate | null> {
     const grupo = await this.model.findById(id);
 
     if (!grupo) {
       return null;
     }
 
-    let newGrupo: IGrupoInventarioWithPopulate = grupo;
+    let newGrupo: IGrupoInventarioWithPopulate = {
+      nombre: grupo.nombre,
+      descripcion: grupo.descripcion,
+      _id: (grupo._id as mongoose.Types.ObjectId),
+      deleted_at: grupo.deleted_at,
+      products: [],
+    };
 
     let productGroup = await this.modelProductoGrupo
       .find({ grupoId: id, deleted_at: null })
@@ -49,12 +56,12 @@ export class GrupoInventarioRepository {
     if (productGroup.length > 0) {
       productGroup.forEach((product) => {
         if ((product.productoId as IProducto).deleted_at == null) {
-          newGrupo.products?.push(product.productoId as IProducto);
+          newGrupo.products.push(product.productoId as IProducto);
         }
       });
     }
 
-    return grupo;
+    return newGrupo;
   }
 
   async findAll(

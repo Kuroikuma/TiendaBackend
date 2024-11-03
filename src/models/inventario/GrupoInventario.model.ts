@@ -8,8 +8,12 @@ export interface IGrupoInventario extends Document {
   deleted_at: Date | null;
 }
 
-export interface IGrupoInventarioWithPopulate extends IGrupoInventario {
-  products?: IProducto[];
+export interface IGrupoInventarioWithPopulate {
+  nombre: string;
+  descripcion: string;
+  _id: mongoose.Types.ObjectId;
+  deleted_at: Date | null;
+  products: IProducto[];
 }
 
 const grupoInventarioSchema: Schema = new Schema(
