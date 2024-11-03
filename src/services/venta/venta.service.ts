@@ -6,7 +6,7 @@ import { ITipoAplicacion, ITipoDescuento, IVentaDescuentosAplicados } from '../.
 import { IDetalleVenta } from '../../models/Ventas/DetalleVenta.model';
 import { IProducto } from '../../models/inventario/Producto.model';
 import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
-import { MovimientoInventario } from 'src/models/inventario/MovimientoInventario.model';
+import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
 
 @injectable()
 export class VentaService {
