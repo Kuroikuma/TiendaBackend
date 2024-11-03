@@ -1,5 +1,5 @@
 import { injectable, inject } from 'tsyringe';
-import { IGrupoInventario } from '../../models/inventario/GrupoInventario.model';
+import { IGrupoInventario, IGrupoInventarioWithPopulate } from '../../models/inventario/GrupoInventario.model';
 import { GrupoInventarioRepository } from '../../repositories/inventary/GrupoInventario.repository';
 
 @injectable()
@@ -59,7 +59,7 @@ export class GrupoInventarioService {
     return this.repository.restore(id);
   }
 
-  async findByIdWithProduct(id: string): Promise<IGrupoInventario | null> {
+  async findByIdWithProduct(id: string): Promise<IGrupoInventarioWithPopulate | null> {
     return await this.repository.findByIdWithProduct(id);
   }
 }
