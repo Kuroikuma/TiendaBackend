@@ -73,7 +73,7 @@ export const notifyWhatsappReorderThreshold = async (
       from: 'whatsapp:+14155238886',
       contentSid: 'HX9ef6ee663e504074313eaacce2056b1b',
       contentVariables: JSON.stringify(contentVariables), // Asegúrate de enviar las variables en formato JSON
-      to: 'whatsapp:+50558851605',
+      to: 'whatsapp:+50586349918',
     })
     .then((message) => console.log(`Mensaje enviado con SID: ${message.sid}`))
     .catch((error) => console.error(`Error al enviar el mensaje: ${error}`));
