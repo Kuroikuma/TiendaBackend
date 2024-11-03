@@ -1,7 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 import { VentaRepository } from '../../repositories/venta/venta.repository';
 import mongoose, { Types } from 'mongoose';
-import { IVenta, IVentaCreate, IVentaProducto } from '../../models/Ventas/Venta.model';
+import { IVenta, IVentaCreate, IVentaDescuento, IVentaProducto } from '../../models/Ventas/Venta.model';
 import { ITipoAplicacion, ITipoDescuento, IVentaDescuentosAplicados } from '../../models/Ventas/VentaDescuentosAplicados.model';
 import { IDetalleVenta } from '../../models/Ventas/DetalleVenta.model';
 import { IProducto } from '../../models/inventario/Producto.model';
@@ -9,6 +9,7 @@ import { InventarioSucursalRepository } from '../../repositories/inventary/inven
 import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
+import { IUser } from 'src/models/usuarios/User.model';
 
 @injectable()
 export class VentaService {
@@ -59,7 +60,7 @@ export class VentaService {
           tipoCliente: element.clientType,
         }
 
-        await this.repository.createDetalleVenta(detalleVenta, session);
+        let newdDetalleVenta = await this.repository.createDetalleVenta(detalleVenta, session);
 
         let tipoAplicacion:ITipoAplicacion = element.discount?.type === "grupo" ? 'GRUPO' : 'PRODUCTO';
         let tipo:ITipoDescuento = "PORCENTAJE";
@@ -68,7 +69,7 @@ export class VentaService {
         let descuentoGrupoId = element.groupId ? new mongoose.Types.ObjectId(element.groupId) : undefined;
 
         let ventaDescuentosAplicados = {
-          ventaId: (newSale._id as mongoose.Types.ObjectId),
+          detalleVentaId: (newdDetalleVenta._id as mongoose.Types.ObjectId),
           descuentosProductosId: descuentosProductosId,
           descuentoGrupoId: descuentoGrupoId,
           tipoAplicacion: tipoAplicacion,
@@ -134,7 +135,7 @@ export class VentaService {
     // Iterar sobre cada venta y obtener los detalles de venta
     for (const venta of ventas) {
       const detalleVenta = await this.repository.findAllDetalleVentaByVentaId((venta._id as Types.ObjectId).toString());
-      const ventaDto = this.mapperData(venta, detalleVenta);
+      const ventaDto = (await this.mapperData(venta, detalleVenta) as IVentaCreate);
       ventasDto.push(ventaDto);
     }
   
@@ -148,7 +149,7 @@ export class VentaService {
     // Iterar sobre cada venta y obtener los detalles de venta
     for (const venta of ventas) {
       const detalleVenta = await this.repository.findAllDetalleVentaByVentaId((venta._id as Types.ObjectId).toString());
-      const ventaDto = this.mapperData(venta, detalleVenta);
+      const ventaDto = (await this.mapperData(venta, detalleVenta) as IVentaCreate);
       ventasDto.push(ventaDto);
     }
   
@@ -164,32 +165,41 @@ export class VentaService {
 
     let detalleVenta = await this.repository.findAllDetalleVentaByVentaId(id);
 
-    let ventaDto = this.mapperData(venta, detalleVenta);
+    let ventaDto:IVentaCreate = (await this.mapperData(venta, detalleVenta) as IVentaCreate);
 
     return ventaDto;
   }
 
-  mapperData(venta: IVenta, detalleVenta: IDetalleVenta[]): IVentaCreate {
+ async mapperData(venta: IVenta, detalleVenta: IDetalleVenta[]): Promise<IVentaCreate | null> {
     let products: IVentaProducto[] = [];
 
-    detalleVenta.forEach((detalle) => {
+    for await (const detalle of detalleVenta) {
+      let descuentoAplicado = await this.repository.findVentaDescuentosAplicadosByDetalleVentaId((detalle._id as mongoose.Types.ObjectId).toString());
+
+      let descuento:IVentaDescuento = {
+        id: "",
+        name: "",
+        amount: Number(descuentoAplicado.valor),
+        percentage: 100,
+        type: "producto",
+      }
+
       let producto = {
         productId: ((detalle.productoId as IProducto)._id as mongoose.Types.ObjectId).toString(),
-        // groupId: (detalle.descuentoGrupoId as mongoose.Types.ObjectId).toString(),
         clientType: detalle.tipoCliente,
         productName: (detalle.productoId as IProducto).nombre,
         quantity: detalle.cantidad,
         price: Number(detalle.precio),
         ventaId: (venta._id as mongoose.Types.ObjectId).toString(),
         groupId: "",
-        discount: null
+        discount: descuento
       }
-
+   
       products.push(producto);
-    });
+    }
 
     let ventaDto: IVentaCreate = {
-      userId: venta.usuarioId.toString(),
+      userId: (venta.usuarioId as IUser).username,
       sucursalId: venta.sucursalId.toString(),
       subtotal: Number(venta.subtotal),
       total: Number(venta.total),
@@ -203,9 +213,5 @@ export class VentaService {
 
   async getAllDetalleVentaByVentaId(ventaId: string): Promise<IDetalleVenta[]> {
     return this.repository.findAllDetalleVentaByVentaId(ventaId);
-  }
-
-  async getAllVentaDescuentosAplicadosByVentaId(ventaId: string): Promise<IVentaDescuentosAplicados[]> {
-    return this.repository.findAllVentaDescuentosAplicadosByVentaId(ventaId);
   }
 }

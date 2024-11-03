@@ -1,12 +1,14 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { IDescuentosProductos } from "./DescuentosProductos.model";
+import { IDescuentoGrupo } from "./DescuentoGrupo.model";
 
 export type ITipoAplicacion = 'PRODUCTO' | 'GRUPO';
 export type ITipoDescuento = 'PORCENTAJE' | 'FIJO';
 
 export interface IVentaDescuentosAplicados extends Document {
-  ventaId: mongoose.Types.ObjectId;
-  descuentosProductosId?: mongoose.Types.ObjectId | null;
-  descuentoGrupoId?: mongoose.Types.ObjectId | null;
+  detalleVentaId: mongoose.Types.ObjectId;
+  descuentosProductosId?: mongoose.Types.ObjectId | IDescuentosProductos;
+  descuentoGrupoId?: mongoose.Types.ObjectId | IDescuentoGrupo;
   tipoAplicacion: ITipoAplicacion;
   valor: mongoose.Types.Decimal128;
   tipo: ITipoDescuento;
@@ -14,9 +16,9 @@ export interface IVentaDescuentosAplicados extends Document {
 }
 
 const ventaDescuentosAplicadosSchema = new Schema<IVentaDescuentosAplicados>({
-  ventaId: {
+  detalleVentaId: {
     type: Schema.Types.ObjectId,
-    ref: 'Venta',
+    ref: 'DetalleVenta',
     required: true
   },
   descuentosProductosId: {
