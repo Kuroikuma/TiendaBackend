@@ -62,7 +62,8 @@ export class SucursalRepository {
 
     const products = await this.modelInventarioSucursal
       .find({ sucursalId: id, deleted_at: null })
-      .populate('productoId');
+      .populate(['productoId', 'sucursalId']);
+      
 
     let newProducts: IBranchProducts[] = [];
 
@@ -144,7 +145,7 @@ export class SucursalRepository {
     const uniqueProductsMap = new Map<string, IInventarioSucursal>();
     for (const product of listProductSinSucursal) {
       const productId = (product.productoId._id as mongoose.Types.ObjectId).toString();
-      if (!uniqueProductsMap.has(productId)) {
+      if (!uniqueProductsMap.has(productId) && (product.productoId as IProducto).deleted_at == null) {
         uniqueProductsMap.set(productId, product);
       }
     }

@@ -10,7 +10,7 @@ export class VentaController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const venta = await this.service.createVenta(req.body);
+      const venta = await this.service.createVenta(req.body, (req.user as CustomJwtPayload));
       res.status(201).json(venta);
     } catch (error) {
       next(error);

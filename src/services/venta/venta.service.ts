@@ -10,6 +10,8 @@ import { MovimientoInventario } from '../../models/inventario/MovimientoInventar
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
 import { IUser } from 'src/models/usuarios/User.model';
+import { CustomJwtPayload } from 'src/utils/jwt';
+import { ISucursal } from 'src/models/sucursales/Sucursal.model';
 
 @injectable()
 export class VentaService {
@@ -18,7 +20,7 @@ export class VentaService {
     @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository
   ) {}
 
-  async createVenta(data: Partial<IVentaCreate>): Promise<Partial<IVentaCreate>> {
+  async createVenta(data: Partial<IVentaCreate>, user: CustomJwtPayload): Promise<Partial<IVentaCreate>> {
     const session = await mongoose.startSession();
 
     try {
@@ -34,7 +36,7 @@ export class VentaService {
         sucursalId: sucursalId,
         subtotal: new mongoose.Types.Decimal128(data.subtotal?.toString()!),
         total: new mongoose.Types.Decimal128(data.total?.toString()!),
-        descuento: new mongoose.Types.Decimal128(data.discount?.toString()!),
+        descuento: new mongoose.Types.Decimal128(data.discount?.toString()! || "0"),
         deleted_at: null,
         fechaRegistro: new Date(),
       }
@@ -44,7 +46,7 @@ export class VentaService {
       for await (const element of data.products!) {
 
         let subtotal = element.price * element.quantity;
-        let descuento = element.discount?.amount!;
+        let descuento = element.discount?.amount! || 0;
         let total = subtotal - descuento;
         let productoId = new mongoose.Types.ObjectId(element.productId);
 
@@ -89,7 +91,7 @@ export class VentaService {
           listInventarioSucursal.push(inventarioSucursal);
         }
 
-        inventarioSucursal.save();
+        inventarioSucursal.save({ session });
 
         let movimientoInventario = new MovimientoInventario({
           inventarioSucursalId: inventarioSucursal._id,
@@ -101,7 +103,7 @@ export class VentaService {
           usuarioId: usuarioId,
         });
     
-        await movimientoInventario.save();
+        await movimientoInventario.save({ session });
       }
 
       let productListReOrder = listInventarioSucursal
@@ -112,7 +114,7 @@ export class VentaService {
           reorderPoint: item.puntoReCompra,
         }));
 
-      notifyWhatsappReorderThreshold("Junior Hurtado", "Tienda Juigalpa", productListReOrder);
+      notifyWhatsappReorderThreshold(user.username, (listInventarioSucursal[0].sucursalId as ISucursal).nombre, productListReOrder);
 
       await session.commitTransaction();
       session.endSession();

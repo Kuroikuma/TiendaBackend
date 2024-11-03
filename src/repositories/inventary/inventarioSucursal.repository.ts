@@ -94,7 +94,7 @@ export class InventarioSucursalRepository {
   async findBySucursalIdAndProductId(sucursarlIdStr:string, productoIdStr:string) {
     let sucursalId = new mongoose.Types.ObjectId(sucursarlIdStr);
     let productoId = new mongoose.Types.ObjectId(productoIdStr);
-    const inventarioSucursal = await this.model.find({sucursalId, productoId}).populate("productoId");
+    const inventarioSucursal = await this.model.find({sucursalId, productoId}).populate(["productoId", "sucursalId"]);
 
     return inventarioSucursal[0];
   }
