@@ -274,6 +274,23 @@ export class TrasladoRepository {
     }
   }
 
+  async findAllItemsDePedidosByPedidosInTransit(pedidoIds: string[]) {
+    try {
+      const listItemDePedido = await this.modelDetalleTraslado.find({  
+        trasladoId: { $in: pedidoIds },
+      });
+
+      const listItemDePedidoTransitProduct = listItemDePedido.filter(
+        (itemDePedido) => itemDePedido.recibido === false && !itemDePedido.regresado
+      );
+
+      return listItemDePedidoTransitProduct;
+    } catch (error) {
+      console.error('Error al obtener los items de pedido:', error);
+      throw new Error('Error al obtener los items de pedido');
+    }
+  }
+
   async findAllItemDePedidoByPedidoByTransitProduct(pedidoId: string) {
     try {
       const listItemDePedido = await this.modelDetalleTraslado.find({

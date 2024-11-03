@@ -48,7 +48,9 @@ export class GrupoInventarioRepository {
 
     if (productGroup.length > 0) {
       productGroup.forEach((product) => {
-        newGrupo.products?.push(product.productoId as IProducto);
+        if ((product.productoId as IProducto).deleted_at == null) {
+          newGrupo.products?.push(product.productoId as IProducto);
+        }
       });
     }
 

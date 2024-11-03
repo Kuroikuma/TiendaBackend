@@ -133,7 +133,7 @@ export class TrasladoService {
       // notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
       // notifyReorderThreshold(username, branchName, productListReOrder, channel2);
       notifyWhatsappManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch);
-      notifyWhatsappReorderThreshold(username, branchName, productListReOrder);
+      listItemDePedidos.length > 0 && notifyWhatsappReorderThreshold(username, branchName, productListReOrder)
 
       return traslado;
     } catch (error) {

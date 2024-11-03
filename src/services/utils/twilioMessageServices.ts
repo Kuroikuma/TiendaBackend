@@ -46,6 +46,7 @@ export const notifyWhatsappManagerOfIncomingProducts = async (
       contentSid: 'HX6951120bd3833aff5b75c99790f67bba',
       contentVariables: JSON.stringify(contentVariables), // Convierte a cadena JSON
       to: 'whatsapp:+50558851605',
+      // to: 'whatsapp:+50586349918',
     })
     .then((message) => console.log(`Mensaje enviado con SID: ${message.sid}`))
     .catch((error) => console.error(`Error al enviar el mensaje: ${error}`));
@@ -73,7 +74,8 @@ export const notifyWhatsappReorderThreshold = async (
       from: 'whatsapp:+14155238886',
       contentSid: 'HX9ef6ee663e504074313eaacce2056b1b',
       contentVariables: JSON.stringify(contentVariables), // Asegúrate de enviar las variables en formato JSON
-      to: 'whatsapp:+50586349918',
+      // to: 'whatsapp:+50586349918',
+      to: 'whatsapp:+50558851605',
     })
     .then((message) => console.log(`Mensaje enviado con SID: ${message.sid}`))
     .catch((error) => console.error(`Error al enviar el mensaje: ${error}`));
