@@ -83,64 +83,50 @@ export class ProductoService {
     return this.repository.restore(id);
   }
 
+
   async findProductInTransitBySucursal(
     sucursaleId: string
-  ): Promise<IInventarioSucursal> {
-    const pedidosEnTransito =
-      await this.trasladoRepository.findAllPedidoBySucursal(sucursaleId);
-
-    let itemsDePedido: IDetalleTraslado[] = [];
-    let listInventarioSucursalId: string[] = [];
-
-    for await (const element of pedidosEnTransito) {
-      let itemDePedido =
-        await this.trasladoRepository.findAllItemDePedidoByPedidoByTransitProduct(
-          (element._id as mongoose.Types.ObjectId).toString()
-        );
-
-      itemsDePedido.push(...itemDePedido);
-    }
-
-    for await (const element of itemsDePedido) {
-      listInventarioSucursalId.push(element.inventarioSucursalId.toString());
-    }
-
-    let productos =
-      await this.inventarioSucursalRepository.getListProductByInventarioSucursalIds(
-        sucursaleId,
-        listInventarioSucursalId
-      );
-
-    let productInTransit: IProductInTransit[] = [];
-
-    itemsDePedido.forEach((element) => {
-      let inventarioSucursal = productos.find(
-        (product) => product.id === element.inventarioSucursalId.toString()
-      ) as IInventarioSucursal;
-      let pedido = pedidosEnTransito.find(
-        (pedido) => pedido.id === element.trasladoId.toString()
-      ) as ITraslado;
-      let producto = inventarioSucursal.productoId as IProducto;
-      let sucursalDestino = pedido.sucursalDestinoId as ISucursal;
-
-      if (inventarioSucursal && pedido) {
-        productInTransit.push({
-          nombre: producto.nombre,
-          descripcion: producto.descripcion,
-          ultimoMovimiento: inventarioSucursal.ultimo_movimiento,
-          stock: element.cantidad,
-          precio: inventarioSucursal.precio,
-          monedaId: producto.monedaId,
-          consucutivoPedido: pedido.nombre,
-          id: element._id as mongoose.Types.ObjectId,
-          sucursalDestino: sucursalDestino.nombre,
-        });
-      }
-    });
-
-    //@ts-ignore
+  ): Promise<IProductInTransit[]> {
+    const pedidosEnTransito = await this.trasladoRepository.findAllPedidoBySucursal(sucursaleId);
+  
+    const pedidoIds = (pedidosEnTransito.map((pedido) => pedido._id) as string[]);
+  
+    const itemsDePedido = await this.trasladoRepository.findAllItemsDePedidosByPedidosInTransit(pedidoIds);
+  
+    const listInventarioSucursalId = ([...new Set(itemsDePedido.map((item) => item.inventarioSucursalId.toString()))] as string[]);
+  
+    const productos = await this.inventarioSucursalRepository.getListProductByInventarioSucursalIds(
+      sucursaleId,
+      listInventarioSucursalId
+    );
+  
+    const productoMap = new Map(productos.map((prod) => [prod.id.toString(), prod]));
+    const pedidoMap = new Map(pedidosEnTransito.map((pedido:ITraslado) => [(pedido._id as mongoose.Types.ObjectId).toString(), pedido]));
+  
+    const productInTransit = itemsDePedido.map((element) => {
+      const inventarioSucursal = productoMap.get(element.inventarioSucursalId.toString()) as IInventarioSucursal;
+      const pedido = pedidoMap.get(element.trasladoId.toString()) as ITraslado;
+      const producto = inventarioSucursal?.productoId as IProducto;
+      const sucursalDestino = pedido?.sucursalDestinoId as ISucursal;
+  
+      return inventarioSucursal && pedido
+        ? {
+            nombre: producto.nombre,
+            descripcion: producto.descripcion,
+            ultimoMovimiento: inventarioSucursal.ultimo_movimiento,
+            stock: element.cantidad,
+            precio: inventarioSucursal.precio,
+            monedaId: producto.monedaId,
+            consucutivoPedido: pedido.nombre,
+            id: element._id,
+            sucursalDestino: sucursalDestino.nombre,
+          }
+        : null;
+    }).filter((item) => item !== null) as IProductInTransit[];
+  
     return productInTransit;
   }
+  
 
   async findAllProducts(): Promise<IBranchProductsAll[]> {
     return this.repository.findAllProducts();

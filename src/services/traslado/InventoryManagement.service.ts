@@ -235,12 +235,10 @@ export class InventoryManagementService implements IManageHerramientaModel {
     cantidad: number,
     inventarioSucursalId: mongoose.Types.ObjectId
   ): Promise<IInventarioSucursal | null> {
-    const inventarioSucursal = (await this.inventarioSucursalRepo.findById(
-      inventarioSucursalId.toString()
-    )) as IInventarioSucursal;
+    const inventarioSucursal = this._listInventarioSucursal.find((sucursal) => (sucursal._id as mongoose.Types.ObjectId).toString() === inventarioSucursalId.toString());
 
     if (!inventarioSucursal)
-      throw new Error('Herramienta no encontrada en la bodega');
+      throw new Error('Producto no encontrado en la sucursal');
 
     if (cantidad > inventarioSucursal.stock)
       throw new Error('Cantidad a sustraer es mayor a la disponible.');
