@@ -15,6 +15,23 @@ router.post(
   authMiddleware,
   ventaController.create.bind(ventaController)
 );
+router.get(
+  '/:id',
+  authMiddleware,
+  ventaController.getVentaById.bind(ventaController)
+);
+
+router.get(
+  '/:id/branch',
+  authMiddleware,
+  ventaController.getBySucursalId.bind(ventaController)
+);
+
+router.get(
+  '/:id/branch/user',
+  authMiddleware,
+  ventaController.findAllVentaBySucursalIdAndUserId.bind(ventaController)
+);
 
 // router.get('/', authMiddleware, ventaController.getAll.bind(ventaController));
 // router.get(
