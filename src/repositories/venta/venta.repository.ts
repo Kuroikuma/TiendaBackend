@@ -34,8 +34,8 @@ export class VentaRepository {
 
     return detalleVenta;
   }
-  async findAllVentaDescuentosAplicadosByVentaId(ventaId: string): Promise<IVentaDescuentosAplicados[]> {
-    const ventaDescuentosAplicados = await this.modelVentaDescuentosAplicados.find({ ventaId: ventaId });
+  async findVentaDescuentosAplicadosByDetalleVentaId(detalleVentaId: string): Promise<IVentaDescuentosAplicados> {
+    const ventaDescuentosAplicados = (await this.modelVentaDescuentosAplicados.findOne({ detalleVentaId: detalleVentaId }) as IVentaDescuentosAplicados)
 
     return ventaDescuentosAplicados;
   }
@@ -50,7 +50,7 @@ export class VentaRepository {
     return venta;
   }
   async findVentaById(id: string): Promise<IVenta | null> {
-    const venta = await this.model.findById(id);
+    const venta = await this.model.findById(id).populate("usuarioId");
 
     if (!venta) {
       return null;
