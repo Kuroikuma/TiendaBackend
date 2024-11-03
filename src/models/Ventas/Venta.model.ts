@@ -8,6 +8,7 @@ export interface IVenta extends Document {
   subtotal: mongoose.Types.Decimal128;
   total: mongoose.Types.Decimal128;
   descuento: mongoose.Types.Decimal128;
+  fechaRegistro: Date;
   deleted_at: Date | null;
 }
 
@@ -36,6 +37,7 @@ export interface IVentaCreate {
   subtotal: number;
   total: number;
   discount: number;
+  fechaRegistro?: Date;
 }
 
 const ventaSchema: Schema = new Schema(
@@ -47,6 +49,7 @@ const ventaSchema: Schema = new Schema(
       required: true,
     },
     subtotal: { type: Schema.Types.Decimal128, required: true },
+    fechaRegistro: { type: Date, required: true },
     total: { type: Schema.Types.Decimal128, required: true },
     descuento: { type: Schema.Types.Decimal128, default: 0 },
     deleted_at: { type: Date, default: null },

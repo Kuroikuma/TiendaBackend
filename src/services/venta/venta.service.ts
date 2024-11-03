@@ -7,6 +7,8 @@ import { IDetalleVenta } from '../../models/Ventas/DetalleVenta.model';
 import { IProducto } from '../../models/inventario/Producto.model';
 import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
 import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
+import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
+import { notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
 
 @injectable()
 export class VentaService {
@@ -24,6 +26,8 @@ export class VentaService {
       let sucursalId = new mongoose.Types.ObjectId(data.sucursalId!);
       let usuarioId = new mongoose.Types.ObjectId(data.userId!);
 
+      let listInventarioSucursal:IInventarioSucursal[] = []
+
       let newVenta = {
         usuarioId: usuarioId,
         sucursalId: sucursalId,
@@ -31,6 +35,7 @@ export class VentaService {
         total: new mongoose.Types.Decimal128(data.total?.toString()!),
         descuento: new mongoose.Types.Decimal128(data.discount?.toString()!),
         deleted_at: null,
+        fechaRegistro: new Date(),
       }
 
       const newSale = await this.repository.create(newVenta, session);
@@ -79,6 +84,10 @@ export class VentaService {
         inventarioSucursal.stock -= element.quantity;
         inventarioSucursal.ultimo_movimiento = new Date();
 
+        if (inventarioSucursal.stock <= inventarioSucursal.puntoReCompra) {
+          listInventarioSucursal.push(inventarioSucursal);
+        }
+
         inventarioSucursal.save();
 
         let movimientoInventario = new MovimientoInventario({
@@ -93,6 +102,16 @@ export class VentaService {
     
         await movimientoInventario.save();
       }
+
+      let productListReOrder = listInventarioSucursal
+        .filter((item) => item.stock < item.puntoReCompra)
+        .map((item) => ({
+          name: (item.productoId as IProducto).nombre,
+          currentQuantity: item.stock,
+          reorderPoint: item.puntoReCompra,
+        }));
+
+      notifyWhatsappReorderThreshold("Junior Hurtado", "Tienda Juigalpa", productListReOrder);
 
       await session.commitTransaction();
       session.endSession();
@@ -175,6 +194,7 @@ export class VentaService {
       subtotal: Number(venta.subtotal),
       total: Number(venta.total),
       discount: Number(venta.descuento),
+      fechaRegistro: venta.fechaRegistro,
       products: products,
     }
 
