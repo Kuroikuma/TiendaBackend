@@ -19,6 +19,7 @@ export const notifyWhatsappManagerOfIncomingProducts = async (
   productList: Product[],
   orderId: string,
   originBranch: string,
+  enviadoPor: string
 ) => {
   const productDetails = productList
     .map((product, index) => `*${index + 1}.* ${product.name} - *Cantidad:* ${product.quantity}`)
@@ -38,12 +39,13 @@ export const notifyWhatsappManagerOfIncomingProducts = async (
     '6': productDetails,        // {{6}} - Detalles del pedido en formato lista
     '7': totalProduct.toString(), // {{7}} - Total de artículos (convertido a string)
     '8': totalQuantity.toString(), // {{8}} - Cantidad total de productos (convertido a string)
+    '9': enviadoPor,            // {{9}} - Usuario que envió el pedido
   };
 
   client.messages
     .create({
       from: 'whatsapp:+14155238886',
-      contentSid: 'HX6951120bd3833aff5b75c99790f67bba',
+      contentSid: 'HX79e150ce0e6cff5508a79a1edb5ea7ec',
       contentVariables: JSON.stringify(contentVariables), // Convierte a cadena JSON
       to: 'whatsapp:+50558851605',
       // to: 'whatsapp:+50586349918',
@@ -72,7 +74,7 @@ export const notifyWhatsappReorderThreshold = async (
   client.messages
     .create({
       from: 'whatsapp:+14155238886',
-      contentSid: 'HX9ef6ee663e504074313eaacce2056b1b',
+      contentSid: 'HX9ffb180a7e2d6b959f9b1598ee7dfbac',
       contentVariables: JSON.stringify(contentVariables), // Asegúrate de enviar las variables en formato JSON
       // to: 'whatsapp:+50586349918',
       to: 'whatsapp:+50558851605',
