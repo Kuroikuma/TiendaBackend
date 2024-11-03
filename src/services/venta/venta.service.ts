@@ -15,7 +15,7 @@ export class VentaService {
     @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository
   ) {}
 
-  async createVenta(data: Partial<IVentaCreate>): Promise<IVenta> {
+  async createVenta(data: Partial<IVentaCreate>): Promise<Partial<IVentaCreate>> {
     const session = await mongoose.startSession();
 
     try {
@@ -97,7 +97,7 @@ export class VentaService {
       await session.commitTransaction();
       session.endSession();
 
-      return newSale;
+      return data;
     } catch (error) {
       console.log(error);
 
