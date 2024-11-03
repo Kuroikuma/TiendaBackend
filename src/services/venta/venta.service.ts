@@ -76,7 +76,7 @@ export class VentaService {
 
         const inventarioSucursal = await this.inventarioSucursalRepo.findBySucursalIdAndProductId(sucursalId.toString(), productoId.toString());
 
-        inventarioSucursal.stock += element.quantity;
+        inventarioSucursal.stock -= element.quantity;
         inventarioSucursal.ultimo_movimiento = new Date();
 
         inventarioSucursal.save();
@@ -85,7 +85,7 @@ export class VentaService {
           inventarioSucursalId: inventarioSucursal._id,
           cantidadCambiada: element.quantity,
           cantidadInicial: inventarioSucursal.stock,
-          cantidadFinal: inventarioSucursal.stock + element.quantity,
+          cantidadFinal: inventarioSucursal.stock - element.quantity,
           tipoMovimiento: 'venta',
           fechaMovimiento: new Date(),
           usuarioId: usuarioId,
