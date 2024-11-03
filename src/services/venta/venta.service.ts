@@ -5,11 +5,14 @@ import { IVenta, IVentaCreate, IVentaProducto } from '../../models/Ventas/Venta.
 import { ITipoAplicacion, ITipoDescuento, IVentaDescuentosAplicados } from '../../models/Ventas/VentaDescuentosAplicados.model';
 import { IDetalleVenta } from '../../models/Ventas/DetalleVenta.model';
 import { IProducto } from '../../models/inventario/Producto.model';
+import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
+import { MovimientoInventario } from 'src/models/inventario/MovimientoInventario.model';
 
 @injectable()
 export class VentaService {
   constructor(
-    @inject(VentaRepository) private repository: VentaRepository
+    @inject(VentaRepository) private repository: VentaRepository,
+    @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository
   ) {}
 
   async createVenta(data: Partial<IVentaCreate>): Promise<IVenta> {
@@ -18,9 +21,12 @@ export class VentaService {
     try {
       session.startTransaction();
 
+      let sucursalId = new mongoose.Types.ObjectId(data.sucursalId!);
+      let usuarioId = new mongoose.Types.ObjectId(data.userId!);
+
       let newVenta = {
-        usuarioId: new mongoose.Types.ObjectId(data.userId!),
-        sucursalId: new mongoose.Types.ObjectId(data.sucursalId!),
+        usuarioId: usuarioId,
+        sucursalId: sucursalId,
         subtotal: new mongoose.Types.Decimal128(data.subtotal?.toString()!),
         total: new mongoose.Types.Decimal128(data.total?.toString()!),
         descuento: new mongoose.Types.Decimal128(data.discount?.toString()!),
@@ -34,10 +40,11 @@ export class VentaService {
         let subtotal = element.price * element.quantity;
         let descuento = element.discount?.amount!;
         let total = subtotal - descuento;
+        let productoId = new mongoose.Types.ObjectId(element.productId);
 
         let detalleVenta = {
           ventaId: (newSale._id as mongoose.Types.ObjectId),
-          productoId: new mongoose.Types.ObjectId(element.productId),
+          productoId: productoId,
           precio: new mongoose.Types.Decimal128(element.price?.toString()!),
           cantidad: element.quantity,
           subtotal: new mongoose.Types.Decimal128(subtotal.toString()),
@@ -66,6 +73,25 @@ export class VentaService {
         }
 
         await this.repository.createVentaDescuentosAplicados(ventaDescuentosAplicados, session);
+
+        const inventarioSucursal = await this.inventarioSucursalRepo.findBySucursalIdAndProductId(sucursalId.toString(), productoId.toString());
+
+        inventarioSucursal.stock += element.quantity;
+        inventarioSucursal.ultimo_movimiento = new Date();
+
+        inventarioSucursal.save();
+
+        let movimientoInventario = new MovimientoInventario({
+          inventarioSucursalId: inventarioSucursal._id,
+          cantidadCambiada: element.quantity,
+          cantidadInicial: inventarioSucursal.stock,
+          cantidadFinal: inventarioSucursal.stock + element.quantity,
+          tipoMovimiento: 'transferencia',
+          fechaMovimiento: new Date(),
+          usuarioId: usuarioId,
+        });
+    
+        await movimientoInventario.save();
       }
 
       await session.commitTransaction();
