@@ -8,6 +8,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import grupoRoutes from './routes/inventario/grupo.routes';
 import productTransfer from './routes/traslado/traslado.routes';
 import descuentos from './routes/venta/descuento.routes';
+import ventaRoutes from './routes/venta/venta.routes';
 
 const express = require('express');
 const cors = require('cors');
@@ -36,6 +37,7 @@ app.use('/api/transfer', productTransfer);
 
 //rutas de venta
 app.use('/api/venta/descuentos', descuentos);
+app.use('/api/venta', ventaRoutes);
 
 // Middleware de manejo de errores
 app.use(errorHandler);

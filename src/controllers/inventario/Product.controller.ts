@@ -102,8 +102,17 @@ export class ProductoController {
   }
   async restoreAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { modifiedCount } = await this.service.restoreAll();
-      res.status(200).json({ modifiedCount });
+      await this.service.restoreAll();
+      res.status(200).json({ "restored": true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findRepeatedProductsInInventario(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const repeatedProducts = await this.service.findRepeatedProductsInInventario();
+      res.status(200).json(repeatedProducts);
     } catch (error) {
       next(error);
     }

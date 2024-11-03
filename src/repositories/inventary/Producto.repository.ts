@@ -206,6 +206,54 @@ export class ProductoRepository {
     return query ? product : null;
   }
 
+  async findRepeatedProductsInInventario(): Promise<any[]> {
+    const repeatedProducts = await this.modelInventarioSucursal.aggregate([
+        {
+            $match: { deleted_at: null } // Asegúrate de que no se incluyan documentos eliminados
+        },
+        {
+            $group: {
+                _id: { productoId: "$productoId", sucursalId: "$sucursalId" }, // Agrupar por productoId y sucursalId
+                count: { $sum: 1 } // Contar cuántas veces aparece cada combinación
+            }
+        },
+        {
+            $match: { count: { $gt: 1 } } // Filtrar solo los que aparecen más de una vez
+        }
+    ]);
+
+    return repeatedProducts;
+}
+
+async removeDuplicateInventario(): Promise<void> {
+  // Paso 1: Identificar los duplicados
+  const duplicates = await this.modelInventarioSucursal.aggregate([
+      {
+          $match: { deleted_at: null } // Asegurarse de que solo se incluyan documentos no eliminados
+      },
+      {
+          $group: {
+              _id: { productoId: "$productoId", sucursalId: "$sucursalId" },
+              ids: { $push: "$_id" }, // Guardar los IDs de los documentos duplicados
+              count: { $sum: 1 }
+          }
+      },
+      {
+          $match: { count: { $gt: 1 } } // Filtrar solo los que aparecen más de una vez
+      }
+  ]);
+
+  // Paso 2: Eliminar duplicados
+  for (const duplicate of duplicates) {
+      // Mantener solo el primer ID y eliminar el resto
+      const idsToDelete = duplicate.ids.slice(1); // Ignorar el primer ID
+
+      // Eliminar los documentos duplicados
+      await this.modelInventarioSucursal.deleteMany({ _id: { $in: idsToDelete } });
+  }
+}
+
+
   async findProductByName(name: string): Promise<IProducto | null> {
     const product = await this.model.findOne({ nombre: name });
 

@@ -5,11 +5,37 @@ import { ISucursal } from '../sucursales/Sucursal.model';
 export interface IVenta extends Document {
   usuarioId: mongoose.Types.ObjectId | IUser;
   sucursalId: mongoose.Types.ObjectId | ISucursal;
-  tipoCliente: 'Regular' | 'Proveedor';
   subtotal: mongoose.Types.Decimal128;
   total: mongoose.Types.Decimal128;
   descuento: mongoose.Types.Decimal128;
   deleted_at: Date | null;
+}
+
+export interface IVentaProducto {
+  ventaId: string;
+  productId: string;
+  groupId: string;
+  clientType: 'Regular' | 'Proveedor';
+  productName: string;
+  quantity: number;
+  price: number;
+  discount: null | IVentaDescuento;
+}
+
+export interface IVentaDescuento {
+  id: string;
+  name: string;
+  amount: number;
+  percentage: number;
+  type:"grupo" | "producto";
+} 
+export interface IVentaCreate {
+  userId: string;
+  sucursalId: string;
+  products: IVentaProducto[];
+  subtotal: number;
+  total: number;
+  discount: number;
 }
 
 const ventaSchema: Schema = new Schema(
@@ -18,11 +44,6 @@ const ventaSchema: Schema = new Schema(
     sucursalId: {
       type: Schema.Types.ObjectId,
       ref: 'Sucursal',
-      required: true,
-    },
-    tipoCliente: {
-      type: String,
-      enum: ['Regular', 'Proveedor'],
       required: true,
     },
     subtotal: { type: Schema.Types.Decimal128, required: true },

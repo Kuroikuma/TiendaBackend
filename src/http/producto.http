@@ -16,8 +16,8 @@ Content-Type: application/json
 
 
 ### Productos
-GET {{api}}/allProduct
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwMjE4MDk1LCJleHAiOjE3MzAyMjE2OTV9.5RBoseJdKDPuxKRpBgybTvyux05GHI7TtpBx_wYYC78
+GET {{api}}/repeated-product
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwNTkwNzY2LCJleHAiOjE3MzA2NzcxNjZ9.g42ooztO7s34cTBti5ZMnaSeo94De5ZqWlnPYdsaNtw
 Content-Type: application/json
 
 ### Producto en transito
@@ -28,5 +28,5 @@ Content-Type: application/json
 
 ### Producto en transito
 PATCH  {{api}}/restore
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmYTNkOGFjMWI0Y2UyZWYzNTNkYyIsInVzZXJuYW1lIjoiR3V0aGVyIER1YXJ0ZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczMDQyMDAwNiwiZXhwIjoxNzMwNTA2NDA2fQ.pr444_3KGYfHv7bOUWS-teSFp2m7WCUH7V17EWU6yu0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjBmN2I3OGFjMWI0Y2UyZWYzNTNkNCIsInVzZXJuYW1lIjoicm9vdCIsInJvbGUiOiJyb290IiwiaWF0IjoxNzMwNTkwNzY2LCJleHAiOjE3MzA2NzcxNjZ9.g42ooztO7s34cTBti5ZMnaSeo94De5ZqWlnPYdsaNtw
 Content-Type: application/json
