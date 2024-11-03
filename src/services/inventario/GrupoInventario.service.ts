@@ -62,4 +62,7 @@ export class GrupoInventarioService {
   async findByIdWithProduct(id: string): Promise<IGrupoInventarioWithPopulate | null> {
     return await this.repository.findByIdWithProduct(id);
   }
+  async findByIdWithProductBySucursalId(id: string, sucursalId: string): Promise<IGrupoInventarioWithPopulate | null> {
+    return await this.repository.findByIdWithProductBySucursalId(id, sucursalId);
+  }
 }

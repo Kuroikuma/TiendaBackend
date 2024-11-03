@@ -64,6 +64,47 @@ export class GrupoInventarioRepository {
     return newGrupo;
   }
 
+  async findByIdWithProductBySucursalId(id: string, sucursalId: string): Promise<IGrupoInventarioWithPopulate | null> {
+    const grupo = await this.model.findById(id);
+
+    if (!grupo) {
+      return null;
+    }
+
+    let newGrupo: IGrupoInventarioWithPopulate = {
+      nombre: grupo.nombre,
+      descripcion: grupo.descripcion,
+      _id: (grupo._id as mongoose.Types.ObjectId),
+      deleted_at: grupo.deleted_at,
+      products: [],
+    };
+
+    let productGroup = await this.modelProductoGrupo
+      .find({ grupoId: id, deleted_at: null })
+      .populate('productoId');
+
+    let productGroupGen = productGroup.filter((product) => product.sucursalId === undefined);
+    let productGroupSuc = productGroup.filter((product) => (product.sucursalId as mongoose.Types.ObjectId).toString() === sucursalId);
+
+    if (productGroupGen.length > 0) {
+      productGroupGen.forEach((product) => {
+        if ((product.productoId as IProducto).deleted_at == null) {
+          newGrupo.products.push(product.productoId as IProducto);
+        }
+      });
+    }
+
+    if (productGroupSuc.length > 0) {
+      productGroupSuc.forEach((product) => {
+        if ((product.productoId as IProducto).deleted_at == null) {
+          newGrupo.products.push(product.productoId as IProducto);
+        }
+      });
+    }
+
+    return newGrupo;
+  }
+
   async findAll(
     filters: any = {},
     limit: number = 10,

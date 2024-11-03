@@ -16,6 +16,7 @@ router.get(
   authMiddleware,
   groupController.findByIdWithProduct.bind(groupController)
 );
+router.get('/:id/products/:sucursalId', authMiddleware, groupController.findByIdWithProductBySucursalId.bind(groupController));
 router.get(
   '/:id',
   authMiddleware,

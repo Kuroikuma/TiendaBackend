@@ -58,6 +58,23 @@ export class GrupoInventarioController {
     }
   }
 
+  async findByIdWithProductBySucursalId(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const group = await this.service.findByIdWithProductBySucursalId(
+        req.params.id,
+        req.params.sucursalId
+      )
+
+      res.status(200).json(group);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const group = await this.service.updateGroup(req.params.id, req.body);
