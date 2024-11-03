@@ -40,7 +40,7 @@ export class VentaRepository {
     return ventaDescuentosAplicados;
   }
   async findAllVentaBySucursalId(sucursalId: string): Promise<IVenta[]> {
-    const venta = await this.model.find({ sucursalId: sucursalId });
+    const venta = await this.model.find({ sucursalId: sucursalId }).populate("usuarioId");
 
     return venta;
   }
