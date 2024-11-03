@@ -86,7 +86,7 @@ export class VentaService {
           cantidadCambiada: element.quantity,
           cantidadInicial: inventarioSucursal.stock,
           cantidadFinal: inventarioSucursal.stock + element.quantity,
-          tipoMovimiento: 'transferencia',
+          tipoMovimiento: 'venta',
           fechaMovimiento: new Date(),
           usuarioId: usuarioId,
         });
