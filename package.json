@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "build": "npm run lint && tsc -b ",
+    "build": "tsc",
     "lint": "eslint .",
     "format": "prettier --write .",
     "serve": "npm run build && npm start"
