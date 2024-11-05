@@ -32,10 +32,6 @@ export const sendChannelMessage = async (channel: string, message: string): Prom
 
     const slackToken = process.env.SLACK_BOT_TOKEN;
     const slackClient = new WebClient(slackToken);
-
-    console.log(process.env.SLACK_BOT_TOKEN);
-    console.log(slackToken);
-    console.log("dadad");
     
     
     await slackClient.chat.postMessage({
