@@ -84,6 +84,14 @@ export class VentaService {
 
         const inventarioSucursal = await this.inventarioSucursalRepo.findBySucursalIdAndProductId(sucursalId.toString(), productoId.toString());
 
+        if (!inventarioSucursal) {
+          throw new Error("No existe inventario para el producto");
+        }
+
+        if (inventarioSucursal.stock < element.quantity) {
+          throw new Error("El producto no tiene suficiente stock");
+        }
+
         inventarioSucursal.stock -= element.quantity;
         inventarioSucursal.ultimo_movimiento = new Date();
 
@@ -114,7 +122,7 @@ export class VentaService {
           reorderPoint: item.puntoReCompra,
         }));
 
-      notifyWhatsappReorderThreshold(user.username, (listInventarioSucursal[0].sucursalId as ISucursal).nombre, productListReOrder);
+        productListReOrder.length > 0 && notifyWhatsappReorderThreshold(user.username, (listInventarioSucursal[0].sucursalId as ISucursal).nombre, productListReOrder);
 
       await session.commitTransaction();
       session.endSession();

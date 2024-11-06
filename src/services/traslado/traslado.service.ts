@@ -86,7 +86,8 @@ export class TrasladoService {
         );
 
       await this.inventoryManagementService.subtractCantidadByDetalleTraslado(
-        listItemDePedidos
+        listItemDePedidos,
+        session
       );
 
       //  Haciendo el envio del pedido
