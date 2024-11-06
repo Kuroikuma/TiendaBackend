@@ -18,13 +18,12 @@ import shortid from 'shortid';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { Request } from 'express';
 import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
-import { notifyManagerOfIncomingProducts, notifyReorderThreshold } from '../utils/slackService';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { IProducto } from '../../models/inventario/Producto.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
-import { IUser } from '../../models/usuarios/User.model';
 import { notifyWhatsappManagerOfIncomingProducts, notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
 import { CustomJwtPayload } from '../../utils/jwt';
+import { notifyTelegramManagerOfIncomingProducts, notifyTelergramReorderThreshold } from '../utils/telegramServices';
 
 @injectable()
 export class TrasladoService {
@@ -87,7 +86,8 @@ export class TrasladoService {
         );
 
       await this.inventoryManagementService.subtractCantidadByDetalleTraslado(
-        listItemDePedidos
+        listItemDePedidos,
+        session
       );
 
       //  Haciendo el envio del pedido
@@ -118,6 +118,9 @@ export class TrasladoService {
       let originBranch = (traslado.sucursalOrigenId as ISucursal).nombre;
       let orderId = (traslado._id as mongoose.Types.ObjectId).toString();
 
+      let pedidosChannelTelegram = "-1002348544066"
+      let puntoReCompraTelegram = "-4560332210"
+
 
       let productList = listItemDePedidos.map((item) => ({
         name: ((item.inventarioSucursalId as IInventarioSucursal).productoId as IProducto).nombre,
@@ -134,8 +137,11 @@ export class TrasladoService {
 
       // notifyManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, channel);
       // notifyReorderThreshold(username, branchName, productListReOrder, channel2);
-      notifyWhatsappManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, user.username);
-      listItemDePedidos.length > 0 && notifyWhatsappReorderThreshold(username, branchName, productListReOrder)
+      // notifyWhatsappManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, user.username);
+      // listItemDePedidos.length > 0 && notifyWhatsappReorderThreshold(username, branchName, productListReOrder);
+
+      notifyTelegramManagerOfIncomingProducts(username, branchName, productList, orderId, originBranch, user.username, pedidosChannelTelegram);
+      listItemDePedidos.length > 0 && notifyTelergramReorderThreshold(username, branchName, productListReOrder, puntoReCompraTelegram);
 
       return traslado;
     } catch (error) {
@@ -334,8 +340,8 @@ export class TrasladoService {
       inventarioSucursal.stock += itemDePedido.cantidad;
       inventarioSucursal.ultimo_movimiento = new Date();
 
-      let inventarioSucursalActualizado = await this.inventarioSucursalRepo.update(itemDePedido.inventarioSucursalId.toString(), inventarioSucursal);
-      itemDePedido.save();
+      inventarioSucursal.save({ session });
+      itemDePedido.save({ session });
 
       let user = req.user;
 
@@ -349,12 +355,12 @@ export class TrasladoService {
         usuarioId: user?.id,
       });
 
-      movimientoInventario.save();
+      movimientoInventario.save({ session });
 
       await session.commitTransaction();
       session.endSession();
 
-      return inventarioSucursalActualizado;
+      return inventarioSucursal;
     } catch (error) {
 
       await session.abortTransaction();

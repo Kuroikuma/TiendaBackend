@@ -45,7 +45,8 @@ interface IManageHerramientaModel {
     session: mongoose.mongo.ClientSession
   ): Promise<void>;
   subtractCantidadByDetalleTraslado(
-    listItems: IDetalleTraslado[]
+    listItems: IDetalleTraslado[],
+    session: mongoose.mongo.ClientSession,
   ): Promise<void>;
 }
 
@@ -221,19 +222,22 @@ export class InventoryManagementService implements IManageHerramientaModel {
   }
 
   async subtractCantidadByDetalleTraslado(
-    listItems: IDetalleTrasladoCreate[]
+    listItems: IDetalleTrasladoCreate[],
+    session: mongoose.mongo.ClientSession,
   ): Promise<void> {
     for (const item of listItems) {
       await this.subtractCantidad(
         item.cantidad,
-        item.inventarioSucursalId._id as mongoose.Types.ObjectId
+        item.inventarioSucursalId._id as mongoose.Types.ObjectId,
+        session,
       );
     }
   }
 
   private async subtractCantidad(
     cantidad: number,
-    inventarioSucursalId: mongoose.Types.ObjectId
+    inventarioSucursalId: mongoose.Types.ObjectId,
+    session: mongoose.mongo.ClientSession,
   ): Promise<IInventarioSucursal | null> {
     const inventarioSucursal = this._listInventarioSucursal.find((sucursal) => (sucursal._id as mongoose.Types.ObjectId).toString() === inventarioSucursalId.toString());
 
@@ -253,7 +257,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
       usuarioId: this.usuarioEnviaId,
     });
 
-    await movimientoInventario.save();
+    await movimientoInventario.save({ session });
 
     inventarioSucursal.stock -= cantidad;
     
@@ -262,10 +266,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
     inventarioSucursal.ultimo_movimiento = new Date();
 
-    return this.inventarioSucursalRepo.update(
-      inventarioSucursal.id,
-      inventarioSucursal
-    );
+    return await inventarioSucursal.save({ session });
   }
 
   public async addCantidad(
