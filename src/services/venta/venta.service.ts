@@ -12,6 +12,13 @@ import { notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
 import { IUser } from '../../models/usuarios/User.model';
 import { CustomJwtPayload } from '../../utils/jwt';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
+import { inventarioQueue } from '../../queues/inventarioQueue';
+
+
+export interface ICreateVentaProps {
+  venta: Partial<IVentaCreate>;
+  user: CustomJwtPayload;
+}
 
 @injectable()
 export class VentaService {
@@ -20,30 +27,40 @@ export class VentaService {
     @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository
   ) {}
 
-  async createVenta(data: Partial<IVentaCreate>, user: CustomJwtPayload): Promise<Partial<IVentaCreate>> {
+  addSaleToQueue(data: ICreateVentaProps) {
+    const { venta, user } = data;
+    return inventarioQueue.add({
+      venta: venta,
+      user: user
+    });
+  }
+
+  async createVenta(data: ICreateVentaProps): Promise<Partial<IVentaCreate>> {
+    const { venta, user } = data;
+
     const session = await mongoose.startSession();
 
     try {
       session.startTransaction();
 
-      let sucursalId = new mongoose.Types.ObjectId(data.sucursalId!);
-      let usuarioId = new mongoose.Types.ObjectId(data.userId!);
+      let sucursalId = new mongoose.Types.ObjectId(venta.sucursalId!);
+      let usuarioId = new mongoose.Types.ObjectId(venta.userId!);
 
       let listInventarioSucursal:IInventarioSucursal[] = []
 
       let newVenta = {
         usuarioId: usuarioId,
         sucursalId: sucursalId,
-        subtotal: new mongoose.Types.Decimal128(data.subtotal?.toString()!),
-        total: new mongoose.Types.Decimal128(data.total?.toString()!),
-        descuento: new mongoose.Types.Decimal128(data.discount?.toString()! || "0"),
+        subtotal: new mongoose.Types.Decimal128(venta.subtotal?.toString()!),
+        total: new mongoose.Types.Decimal128(venta.total?.toString()!),
+        descuento: new mongoose.Types.Decimal128(venta.discount?.toString()! || "0"),
         deleted_at: null,
         fechaRegistro: new Date(),
       }
 
       const newSale = await this.repository.create(newVenta, session);
 
-      for await (const element of data.products!) {
+      for await (const element of venta.products!) {
 
         let subtotal = element.price * element.quantity;
         let descuento = element.discount?.amount! || 0;
@@ -127,7 +144,7 @@ export class VentaService {
       await session.commitTransaction();
       session.endSession();
 
-      return data;
+      return venta;
     } catch (error) {
       console.log(error);
 
