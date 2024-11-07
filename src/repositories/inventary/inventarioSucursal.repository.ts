@@ -1,18 +1,21 @@
 import { injectable } from 'tsyringe';
 import { IInventarioSucursal, InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import mongoose, { mongo, Types } from 'mongoose';
+import { IMovimientoInventario, MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
 
 @injectable()
 export class InventarioSucursalRepository {
   private model: typeof InventarioSucursal;
+  private movimientoInventarioModel: typeof MovimientoInventario;
 
   constructor() {
     this.model = InventarioSucursal;
+    this.movimientoInventarioModel = MovimientoInventario;
   }
 
   async create(data: Partial<IInventarioSucursal>): Promise<IInventarioSucursal> {
     const inventarioSucursal = new this.model(data);
-    return await inventarioSucursal.save();
+    return inventarioSucursal;
   }
 
   async createWithSession(data: Partial<IInventarioSucursal>, session: mongoose.mongo.ClientSession): Promise<IInventarioSucursal> {
@@ -113,5 +116,9 @@ export class InventarioSucursalRepository {
     }));
   
     await this.model.bulkWrite(bulkOps, { session });
+  }
+
+  async saveAllMovimientoInventario(data: IMovimientoInventario[], session: mongo.ClientSession): Promise<void> {
+    await this.movimientoInventarioModel.insertMany(data, { session });
   }
 }

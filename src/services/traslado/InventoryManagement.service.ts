@@ -1,410 +1,146 @@
-import mongoose, { ObjectId } from 'mongoose';
-import {
-  IDetalleTraslado,
-  IDetalleTrasladoCreate,
-  IDetalleTrasladoEnvio,
-  IDetalleTrasladoRecepcion,
-} from '../../models/traslados/DetalleTraslado.model';
+import mongoose, { mongo } from 'mongoose';
 import { InventarioSucursalRepository } from '../../repositories/inventary/inventarioSucursal.repository';
-import {
-  IResponseToAddCantidad,
-  ISendTrasladoProducto,
-  ITraslado,
-  Traslado,
-} from '../../models/traslados/Traslado.model';
-import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
-import { TrasladoRepository } from '../../repositories/traslado/traslado.repository';
 import { inject, injectable } from 'tsyringe';
-import {
-  IInventarioSucursal,
-  InventarioSucursal,
-} from '../../models/inventario/InventarioSucursal.model';
-import fileUploadService from '../utils/fileUploadService';
-import { IFilesUpload } from '../../gen/files';
-import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
-const accountSid = 'AC765fa1004417bf97128e3ca10824aacd';
-const authToken = 'f590cfbf94ad7e8c92d2b8538adccfee';
-const client = require('twilio')(accountSid, authToken);
-const shortid = require('shortid');
-
-
-interface IManageHerramientaModel {
-  init(
-    sucursalEnviaId: string,
-    sucursalRecibeId: string,
-    usuarioIdEnvia: string
-  ): void;
-  initManage(
-    sucursalEnviaId: string,
-    sucursalRecibeId: string,
-    listInventarioSucursalId: string[]
-  ): Promise<void>;
-  generatePedidoHerramienta(session: mongoose.mongo.ClientSession);
-  sendPedidoHerramienta(
-    model: ISendTrasladoProducto,
-    session: mongoose.mongo.ClientSession
-  ): Promise<void>;
-  subtractCantidadByDetalleTraslado(
-    listItems: IDetalleTraslado[],
-    session: mongoose.mongo.ClientSession,
-  ): Promise<void>;
-}
+import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
+import { IMovimientoInventario, MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
+import { IAddQuantity, ICreateInventarioSucursal, IHandleStockProductBranch, IInit, IManageHerramientaModel, ISubtractQuantity } from '../../interface/IInventario';
 
 @injectable()
 export class InventoryManagementService implements IManageHerramientaModel {
-  private sucursalEnviaId: mongoose.Types.ObjectId;
-  private sucursalRecibeId: mongoose.Types.ObjectId;
-  private usuarioEnviaId: mongoose.Types.ObjectId;
-  private usuarioRecibeId: ObjectId;
+
+  private userId: mongoose.Types.ObjectId;
   private _listInventarioSucursal: IInventarioSucursal[];
-  private _detalleTralado: IDetalleTraslado[];
+  private _listBranchInventoryAdded: IInventarioSucursal[];
+  private _listUpdatedBranchInventory: IInventarioSucursal[];
+  private _listInventoryMoved: IMovimientoInventario[];
 
   constructor(
     @inject(InventarioSucursalRepository)
     private inventarioSucursalRepo: InventarioSucursalRepository,
-    @inject(SucursalRepository) private sucursalRepository: SucursalRepository,
-    @inject(TrasladoRepository) private trasladoRepository: TrasladoRepository
   ) {}
 
-  init(
-    sucursalEnviaId: string,
-    sucursalRecibeId: string,
-    usuarioIdEnvia: string
-  ): void {
-    this.sucursalEnviaId = new mongoose.Types.ObjectId(sucursalEnviaId);
-    this.sucursalRecibeId = new mongoose.Types.ObjectId(sucursalRecibeId);
-    this.usuarioEnviaId = new mongoose.Types.ObjectId(usuarioIdEnvia);
-    // this.usuarioRecibeId = usuarioIdRecibe;
-  }
 
-  async initRecibir(
-    sucursalEnviaId: string,
-    sucursalRecibeId: string,
-    pedidoId: string
-  ): Promise<void> {
-    this.sucursalEnviaId = new mongoose.Types.ObjectId(sucursalEnviaId);
-    this.sucursalRecibeId = new mongoose.Types.ObjectId(sucursalRecibeId);
-
-    let listItemDePedidos =
-      await this.trasladoRepository.findAllItemDePedidoByPedido(pedidoId);
-
-    this._detalleTralado = listItemDePedidos;
-  }
-
-  async initManage(
-    sucursalEnviaId: string,
-    sucursalRecibeId: string,
-    listInventarioSucursalId: string[]
-  ): Promise<void> {
-    this.sucursalEnviaId = new mongoose.Types.ObjectId(sucursalEnviaId);
-    this.sucursalRecibeId = new mongoose.Types.ObjectId(sucursalRecibeId);
+  async init({ branchId, listInventarioSucursalId, userId }: IInit): Promise<void> {
 
     this._listInventarioSucursal =
       await this.inventarioSucursalRepo.getListProductByInventarioSucursalIds(
-        sucursalEnviaId,
+        branchId,
         listInventarioSucursalId
       );
+      this._listInventoryMoved = [];
+      this._listUpdatedBranchInventory = [];
+      this.userId = new mongoose.Types.ObjectId(userId);
   }
 
-  async generatePedidoHerramienta(session: mongoose.mongo.ClientSession) {
-    const ultimoPedido =
-      await this.trasladoRepository.getLastTrasladoBySucursalId(
-        this.sucursalEnviaId.toString()
-      );
-    const idRegistro = this.usuarioEnviaId; // Aquí debes obtener el id del trabajador desde el contexto o sesión
-
-    const newConsecutivo = ultimoPedido?.consecutivo
-      ? ultimoPedido.consecutivo + 1
-      : 1;
-
-    const newPedido = new Traslado({
-      estatusTraslado: 'Solicitado',
-      fechaRegistro: new Date(),
-      tipoPedido: 0,
-      estado: true,
-      consecutivo: newConsecutivo,
-      nombre: `Pedido #${newConsecutivo}`,
-      sucursalDestinoId: this.sucursalRecibeId,
-      sucursalOrigenId: this.sucursalEnviaId,
-    });
-
-    (await newPedido.save({ session })).populate(["sucursalOrigenId", "sucursalDestinoId", "usuarioIdEnvia", "usuarioIdRecibe"]);
-
-    // client.messages
-    //   .create({
-    //     from: 'whatsapp:+14155238886',
-    //     contentSid: 'HX77ae3198ad4f995cb2c7bf1d7bead3a9',
-    //     contentVariables:
-    //       '{"1":"Junior Hurtado","2":"Audifonos","3":"Juigalpa", "4":"10", "5":"20"}',
-    //     to: 'whatsapp:+50558851605',
-    //   })
-    //   .then((message) => {
-    //     console.log(`Mensaje enviado con SID: ${message.sid}`);
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error al enviar el mensaje:', error);
-    //   });
-
-    return newPedido;
+  async initHandleStockProductBranch(userId: string): Promise<void> {
+    this._listUpdatedBranchInventory = [];
+    this._listBranchInventoryAdded = [];
+    this._listInventoryMoved = [];
+    this.userId = new mongoose.Types.ObjectId(userId);
   }
 
-  async sendPedidoHerramienta(
-    model: ISendTrasladoProducto,
-    session: mongoose.mongo.ClientSession
-  ): Promise<void> {
-    let traslado = model.traslado;
-    let trasladoId = (traslado._id as mongoose.Types.ObjectId).toString();
-
-    if (!traslado && trasladoId) {
-      traslado = (await this.trasladoRepository.findById(
-        trasladoId
-      )) as ITraslado;
-    }
-
-    if (!traslado) throw new Error('Pedido no encontrado');
-
-    traslado.estatusTraslado = 'En Proceso';
-    traslado.fechaEnvio = new Date();
-    traslado.usuarioIdEnvia = this.usuarioEnviaId as mongoose.Types.ObjectId;
-
-    // Firma
-    if (model.firmaEnvio) {
-      traslado.firmaEnvio = model.firmaEnvio;
-    }
-
-    traslado.comentarioEnvio = model.comentarioEnvio;
-    traslado.archivosAdjuntos = model.traslado.archivosAdjuntos;
-
-    await this.trasladoRepository.update(trasladoId, traslado, session);
-  }
-
-  public async generateItemDePedidoByPedido(
-    trasladoId: string,
-    listDetalleTraslado: IDetalleTrasladoEnvio[] | IDetalleTrasladoRecepcion[] | IDetalleTraslado[],
-    isNoSave = false,
-    session: mongoose.mongo.ClientSession
-  ): Promise<IDetalleTrasladoCreate[]> {
-    let listItems: IDetalleTrasladoCreate[] = [];
-
-    for (const producto of listDetalleTraslado) {
-      let trasladoIdParsed = new mongoose.Types.ObjectId(trasladoId);
-
-      let archivosAdjuntosStr: string[] = (isNoSave ? producto.archivosAdjuntosRecibido : (producto as IDetalleTrasladoEnvio).archivosAdjuntos as string[]) || [];
-
-      let dataFiles: IFilesUpload[] = archivosAdjuntosStr.map((file) => {
-        return { base64: file, name: shortid.generate() } as IFilesUpload;
-      }) as IFilesUpload[];
-
-      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
-
-      // Crear el objeto ItemDePedido
-      const detalleTraslado: IDetalleTrasladoCreate = {
-        cantidad: producto.cantidad,
-        trasladoId: trasladoIdParsed,
-        inventarioSucursalId: producto.inventarioSucursalId,
-        archivosAdjuntos: (isNoSave ? (producto as IDetalleTrasladoEnvio).archivosAdjuntos : archivosAdjuntos as string[]) || [],
-        archivosAdjuntosRecibido: (isNoSave ?  archivosAdjuntos : (producto as IDetalleTrasladoRecepcion).archivosAdjuntosRecibido  as string[]) || [],
-        deleted_at: null,
-        comentarioEnvio: (producto as IDetalleTrasladoEnvio).comentarioEnvio,
-        comentarioRecepcion: (producto as IDetalleTrasladoRecepcion).comentarioRecibido || "",
-      };
-
-      listItems.push(detalleTraslado);
-    }
-
-    // Guardar en la base de datos si `isNoSave` es falso
-    if (!isNoSave) {
-     let newItems = await this.trasladoRepository.saveAllDetalleTraslado(listItems, session);
-     listItems = newItems;
-    }
-
-    return listItems;
-  }
-
-  async subtractCantidadByDetalleTraslado(
-    listItems: IDetalleTrasladoCreate[],
-    session: mongoose.mongo.ClientSession,
-  ): Promise<void> {
-    for (const item of listItems) {
-      await this.subtractCantidad(
-        item.cantidad,
-        item.inventarioSucursalId._id as mongoose.Types.ObjectId,
-        session,
-      );
-    }
-  }
-
-  private async subtractCantidad(
-    cantidad: number,
-    inventarioSucursalId: mongoose.Types.ObjectId,
-    session: mongoose.mongo.ClientSession,
-  ): Promise<IInventarioSucursal | null> {
-    const inventarioSucursal = this._listInventarioSucursal.find((sucursal) => (sucursal._id as mongoose.Types.ObjectId).toString() === inventarioSucursalId.toString());
+  async subtractQuantity({ quantity, inventarioSucursalId, session, isNoSave = false }: ISubtractQuantity): Promise<void> {
+    const inventarioSucursal = this._listInventarioSucursal.find(
+      (sucursal) =>
+        (sucursal._id as mongoose.Types.ObjectId).toString() ===
+        inventarioSucursalId.toString()
+    );
 
     if (!inventarioSucursal)
       throw new Error('Producto no encontrado en la sucursal');
 
-    if (cantidad > inventarioSucursal.stock)
+    if (quantity > inventarioSucursal.stock)
       throw new Error('Cantidad a sustraer es mayor a la disponible.');
 
     let movimientoInventario = new MovimientoInventario({
       inventarioSucursalId: inventarioSucursal._id,
-      cantidadCambiada: cantidad,
+      cantidadCambiada: quantity,
       cantidadInicial: inventarioSucursal.stock,
-      cantidadFinal: inventarioSucursal.stock - cantidad,
+      cantidadFinal: inventarioSucursal.stock - quantity,
       tipoMovimiento: 'transferencia',
       fechaMovimiento: new Date(),
-      usuarioId: this.usuarioEnviaId,
+      usuarioId: this.userId,
     });
 
-    await movimientoInventario.save({ session });
+    isNoSave ? this._listInventoryMoved.push(movimientoInventario) : await movimientoInventario.save({ session });
 
-    inventarioSucursal.stock -= cantidad;
+    inventarioSucursal.stock -= quantity;
     
     if (inventarioSucursal.stock === 0)
       inventarioSucursal.deleted_at = new Date();
 
     inventarioSucursal.ultimo_movimiento = new Date();
 
-    return await inventarioSucursal.save({ session });
+    isNoSave ? this._listUpdatedBranchInventory.push(inventarioSucursal) : await inventarioSucursal.save({ session });
   }
 
-  public async addCantidad(
-    model: IDetalleTrasladoRecepcion,
-    bodegaId: string,
-    listFiles: string[],
-    isNoSave = false,
-    session: mongoose.mongo.ClientSession,
-    usuarioIdRecibe: string
-  ): Promise<IResponseToAddCantidad> {
-    // Inicialización del response
-    const response: IResponseToAddCantidad = {
-      listHistorialInventario: [],
-      listDetalleTrasladoAgregados: [],
-      listDetalleTrasladoActualizado: [],
-      listInventarioSucursalAgregados: [],
-      listInventarioSucursalActualizado: [],
+  async addQuantity({ quantity, inventarioSucursal, session, list, isNoSave = false }: IAddQuantity): Promise<void> {
+    let movimientoInventario = new MovimientoInventario({
+      inventarioSucursalId: inventarioSucursal._id,
+      cantidadCambiada: quantity,
+      cantidadInicial: inventarioSucursal.stock,
+      cantidadFinal: inventarioSucursal.stock + quantity,
+      tipoMovimiento: 'transferencia',
+      fechaMovimiento: new Date(),
+      usuarioId: this.userId,
+    });
+
+    isNoSave ? this._listInventoryMoved.push(movimientoInventario) : await movimientoInventario.save({ session });
+
+    inventarioSucursal.stock += quantity;
+    inventarioSucursal.ultimo_movimiento = new Date();
+    inventarioSucursal.deleted_at = null;
+
+    isNoSave ? list.push(inventarioSucursal) : await inventarioSucursal.save({ session });
+  }
+
+  async createInventarioSucursal({ list, isNoSave = false, inventarioSucursal, session }: ICreateInventarioSucursal): Promise<void> {
+
+    let movimientoInventario = new MovimientoInventario({
+      inventarioSucursalId: inventarioSucursal._id,
+      cantidadCambiada: inventarioSucursal.stock,
+      cantidadInicial: inventarioSucursal.stock,
+      cantidadFinal: inventarioSucursal.stock + inventarioSucursal.stock,
+      tipoMovimiento: 'entrada',
+      fechaMovimiento: new Date(),
+      usuarioId: this.userId,
+    });
+
+    isNoSave ? this._listInventoryMoved.push(movimientoInventario) : await movimientoInventario.save({ session });
+
+    isNoSave ? list.push(inventarioSucursal) : await inventarioSucursal.save({ session });
+  }
+
+  async handleStockProductBranch({ session, model, quantity }: IHandleStockProductBranch): Promise<void> {
+    const inventarioSucursal = await this.inventarioSucursalRepo.findBySucursalIdAndProductId(model.sucursalId.toString(), model.productoId.toString());
+
+    let dataAddQuantity:IAddQuantity = {
+      quantity: quantity,
+      inventarioSucursal: inventarioSucursal,
+      session: session,
+      list: this._listUpdatedBranchInventory,
+      isNoSave: true
     };
 
-    // Validación inicial
-    const inventarioSucursalEnvia = await this.inventarioSucursalRepo.findById(
-      model.inventarioSucursalId.toString()
-    );
-    const inventarioSucursalRecibe =
-      await this.inventarioSucursalRepo.findBySucursalIdAndProductId(
-        bodegaId,
-        inventarioSucursalEnvia?.productoId.toString() as string
-      );
+   let dataCretaeInventarioSucursal:ICreateInventarioSucursal = {
+      list: this._listBranchInventoryAdded,
+      inventarioSucursal: model,
+      session: session,
+      isNoSave: true
+   }
 
-    if (!inventarioSucursalEnvia) {
-      throw new Error(
-        'No se encontro en el inventario de la sucursal el producto.'
-      );
-    }
+    inventarioSucursal ? await this.addQuantity(dataAddQuantity) : await this.createInventarioSucursal(dataCretaeInventarioSucursal);
+  }
 
-    const itemDePedido = this._detalleTralado.find(
-      (a) =>
-        (a.inventarioSucursalId as mongoose.Types.ObjectId).toString() ===
-        model.inventarioSucursalId.toString()
-    ) as IDetalleTraslado;
+  async updateAllBranchInventory(session: mongo.ClientSession): Promise<void> {
+    await this.inventarioSucursalRepo.updateAllInventarioSucursal(this._listUpdatedBranchInventory , session);
+  }
 
-    if (!itemDePedido) {
-      throw new Error('Item de pedido no encontrado');
-    }
+  async saveAllMovimientoInventario(session: mongo.ClientSession): Promise<void> {
+    await this.inventarioSucursalRepo.saveAllMovimientoInventario(this._listInventoryMoved, session);
+  }
 
-    itemDePedido.recibido = model.recibido;
-    itemDePedido.comentarioRecepcion = model.comentarioRecibido;
-    itemDePedido.estadoProducto = model.estadoProducto;
-
-    if (itemDePedido.archivosAdjuntos === null) {
-      itemDePedido.archivosAdjuntos = [];
-    }
-
-    //manejo de cantidad 0
-    if (model.cantidad == 0) {
-      itemDePedido.recibido = false;
-    }
-
-    // Manejo de cantidades menores
-    if ((itemDePedido.cantidad > model.cantidad) && model.cantidad > 0) {
-      itemDePedido.recibido = false;
-      itemDePedido.cantidad -= model.cantidad;
-
-      const herramientaModel: IDetalleTrasladoEnvio = {
-        cantidad: model.cantidad,
-        inventarioSucursalId: itemDePedido.inventarioSucursalId,
-        archivosAdjuntosRecibido: listFiles,
-        precio: model.precio,
-        comentarioRecibido: model.comentarioRecibido,
-      };
-
-      let list: IDetalleTrasladoEnvio[] = [];
-      list.push(herramientaModel);
-
-      let newItemsDePedido = await this.generateItemDePedidoByPedido(
-        (itemDePedido.trasladoId as mongoose.Types.ObjectId).toString(),
-        list,
-        true,
-        session
-      );
-
-      itemDePedido.archivosAdjuntosRecibido = newItemsDePedido[0].archivosAdjuntosRecibido as string[];
-
-      newItemsDePedido.forEach((item) => (item.recibido = true));
-      newItemsDePedido.forEach((item) => (item.estadoProducto = "En Buen Estado"));
-      response.listDetalleTrasladoAgregados.push(...newItemsDePedido);
-    } else {
-
-      let dataFiles: IFilesUpload[] = listFiles.map((file) => {
-        return { base64: file, name: shortid.generate() } as IFilesUpload;
-      }) as IFilesUpload[];
-
-      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
-
-      if (listFiles.length > 0) {
-        itemDePedido.archivosAdjuntosRecibido = archivosAdjuntos;
-      }
-    }
-
-    // Actualización de cantidades en bodega
-    if (model.recibido && model.cantidad > 0) {
-      if (inventarioSucursalRecibe) {
-
-        let movimientoInventario = new MovimientoInventario({
-          inventarioSucursalId: inventarioSucursalRecibe._id,
-          cantidadCambiada: model.cantidad,
-          cantidadInicial: inventarioSucursalRecibe.stock,
-          cantidadFinal: inventarioSucursalRecibe.stock + model.cantidad,
-          tipoMovimiento: 'transferencia',
-          fechaMovimiento: new Date(),
-          usuarioId: usuarioIdRecibe,
-        });
-    
-        await movimientoInventario.save();
-
-        inventarioSucursalRecibe.stock += model.cantidad;
-        inventarioSucursalRecibe.ultimo_movimiento = new Date();
-
-        response.listInventarioSucursalActualizado.push(
-          inventarioSucursalRecibe
-        );
-      } else if (model.cantidad > 0) {
-        const inventarioSucursalRecibe = new InventarioSucursal({
-          stock: model.cantidad,
-          sucursalId: new mongoose.Types.ObjectId(bodegaId),
-          productoId: inventarioSucursalEnvia.productoId,
-          ultimo_movimiento: new Date(),
-          deleted_at: null,
-          precio: model.precio,
-          puntoReCompra: model.puntoReCompra,
-        });
-
-        response.listInventarioSucursalAgregados.push(inventarioSucursalRecibe);
-      }
-    }
-
-    response.listDetalleTrasladoActualizado.push(itemDePedido);
-
-    return response;
+  async saveAllBranchInventory(session: mongo.ClientSession): Promise<void> {
+    await this.inventarioSucursalRepo.saveAllInventarioSucursal(this._listBranchInventoryAdded, session);
   }
 }
