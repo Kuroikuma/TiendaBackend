@@ -1,12 +1,17 @@
 import { injectable, inject } from 'tsyringe';
 import {
+  IResponseToAddCantidad,
+  ISendTrasladoProducto,
   ITraslado,
   ITrasladoEnvio,
   ITrasladoRecepcion,
+  Traslado,
 } from '../../models/traslados/Traslado.model';
 import {
   IDetalleTraslado,
+  IDetalleTrasladoCreate,
   IDetalleTrasladoEnvio,
+  IDetalleTrasladoRecepcion,
 } from '../../models/traslados/DetalleTraslado.model';
 import { InventoryManagementService } from './InventoryManagement.service';
 import mongoose, { Types } from 'mongoose';
@@ -15,15 +20,16 @@ import { InventarioSucursalRepository } from '../../repositories/inventary/inven
 import fileUploadService from '../utils/fileUploadService';
 import { IFilesUpload } from '../../gen/files';
 import shortid from 'shortid';
-import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
+import { IInventarioSucursal, InventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { Request } from 'express';
 import { MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { IProducto } from '../../models/inventario/Producto.model';
 import { SucursalRepository } from '../../repositories/sucursal/sucursal.repository';
-import { notifyWhatsappManagerOfIncomingProducts, notifyWhatsappReorderThreshold } from '../utils/twilioMessageServices';
 import { CustomJwtPayload } from '../../utils/jwt';
 import { notifyTelegramManagerOfIncomingProducts, notifyTelergramReorderThreshold } from '../utils/telegramServices';
+import { IAddCantidadTraslado, IGenerateItemDePedidoByPedido, IGeneratePedidoHerramienta, ISendPedidoHerramienta, ISubtractCantidadByDetalleTraslado } from '../../interface/ITraslado';
+import { IInit } from '../../interface/IInventario';
 
 @injectable()
 export class TrasladoService {
@@ -43,31 +49,30 @@ export class TrasladoService {
 
     model.listDetalleTraslado = listDetalleTraslado;
 
-    this.inventoryManagementService.init(
-      model.sucursalOrigenId!,
-      model.sucursalDestinoId!,
-      model.usuarioIdEnvia!
-    );
-
     let listInventarioSucursalIds = model.listDetalleTraslado.map((detalle) =>
       (detalle.inventarioSucursalId as Types.ObjectId).toString()
     );
 
-    this.inventoryManagementService.initManage(
-      model.sucursalOrigenId!,
-      model.sucursalDestinoId!,
-      listInventarioSucursalIds
-    );
+    let dataInit:IInit = {
+      branchId: model.sucursalOrigenId!,
+      listInventarioSucursalId: listInventarioSucursalIds,
+      userId: model.usuarioIdEnvia!
+    }
+
+    this.inventoryManagementService.init(dataInit);
 
     const session = await mongoose.startSession();
 
     try {
       session.startTransaction();
 
-      var traslado =
-        await this.inventoryManagementService.generatePedidoHerramienta(
-          session
-        );
+      let dataGeneratePedido:IGeneratePedidoHerramienta = {
+        session,
+        sucursalEnviaId: model.sucursalOrigenId!,
+        sucursalRecibeId: model.sucursalDestinoId!
+      }
+
+      var traslado = await this.generatePedidoHerramienta(dataGeneratePedido );
 
         let dataFiles: IFilesUpload[] = model.archivosAdjuntos?.map((file) => {
           return { base64: file, name: shortid.generate() } as IFilesUpload;
@@ -77,18 +82,20 @@ export class TrasladoService {
 
       traslado.archivosAdjuntos = archivosAdjuntos;
 
-      var listItemDePedidos =
-        await this.inventoryManagementService.generateItemDePedidoByPedido(
-          (traslado._id as mongoose.Types.ObjectId).toString(),
-          model.listDetalleTraslado,
-          false,
-          session
-        );
+      let dataGenerateItemDePedidoByPedido:IGenerateItemDePedidoByPedido = {
+        trasladoId: (traslado._id as mongoose.Types.ObjectId).toString(),
+        listDetalleTraslado: model.listDetalleTraslado,
+        isNoSave: false,
+        session: session
+      }
 
-      await this.inventoryManagementService.subtractCantidadByDetalleTraslado(
-        listItemDePedidos,
-        session
-      );
+      var listItemDePedidos = await this.generateItemDePedidoByPedido(dataGenerateItemDePedidoByPedido);
+      
+      let dataSubtractCantidad:ISubtractCantidadByDetalleTraslado = {
+        listItems:listItemDePedidos,
+        session: session
+      }
+      await this.subtractCantidadByDetalleTraslado(dataSubtractCantidad);
 
       //  Haciendo el envio del pedido
 
@@ -101,10 +108,13 @@ export class TrasladoService {
         traslado: traslado,
       };
 
-      await this.inventoryManagementService.sendPedidoHerramienta(
-        sendTrasladoProducto,
-        session
-      );
+      let dataSendPedido:ISendPedidoHerramienta = {
+        model: sendTrasladoProducto,
+        session: session,
+        usuarioEnviaId: model.usuarioIdEnvia!
+      }
+
+      await this.sendPedidoHerramienta(dataSendPedido);
 
       let usuario = await this.sucursalRepo.findUserAdminForBranch((traslado.sucursalDestinoId._id as mongoose.Types.ObjectId).toString());
 
@@ -159,21 +169,12 @@ export class TrasladoService {
 
     try {
       session.startTransaction();
+      this.inventoryManagementService.initHandleStockProductBranch(model.usuarioIdRecibe!);
 
-      var pedido = (await this.trasladoRepository.findById(
-        model.trasladoId!
-      )) as ITraslado;
-      var listItemDePedidos =
-        await this.trasladoRepository.findAllItemDePedidoByPedido(
-          model.trasladoId!
-        );
+      var pedido = (await this.trasladoRepository.findById(model.trasladoId!)) as ITraslado;
+      var listItemDePedidos = await this.trasladoRepository.findAllItemDePedidoByPedido(model.trasladoId!);
+
       var trabajadorId = model.usuarioIdRecibe!;
-
-      this.inventoryManagementService.initRecibir(
-        (pedido?.sucursalOrigenId._id as Types.ObjectId).toString(),
-        (pedido?.sucursalDestinoId._id as Types.ObjectId).toString(),
-        model.trasladoId!
-      );
 
       // Actualizando el pedido
       pedido.estatusTraslado = 'Terminado';
@@ -199,15 +200,26 @@ export class TrasladoService {
       const firmaRecepcion = await fileUploadService.uploadFile(model.firmaRecepcion!, shortid.generate());
 
       pedido.firmaRecepcion = firmaRecepcion;
+
+      let listResponseAdd: IResponseToAddCantidad = {
+        listHistorialInventario: [],
+        listDetalleTrasladoAgregados: [],
+        listDetalleTrasladoActualizado: [],
+        listInventarioSucursalAgregados: [],
+        listInventarioSucursalActualizado: [],
+      }
+
       for await (const element of model.listDetalleTraslado!) {
-        let responseAdd = await this.inventoryManagementService.addCantidad(
-          element,
-          (pedido.sucursalDestinoId._id as mongoose.Types.ObjectId).toString(),
-          element.archivosAdjuntosRecibido as string[],
-          true,
-          session,
-          model.usuarioIdRecibe!
-        );
+
+        let dataAddCantidad:IAddCantidadTraslado = {
+          model: element,
+          bodegaId: (pedido.sucursalDestinoId._id as mongoose.Types.ObjectId).toString(),
+          listFiles: element.archivosAdjuntosRecibido as string[],
+          session: session,
+          _detalleTralado: listItemDePedidos as IDetalleTraslado[]
+        }
+
+        let responseAdd = await this.addCantidad(dataAddCantidad);
 
         var item2 = listItemDePedidos.find(
           (x) =>
@@ -218,24 +230,18 @@ export class TrasladoService {
         if (item2.cantidad > element.cantidad) {
           pedido.estatusTraslado = 'Terminado incompleto';
         }
-
-        await this.trasladoRepository.saveAllDetalleTraslado(
-          responseAdd.listDetalleTrasladoAgregados,
-          session
-        );
-        await this.trasladoRepository.updateAllDetalleTraslado(
-          responseAdd.listDetalleTrasladoActualizado,
-          session
-        );
-        await this.inventarioSucursalRepo.saveAllInventarioSucursal(
-          responseAdd.listInventarioSucursalAgregados,
-          session
-        );
-        await this.inventarioSucursalRepo.updateAllInventarioSucursal(
-          responseAdd.listInventarioSucursalActualizado,
-          session
-        );
+        listResponseAdd.listDetalleTrasladoActualizado.concat(responseAdd.listDetalleTrasladoActualizado);
+        listResponseAdd.listDetalleTrasladoAgregados.concat(responseAdd.listDetalleTrasladoAgregados);
       }
+
+      let DTAdd = listResponseAdd.listDetalleTrasladoAgregados
+      let DTUpdate = listResponseAdd.listDetalleTrasladoActualizado
+
+      await this.trasladoRepository.saveAllDetalleTraslado(DTAdd, session);
+      await this.trasladoRepository.updateAllDetalleTraslado(DTUpdate, session);
+      await this.inventoryManagementService.saveAllBranchInventory(session);
+      await this.inventoryManagementService.updateAllBranchInventory(session);
+      await this.inventoryManagementService.saveAllMovimientoInventario(session);
 
       await pedido.save({session});
 
@@ -369,5 +375,236 @@ export class TrasladoService {
       console.error('Error al obtener el pedido:', error);
       throw new Error('Error al obtener el pedido');
     }
+  }
+
+  // logic crear pedido
+
+  async generatePedidoHerramienta({ session, sucursalEnviaId, sucursalRecibeId }: IGeneratePedidoHerramienta) {
+
+    const sucursalEnviaIdParsed = new mongoose.Types.ObjectId(sucursalEnviaId);
+    const sucursalRecibeIdParsed = new mongoose.Types.ObjectId(sucursalRecibeId);
+
+    const ultimoPedido = await this.trasladoRepository.getLastTrasladoBySucursalId(sucursalEnviaId);
+
+    const newConsecutivo = ultimoPedido?.consecutivo
+      ? ultimoPedido.consecutivo + 1
+      : 1;
+
+    const newPedido = new Traslado({
+      estatusTraslado: 'Solicitado',
+      fechaRegistro: new Date(),
+      tipoPedido: 0,
+      estado: true,
+      consecutivo: newConsecutivo,
+      nombre: `Pedido #${newConsecutivo}`,
+      sucursalDestinoId: sucursalRecibeIdParsed,
+      sucursalOrigenId: sucursalEnviaIdParsed,
+    });
+
+    return (await newPedido.save({ session })).populate([
+      'sucursalOrigenId',
+      'sucursalDestinoId',
+      'usuarioIdEnvia',
+      'usuarioIdRecibe',
+    ]);
+  }
+
+  async sendPedidoHerramienta({ model, session, usuarioEnviaId }: ISendPedidoHerramienta): Promise<void> {
+    let traslado = model.traslado;
+    let trasladoId = (traslado._id as mongoose.Types.ObjectId).toString();
+
+    if (!traslado && trasladoId) {
+      traslado = (await this.trasladoRepository.findById(
+        trasladoId
+      )) as ITraslado;
+    }
+
+    if (!traslado) throw new Error('Pedido no encontrado');
+
+    traslado.estatusTraslado = 'En Proceso';
+    traslado.fechaEnvio = new Date();
+    traslado.usuarioIdEnvia = new mongoose.Types.ObjectId(usuarioEnviaId);
+
+    // Firma
+    if (model.firmaEnvio) {
+      traslado.firmaEnvio = model.firmaEnvio;
+    }
+
+    traslado.comentarioEnvio = model.comentarioEnvio;
+    traslado.archivosAdjuntos = model.traslado.archivosAdjuntos;
+
+    await this.trasladoRepository.update(trasladoId, traslado, session);
+  }
+
+  public async generateItemDePedidoByPedido({
+    trasladoId,
+    listDetalleTraslado,
+    isNoSave = false,
+    session,
+  }: IGenerateItemDePedidoByPedido): Promise<IDetalleTrasladoCreate[]> {
+    let listItems: IDetalleTrasladoCreate[] = [];
+
+    for (const producto of listDetalleTraslado) {
+      let trasladoIdParsed = new mongoose.Types.ObjectId(trasladoId);
+
+      let archivosAdjuntosStr: string[] = (isNoSave ? producto.archivosAdjuntosRecibido : (producto as IDetalleTrasladoEnvio).archivosAdjuntos as string[]) || [];
+
+      let dataFiles: IFilesUpload[] = archivosAdjuntosStr.map((file) => {
+        return { base64: file, name: shortid.generate() } as IFilesUpload;
+      }) as IFilesUpload[];
+
+      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+
+      // Crear el objeto ItemDePedido
+      const detalleTraslado: IDetalleTrasladoCreate = {
+        cantidad: producto.cantidad,
+        trasladoId: trasladoIdParsed,
+        inventarioSucursalId: producto.inventarioSucursalId,
+        archivosAdjuntos: (isNoSave ? (producto as IDetalleTrasladoEnvio).archivosAdjuntos : archivosAdjuntos as string[]) || [],
+        archivosAdjuntosRecibido: (isNoSave ?  archivosAdjuntos : (producto as IDetalleTrasladoRecepcion).archivosAdjuntosRecibido  as string[]) || [],
+        deleted_at: null,
+        comentarioEnvio: (producto as IDetalleTrasladoEnvio).comentarioEnvio,
+        comentarioRecepcion: (producto as IDetalleTrasladoRecepcion).comentarioRecibido || "",
+      };
+
+      listItems.push(detalleTraslado);
+    }
+
+    // Guardar en la base de datos si `isNoSave` es falso
+    if (!isNoSave) {
+     let newItems = await this.trasladoRepository.saveAllDetalleTraslado(listItems, session);
+     listItems = newItems;
+    }
+
+    return listItems;
+  }
+
+  async subtractCantidadByDetalleTraslado({ listItems, session }:ISubtractCantidadByDetalleTraslado): Promise<void> {
+    for await (const item of listItems) {
+      await this.inventoryManagementService.subtractQuantity(
+        {
+          quantity: item.cantidad,
+          inventarioSucursalId: item.inventarioSucursalId._id as mongoose.Types.ObjectId,
+          session: session,
+          isNoSave: true
+        }
+      );
+    }
+
+    await this.inventoryManagementService.updateAllBranchInventory(session);
+    await this.inventoryManagementService.saveAllMovimientoInventario(session);
+  }
+
+  public async addCantidad({ model, bodegaId, listFiles, session, _detalleTralado }: IAddCantidadTraslado): Promise<IResponseToAddCantidad> {
+    // Inicialización del response
+    const response: IResponseToAddCantidad = {
+      listHistorialInventario: [],
+      listDetalleTrasladoAgregados: [],
+      listDetalleTrasladoActualizado: [],
+      listInventarioSucursalAgregados: [],
+      listInventarioSucursalActualizado: [],
+    };
+
+    // Validación inicial
+    const inventarioSucursalEnvia = await this.inventarioSucursalRepo.findById(
+      model.inventarioSucursalId.toString()
+    );
+
+    if (!inventarioSucursalEnvia) {
+      throw new Error(
+        'No se encontro en el inventario de la sucursal el producto.'
+      );
+    }
+
+    const itemDePedido = _detalleTralado.find(
+      (a) =>
+        (a.inventarioSucursalId as mongoose.Types.ObjectId).toString() ===
+        model.inventarioSucursalId.toString()
+    ) as IDetalleTraslado;
+
+    if (!itemDePedido) {
+      throw new Error('Item de pedido no encontrado');
+    }
+
+    itemDePedido.recibido = model.recibido;
+    itemDePedido.comentarioRecepcion = model.comentarioRecibido;
+    itemDePedido.estadoProducto = model.estadoProducto;
+
+    if (itemDePedido.archivosAdjuntos === null) {
+      itemDePedido.archivosAdjuntos = [];
+    }
+
+    //manejo de cantidad 0
+    if (model.cantidad == 0) {
+      itemDePedido.recibido = false;
+    }
+
+    // Manejo de cantidades menores
+    if ((itemDePedido.cantidad > model.cantidad) && model.cantidad > 0) {
+      itemDePedido.recibido = false;
+      itemDePedido.cantidad -= model.cantidad;
+
+      const herramientaModel: IDetalleTrasladoEnvio = {
+        cantidad: model.cantidad,
+        inventarioSucursalId: itemDePedido.inventarioSucursalId,
+        archivosAdjuntosRecibido: listFiles,
+        precio: model.precio,
+        comentarioRecibido: model.comentarioRecibido,
+      };
+
+      let list: IDetalleTrasladoEnvio[] = [];
+      list.push(herramientaModel);
+
+      let dataGenerateItemDePedidoByPedido:IGenerateItemDePedidoByPedido = {
+        isNoSave: true,
+        trasladoId: (itemDePedido.trasladoId as mongoose.Types.ObjectId).toString(),
+        listDetalleTraslado: list,
+        session: session
+      }
+
+      let newItemsDePedido = await this.generateItemDePedidoByPedido(dataGenerateItemDePedidoByPedido);
+
+      itemDePedido.archivosAdjuntosRecibido = newItemsDePedido[0].archivosAdjuntosRecibido as string[];
+
+      newItemsDePedido.forEach((item) => (item.recibido = true));
+      newItemsDePedido.forEach((item) => (item.estadoProducto = "En Buen Estado"));
+      response.listDetalleTrasladoAgregados.push(...newItemsDePedido);
+    } else {
+
+      let dataFiles: IFilesUpload[] = listFiles.map((file) => {
+        return { base64: file, name: shortid.generate() } as IFilesUpload;
+      }) as IFilesUpload[];
+
+      const archivosAdjuntos = await fileUploadService.uploadFiles(dataFiles);
+
+      if (listFiles.length > 0) {
+        itemDePedido.archivosAdjuntosRecibido = archivosAdjuntos;
+      }
+    }
+
+    // Actualización de cantidades en bodega
+    if (model.recibido && model.cantidad > 0) {
+      const inventarioSucursal = new InventarioSucursal({
+        stock: model.cantidad,
+        sucursalId: new mongoose.Types.ObjectId(bodegaId),
+        productoId: inventarioSucursalEnvia.productoId,
+        ultimo_movimiento: new Date(),
+        deleted_at: null,
+        precio: model.precio,
+        puntoReCompra: model.puntoReCompra,
+      });
+
+      let dataHandle = {
+        session: session,
+        model: inventarioSucursal,
+        quantity: model.cantidad
+      }
+
+      await this.inventoryManagementService.handleStockProductBranch(dataHandle);
+    }
+
+    response.listDetalleTrasladoActualizado.push(itemDePedido);
+
+    return response;
   }
 }
