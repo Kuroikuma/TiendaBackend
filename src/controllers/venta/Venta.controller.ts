@@ -1,6 +1,6 @@
 import { injectable, inject } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
-import { VentaService } from '../../services/venta/venta.service';
+import { ICreateVentaProps, VentaService } from '../../services/venta/venta.service';
 import { CustomJwtPayload } from '../../utils/jwt';
 import mongoose from 'mongoose';
 
@@ -10,7 +10,11 @@ export class VentaController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const venta = await this.service.createVenta(req.body, (req.user as CustomJwtPayload));
+      let data: ICreateVentaProps = {
+        venta: req.body,
+        user: (req.user as CustomJwtPayload)
+      }
+      const venta = await this.service.addSaleToQueue(data);
       res.status(201).json(venta);
     } catch (error) {
       next(error);
