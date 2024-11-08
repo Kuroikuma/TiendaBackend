@@ -3,7 +3,7 @@ import { InventarioSucursalRepository } from '../../repositories/inventary/inven
 import { inject, injectable } from 'tsyringe';
 import { IInventarioSucursal } from '../../models/inventario/InventarioSucursal.model';
 import { IMovimientoInventario, MovimientoInventario } from '../../models/inventario/MovimientoInventario.model';
-import { IAddQuantity, ICreateInventarioSucursal, IHandleStockProductBranch, IInit, IManageHerramientaModel, ISubtractQuantity } from '../../interface/IInventario';
+import { IAddQuantity, ICreateInventarioSucursal, IHandleStockProductBranch, IInit, IManageHerramientaModel, ISubtractQuantity, ISubtractQuantityLoop } from '../../interface/IInventario';
 
 @injectable()
 export class InventoryManagementService implements IManageHerramientaModel {
@@ -39,7 +39,7 @@ export class InventoryManagementService implements IManageHerramientaModel {
     this.userId = new mongoose.Types.ObjectId(userId);
   }
 
-  async subtractQuantity({ quantity, inventarioSucursalId, session, isNoSave = false }: ISubtractQuantity): Promise<void> {
+  async subtractQuantity({ quantity, inventarioSucursalId, session, isNoSave = false }: ISubtractQuantity): Promise<void | IInventarioSucursal> {
     const inventarioSucursal = this._listInventarioSucursal.find(
       (sucursal) =>
         (sucursal._id as mongoose.Types.ObjectId).toString() ===
@@ -72,6 +72,8 @@ export class InventoryManagementService implements IManageHerramientaModel {
     inventarioSucursal.ultimo_movimiento = new Date();
 
     isNoSave ? this._listUpdatedBranchInventory.push(inventarioSucursal) : await inventarioSucursal.save({ session });
+
+    return inventarioSucursal;
   }
 
   async addQuantity({ quantity, inventarioSucursal, session, list, isNoSave = false }: IAddQuantity): Promise<void> {
@@ -142,5 +144,20 @@ export class InventoryManagementService implements IManageHerramientaModel {
 
   async saveAllBranchInventory(session: mongo.ClientSession): Promise<void> {
     await this.inventarioSucursalRepo.saveAllInventarioSucursal(this._listBranchInventoryAdded, session);
+  }
+  async subtractQuantityLoop({ listItems, session }:ISubtractQuantityLoop): Promise<void> {
+    for await (const item of listItems) {
+      await this.subtractQuantity(
+        {
+          quantity: item.cantidad,
+          inventarioSucursalId: item.inventarioSucursalId,
+          session: session,
+          isNoSave: true
+        }
+      );
+    }
+
+    await this.updateAllBranchInventory(session);
+    await this.saveAllMovimientoInventario(session);
   }
 }
