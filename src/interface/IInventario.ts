@@ -38,3 +38,13 @@ export interface IHandleStockProductBranch {
   model:IInventarioSucursal; 
   quantity:number
 }
+
+export interface IItemSsubtractQuantityLoop {
+  cantidad:number;
+  inventarioSucursalId: mongoose.Types.ObjectId;
+}
+
+export interface ISubtractQuantityLoop {
+  session: mongoose.mongo.ClientSession;
+  listItems: IItemSsubtractQuantityLoop[];
+}
