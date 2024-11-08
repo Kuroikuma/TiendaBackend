@@ -68,7 +68,7 @@ export class DescuentoRepository {
       }
 
       if (fechaInicio && fechaFin) {
-        if (fechaInicio < hoy && fechaFin > hoy) {
+        if (fechaInicio > hoy && fechaFin > hoy || fechaInicio < hoy && fechaFin < hoy) {
           return
         }
       }
@@ -92,7 +92,7 @@ export class DescuentoRepository {
       }
 
       if (fechaInicio && fechaFin) {
-        if (fechaInicio < hoy && fechaFin > hoy) {
+        if (fechaInicio > hoy && fechaFin > hoy || fechaInicio < hoy && fechaFin < hoy) {
           return;
         }
       }
