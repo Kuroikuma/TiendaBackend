@@ -13,6 +13,8 @@ import { IUser } from '../../models/usuarios/User.model';
 import { CustomJwtPayload } from '../../utils/jwt';
 import { ISucursal } from '../../models/sucursales/Sucursal.model';
 import { inventarioQueue } from '../../queues/inventarioQueue';
+import { InventoryManagementService } from '../traslado/InventoryManagement.service';
+import { IInit, ISubtractQuantity } from 'src/interface/IInventario';
 
 
 export interface ICreateVentaProps {
@@ -24,7 +26,8 @@ export interface ICreateVentaProps {
 export class VentaService {
   constructor(
     @inject(VentaRepository) private repository: VentaRepository,
-    @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository
+    @inject(InventarioSucursalRepository) private inventarioSucursalRepo: InventarioSucursalRepository,
+    @inject(InventoryManagementService) private inventoryManagementService: InventoryManagementService,
   ) {}
 
   addSaleToQueue(data: ICreateVentaProps) {
@@ -42,6 +45,16 @@ export class VentaService {
 
     try {
       session.startTransaction();
+
+      let listInventarioSucursalIds = venta.products?.map((detalle) =>detalle.inventarioSucursalId) as string[];
+
+      let dataInit:IInit = {
+        userId: user._id,
+        branchId: venta.sucursalId!,
+        listInventarioSucursalId: listInventarioSucursalIds
+      }
+
+      this.inventoryManagementService.init(dataInit);
 
       let sucursalId = new mongoose.Types.ObjectId(venta.sucursalId!);
       let usuarioId = new mongoose.Types.ObjectId(venta.userId!);
@@ -99,37 +112,22 @@ export class VentaService {
 
         await this.repository.createVentaDescuentosAplicados(ventaDescuentosAplicados, session);
 
-        const inventarioSucursal = await this.inventarioSucursalRepo.findBySucursalIdAndProductId(sucursalId.toString(), productoId.toString());
-
-        if (!inventarioSucursal) {
-          throw new Error("No existe inventario para el producto");
+        let dataSubTractQuantity:ISubtractQuantity = {
+          inventarioSucursalId: new mongoose.mongo.ObjectId(element.inventarioSucursalId) ,
+          quantity: element.quantity,
+          session,
+          isNoSave:true
         }
+        
+       let inventarioSucursal = (await this.inventoryManagementService.subtractQuantity(dataSubTractQuantity) as IInventarioSucursal)
 
-        if (inventarioSucursal.stock < element.quantity) {
-          throw new Error("El producto no tiene suficiente stock");
-        }
-
-        inventarioSucursal.stock -= element.quantity;
-        inventarioSucursal.ultimo_movimiento = new Date();
-
-        if (inventarioSucursal.stock <= inventarioSucursal.puntoReCompra) {
+       if (inventarioSucursal.stock <= inventarioSucursal.puntoReCompra) {
           listInventarioSucursal.push(inventarioSucursal);
         }
-
-        inventarioSucursal.save({ session });
-
-        let movimientoInventario = new MovimientoInventario({
-          inventarioSucursalId: inventarioSucursal._id,
-          cantidadCambiada: element.quantity,
-          cantidadInicial: inventarioSucursal.stock,
-          cantidadFinal: inventarioSucursal.stock - element.quantity,
-          tipoMovimiento: 'venta',
-          fechaMovimiento: new Date(),
-          usuarioId: usuarioId,
-        });
-    
-        await movimientoInventario.save({ session });
       }
+
+      await this.inventoryManagementService.updateAllBranchInventory(session);
+      await this.inventoryManagementService.saveAllMovimientoInventario(session);
 
       let productListReOrder = listInventarioSucursal
         .filter((item) => item.stock < item.puntoReCompra)
@@ -218,6 +216,7 @@ export class VentaService {
         quantity: detalle.cantidad,
         price: Number(detalle.precio),
         ventaId: (venta._id as mongoose.Types.ObjectId).toString(),
+        inventarioSucursalId: "",
         groupId: "",
         discount: descuento
       }

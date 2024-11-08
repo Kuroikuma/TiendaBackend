@@ -20,6 +20,7 @@ export interface IVentaProducto {
   productName: string;
   quantity: number;
   price: number;
+  inventarioSucursalId: string;
   discount: null | IVentaDescuento;
 }
 
